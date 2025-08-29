@@ -1,0 +1,21 @@
+/* use: var(--gradient-main); */
+:root {
+  --color-primary-0: #2a002c;
+  --color-primary-50: #3a0271;
+  --color-primary-100: #010340;
+
+  /* 버튼 색상 */
+  --color-button-primary: #a730b0;
+  --color-button-secondary: #5b00b2;
+  --color-button-tertiary: #525252;
+
+  /* 텍스트 강조 색상 */
+  --color-text-highlight: #ff82ff;
+
+  --gradient-main: linear-gradient(
+    90deg,
+    var(--color-primary-0) 0%,
+    var(--color-primary-50) 54%,
+    var(--color-primary-100) 100%
+  );
+}
