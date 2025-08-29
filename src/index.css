@@ -1,0 +1,39 @@
+@import './styles/colors.css';
+
+:root {
+  font-size: 16px;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #333333;
+}
+
+body {
+  display: grid;
+  place-items: center;
+}
+
+#root {
+  width: clamp(20rem, 90vw, 25.125rem);
+  aspect-ratio: 402 / 874;
+  max-height: 100dvh;
+  overflow: auto;
+
+  background: var(--gradient-main);
+  border-radius: clamp(0rem, 2vw, 1.25rem);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 402px) {
+  #root {
+    width: 100vw;
+    height: 100dvh;
+    aspect-ratio: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
