@@ -13,9 +13,9 @@
   --color-text-highlight: #ff82ff;
 
   --gradient-main: linear-gradient(
-    90deg,
-    var(--color-primary-0) 0%,
-    var(--color-primary-50) 54%,
-    var(--color-primary-100) 100%
+          10.6deg,
+          #2A002C 14.09%,
+          #3A0271 53.43%,
+          #010340 87.16%
   );
 }
