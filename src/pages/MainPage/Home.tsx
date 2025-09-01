@@ -13,7 +13,7 @@ export default function Home() {
         </div>
         <Bell className={styles.bell} />
       </div>
-      <Card>
+      <Card className={styles.cardSpacing}>
         <h3>8월 사용 금액</h3>
         <p>1,031,000원</p>
       </Card>

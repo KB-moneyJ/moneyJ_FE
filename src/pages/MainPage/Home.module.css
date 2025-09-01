@@ -30,3 +30,7 @@
   color: #bdbdbd;
   cursor: pointer;
 }
+
+.cardSpacing {
+  margin: 1rem;
+}
