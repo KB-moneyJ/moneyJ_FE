@@ -1,18 +1,32 @@
 .container {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  justify-content: space-between;
+  padding: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .icon {
-  width: 40px;
-  height: 40px;
-  color: var(--color-button-secondary);
+  width: 1.875rem;
+  height: 1.875rem;
+  color: #bdbdbd;
 }
 
 .nickname {
   font-weight: 600;
   font-size: 1.1rem;
-  color: #333;
+  color: white;
+}
+
+.bell {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #bdbdbd;
+  cursor: pointer;
 }
