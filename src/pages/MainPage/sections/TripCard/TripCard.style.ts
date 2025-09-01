@@ -17,19 +17,6 @@ export const Header = styled.div`
   gap: 0.75rem;
 `;
 
-export const DestinationBox = styled.div`
-  display: flex;
-  align-items: flex-end;
-  gap: 0.5rem;
-`;
-
-export const DestinationText = styled.span`
-  font-weight: 700;
-  font-size: 1rem;
-  line-height: 1.2;
-  margin-top: 0.15rem;
-`;
-
 export const PlaneIcon = styled(PlaneTakeoff)`
   width: 1.3rem;
   height: 1.3rem;
@@ -48,20 +35,58 @@ export const Flag = styled(ReactCountryFlag)`
     width: 100%;
     height: 100%;
     display: block;
-    border-radius: 2px;
   }
 `;
 
-export const ImageWrapper = styled.div`
+export const ImageFrame = styled.div`
+  position: relative;
   width: 100%;
+  height: 10rem;
   border-radius: 0.75rem;
   overflow: hidden;
 `;
 
-export const Thumbnail = styled.img`
+export const DimImage = styled.img`
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: 10rem;
+  height: 100%;
   object-fit: cover;
+  filter: grayscale(100%) brightness(0.45) saturate(0.6);
+`;
+
+export const Tiles = styled.div`
+  position: absolute;
+  inset: 0;
+`;
+
+export const Tile = styled.div<{
+  $url: string;
+  $rows: number;
+  $cols: number;
+  $row: number;
+  $col: number;
+  $visible: boolean;
+}>`
+  position: absolute;
+
+  left: ${({ $col, $cols }) => `calc(100% * ${$col} / ${$cols})`};
+  top: ${({ $row, $rows }) => `calc(100% * ${$row} / ${$rows})`};
+  width: ${({ $cols }) => `calc(100% / ${$cols})`};
+  height: ${({ $rows }) => `calc(100% / ${$rows})`};
+
+  background-image: url(${({ $url }) => $url});
+  background-size: ${({ $cols, $rows }) => `${$cols * 100}% ${$rows * 100}%`};
+  background-position: ${({ $col, $cols, $row, $rows }) => {
+    const x = $cols > 1 ? ($col / ($cols - 1)) * 100 : 0;
+    const y = $rows > 1 ? ($row / ($rows - 1)) * 100 : 0;
+    return `${x}% ${y}%`;
+  }};
+
+  background-repeat: no-repeat;
+
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  transition: opacity 320ms ease-in-out;
 `;
 
 export const Period = styled.span`
