@@ -12,8 +12,9 @@ import Step2 from "./steps/Step2";
 import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
 
-export default function SignupPage() {
+export default function MakePlan() {
   const [step, setStep] = useState<number>(1);
+  const [selectedCountry, setSelectedCountry] = useState(null); // ✅ 선택한 나라
 
   const pageVariants = {
     initial: { x: "100%", opacity: 0 },
@@ -21,21 +22,21 @@ export default function SignupPage() {
     exit: { x: "-100%", opacity: 0, transition: { duration: 0.5 } },
   };
 
-  const goNext = () => {
-    if (step < 4) setStep((prev) => prev + 1);
-  };
+  const goNext = () => step < 4 && setStep((prev) => prev + 1);
+  const goPrev = () => step > 1 && setStep((prev) => prev - 1);
 
-  const goPrev = () => {
-    if (step > 1) setStep((prev) => prev - 1);
-  };
-
-  // step에 따라 보여줄 컴포넌트 매핑
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <Step1 />;
+        return (
+          <Step1
+            onSelectCountry={setSelectedCountry}
+            selected={selectedCountry}
+            goNext={goNext} // ✅ 내려오기 끝나면 Step2
+          />
+        );
       case 2:
-        return <Step2 />;
+        return <Step2 selected={selectedCountry} />;
       case 3:
         return <Step3 />;
       case 4:
@@ -69,12 +70,12 @@ export default function SignupPage() {
             {renderStep()}
           </motion.div>
         </AnimatePresence>
-
-        <div style={{ marginTop: "2rem" }}>
-          {step > 1 && <button onClick={goPrev}>이전</button>}
-          {step < 4 && <button onClick={goNext}>다음</button>}
-        </div>
       </ContentsWrapper>
+
+      <div style={{ marginTop: "2rem" }}>
+        {step > 1 && <button onClick={goPrev}>이전</button>}
+        {step < 4 && <button onClick={goNext}>다음</button>}
+      </div>
     </Wrapper>
   );
 }
