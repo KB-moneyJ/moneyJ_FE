@@ -1,3 +1,16 @@
-export default function App() {
-  return <h1>MoneyJ 홈</h1>;
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "../pages/Home";
+import About from "../pages/StartPlan/About";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </Router>
+  );
 }
+
+export default App;
