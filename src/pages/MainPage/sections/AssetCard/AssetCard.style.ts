@@ -50,6 +50,7 @@ export const Amount = styled.span`
   font-weight: 800;
   font-size: 1.25rem;
   color: white;
+  margin-top: 0.2rem;
 `;
 
 export const SaveBtn = styled.button`
