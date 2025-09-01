@@ -15,5 +15,10 @@
   /* 포인트 배경색 (로고/저축 버튼) */
   --color-accent-light: #fce5ff;
 
+  /* 여행 진행도 바 */
+  --progress-start: #ffe600;
+  --progress-mid: #ff7a41;
+  --progress-end: #ff24e9;
+
   --gradient-main: linear-gradient(10.6deg, #2a002c 14.09%, #3a0271 53.43%, #010340 87.16%);
 }
