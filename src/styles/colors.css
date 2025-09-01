@@ -12,10 +12,8 @@
   /* 텍스트 강조 색상 */
   --color-text-highlight: #ff82ff;
 
-  --gradient-main: linear-gradient(
-          10.6deg,
-          #2A002C 14.09%,
-          #3A0271 53.43%,
-          #010340 87.16%
-  );
+  /* 포인트 배경색 (로고/저축 버튼) */
+  --color-accent-light: #fce5ff;
+
+  --gradient-main: linear-gradient(10.6deg, #2a002c 14.09%, #3a0271 53.43%, #010340 87.16%);
 }
