@@ -1,6 +1,7 @@
 import AssetCard from './sections/AssetCard/AssetCard';
 import UsageCard from './sections/UsageCard/UsageCard';
 import TripCard from './sections/TripCard/TripCard';
+import AddTripCard from './sections/AddTripCard/AddTripCard';
 import { Container, Profile, UserIcon, Nickname, BellIcon } from './Home.style';
 
 export default function Home() {
@@ -40,6 +41,7 @@ export default function Home() {
         progressPercent={100}
         onClickDetail={() => console.log('도쿄 상세보기 클릭')}
       />
+      <AddTripCard onClick={() => console.log('여행 생성 플로우로 이동')} />
     </div>
   );
 }
