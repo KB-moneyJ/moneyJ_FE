@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import styles from './Card.module.css';
+import { GlassCard } from './Card.style';
 
 interface CardProps {
   children: ReactNode;
@@ -7,5 +7,5 @@ interface CardProps {
 }
 
 export default function Card({ children, className }: CardProps) {
-  return <div className={`${styles.glassCard} ${className ?? ''}`}>{children}</div>;
+  return <GlassCard className={className}>{children}</GlassCard>;
 }

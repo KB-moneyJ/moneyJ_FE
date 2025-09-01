@@ -1,33 +1,36 @@
-.assetCard {
+import styled from 'styled-components';
+import Card from '@/components/common/Card/Card';
+
+export const AssetCardContainer = styled(Card)`
   margin: 1rem;
   padding: 1rem 1.25rem;
-}
+`;
 
-.assetHeader {
+export const AssetHeader = styled.div`
   margin-bottom: 0.75rem;
-}
+`;
 
-.assetTitle {
+export const AssetTitle = styled.span`
   color: var(--color-text-highlight);
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-}
+`;
 
-.assetBody {
+export const AssetBody = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-}
+`;
 
-.assetLeft {
+export const AssetLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 0.6rem;
-}
+`;
 
-.brandAvatar {
+export const BrandAvatar = styled.div`
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
@@ -35,21 +38,21 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-}
+`;
 
-.brandMark {
+export const BrandMark = styled.img`
   width: 70%;
   height: 70%;
   object-fit: contain;
-}
+`;
 
-.amount {
+export const Amount = styled.span`
   font-weight: 800;
   font-size: 1.25rem;
   color: white;
-}
+`;
 
-.saveBtn {
+export const SaveBtn = styled.button`
   border: 0;
   border-radius: var(--radius-button);
   padding: 0.4rem 0.7rem;
@@ -61,12 +64,12 @@
 
   min-width: 4.5rem;
   text-align: center;
-}
 
-.saveBtn:hover {
-  filter: brightness(1.05);
-}
+  &:hover {
+    filter: brightness(1.05);
+  }
 
-.saveBtn:active {
-  transform: translateY(1px);
-}
+  &:active {
+    transform: translateY(1px);
+  }
+`;

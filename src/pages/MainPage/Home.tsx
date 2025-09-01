@@ -1,19 +1,20 @@
-import { CircleUserRound, Bell } from 'lucide-react';
-import styles from './Home.module.css';
-
 import AssetCard from './sections/AssetCard/AssetCard';
+import UsageCard from './sections/UsageCard/UsageCard';
+import { Container, Profile, UserIcon, Nickname, BellIcon } from './Home.style';
 
 export default function Home() {
   return (
     <div>
-      <div className={styles.container}>
-        <div className={styles.profile}>
-          <CircleUserRound className={styles.icon} />
-          <span className={styles.nickname}>USERNAME</span>
-        </div>
-        <Bell className={styles.bell} />
-      </div>
+      <Container>
+        <Profile>
+          <UserIcon />
+          <Nickname>USERNAME</Nickname>
+        </Profile>
+        <BellIcon />
+      </Container>
+
       <AssetCard />
+      <UsageCard />
     </div>
   );
 }

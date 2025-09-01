@@ -1,24 +1,33 @@
-import styles from './AssetCard.module.css';
 import logoJ from '@/assets/images/logo-j.png';
-import Card from '@/components/common/Card/Card';
+import {
+  AssetCardContainer,
+  AssetHeader,
+  AssetTitle,
+  AssetBody,
+  AssetLeft,
+  BrandAvatar,
+  BrandMark,
+  Amount,
+  SaveBtn,
+} from './AssetCard.style';
 
 export default function AssetCard() {
   return (
-    <Card className={styles.assetCard}>
-      <div className={styles.assetHeader}>
-        <span className={styles.assetTitle}>MY 자산</span>
-      </div>
+    <AssetCardContainer>
+      <AssetHeader>
+        <AssetTitle>MY 자산</AssetTitle>
+      </AssetHeader>
 
-      <div className={styles.assetBody}>
-        <div className={styles.assetLeft}>
-          <div className={styles.brandAvatar}>
-            <img className={styles.brandMark} src={logoJ} alt="MoneyJ 로고" />
-          </div>
-          <span className={styles.amount}>1,031,000원</span>
-        </div>
+      <AssetBody>
+        <AssetLeft>
+          <BrandAvatar>
+            <BrandMark src={logoJ} alt="MoneyJ 로고" />
+          </BrandAvatar>
+          <Amount>1,031,000원</Amount>
+        </AssetLeft>
 
-        <button className={styles.saveBtn}>저축</button>
-      </div>
-    </Card>
+        <SaveBtn>저축</SaveBtn>
+      </AssetBody>
+    </AssetCardContainer>
   );
 }
