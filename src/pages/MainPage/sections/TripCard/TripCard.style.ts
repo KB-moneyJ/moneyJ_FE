@@ -17,6 +17,19 @@ export const Header = styled.div`
   gap: 0.75rem;
 `;
 
+export const DestinationBox = styled.div`
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+`;
+
+export const DestinationText = styled.span`
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+`;
+
 export const PlaneIcon = styled(PlaneTakeoff)`
   width: 1.3rem;
   height: 1.3rem;

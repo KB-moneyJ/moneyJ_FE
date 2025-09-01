@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   TripCardContainer,
   Header,
+  DestinationBox,
+  DestinationText,
   PlaneIcon,
   Flag,
   ImageFrame,
@@ -67,8 +69,10 @@ export default function TripCard({
     <TripCardContainer>
       <Header>
         <PlaneIcon />
-        <span>{destination}</span>
-        {countryCode && <Flag svg countryCode={countryCode} aria-label={countryCode} />}
+        <DestinationBox>
+          <DestinationText>{destination}</DestinationText>
+          {countryCode && <Flag svg countryCode={countryCode} aria-label={countryCode} />}
+        </DestinationBox>
       </Header>
 
       <ImageFrame>
