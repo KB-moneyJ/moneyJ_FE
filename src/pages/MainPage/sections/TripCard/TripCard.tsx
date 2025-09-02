@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   TripCardContainer,
@@ -21,6 +22,7 @@ const TILE_ROWS = 2;
 const TILE_COLS = 5;
 
 interface TripCardProps {
+  tripId: string;
   destination: string;
   countryCode?: string;
   period: string;
@@ -39,6 +41,7 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 export default function TripCard({
+  tripId,
   destination,
   countryCode,
   period,
@@ -61,7 +64,7 @@ export default function TripCard({
   useEffect(() => {
     setOpenedCount(initialCount);
     orderRef.current = shuffle([...Array(totalTiles).keys()]);
-  }, [thumbnailUrl /* 또는 destination */]);
+  }, [thumbnailUrl]);
 
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
 
@@ -112,7 +115,7 @@ export default function TripCard({
         <ProgressLabel>{progressPercent}%</ProgressLabel>
       </div>
 
-      <DetailBtn type="button" onClick={onClickDetail}>
+      <DetailBtn as={Link} to={`/trip/${tripId}`} onClick={onClickDetail}>
         상세보기
       </DetailBtn>
     </TripCardContainer>
