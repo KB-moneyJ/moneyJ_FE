@@ -72,6 +72,7 @@ export const DropdownHeader = styled.div`
     font-weight: normal;
   display: flex;
   align-items: center;
+    justify-content: space-between;
   cursor: pointer;
   user-select: none;
   border: 2px solid white;
@@ -272,10 +273,11 @@ export const CounterBox = styled.div`
   align-items: center;
     justify-content: space-between;
   border: 2px solid white;
-  border-radius: 10px;
+  border-radius: 5px;
   overflow: hidden;
     width: 298px;
     height: 43px;
+    margin-top: 34px;
 `;
 export const IndicatorButton = styled.button`
     width: 45px;
@@ -310,7 +312,33 @@ export const IndicatorButton2 = styled.button`
         background: rgba(255, 255, 255, 0.1);
     }
 `;
+export const InputContainer = styled.div`
+    max-height: 160px;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* ✅ 항상 위에서부터 정렬 */
+    align-items: center; /* 중앙 정렬 원하면 유지 */
+    overflow-y: auto;
+    overflow-x: hidden;
 
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.38);
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #ff7bfa;
+    }
+`;
 
 export const Count = styled.div`
   min-width: 80px;
@@ -319,17 +347,24 @@ export const Count = styled.div`
   font-weight: bold;
 `;
 
+export const InputWrapper = styled.div`
+    display: flex;
+    justify-content: center;
+    width: 300px;
+    margin-bottom: 10px;
+`
+
 export const IdInput = styled.input`
   width: 298px;
     height: 43px;
   border: 2px solid white;
-  border-radius: 10px;
+  border-radius: 5px;
   background-color: transparent;
   color: white;
   font-size: 16px;
   text-align: center;
   outline: none;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 
   &::placeholder {
     color: #888;
@@ -338,13 +373,16 @@ export const IdInput = styled.input`
 
 export const AddButton = styled.button`
     width: 304px;
-    height: 43px;
-  border: none;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.22);
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
+    height: 45px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.22);
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
 
+    bottom: 0;
 
+    flex-shrink: 0;    
+    align-self: center;
 `;

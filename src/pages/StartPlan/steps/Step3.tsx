@@ -5,7 +5,7 @@ import {
   Wrapper, InputRow, DateInput, LabelText, RangeWrapper, InputRow2
 } from '@/pages/StartPlan/steps/StepsStyle';
 
-export default function Step3({ selected, selectedRegions, otherCity }) {
+export default function Step3({ selected, selectedRegions, otherCity, days, setDays } ) {
   const displayRegions = selectedRegions.filter((r) => r !== "기타");
   if (otherCity.trim().length > 0) {
     displayRegions.push(otherCity);
@@ -23,10 +23,20 @@ export default function Step3({ selected, selectedRegions, otherCity }) {
           <DateInput placeholder="MM" maxLength={2} />
           <LabelText>월</LabelText>
 
-          <DateInput placeholder="N" maxLength={2} />
+          <DateInput
+            placeholder="N"
+            maxLength={2}
+            value={days.nights}
+            onChange={(e) => setDays({ ...days, nights: e.target.value })}
+          />
           <LabelText>박</LabelText>
 
-          <DateInput placeholder="D" maxLength={2} />
+          <DateInput
+            placeholder="D"
+            maxLength={2}
+            value={days.days}
+            onChange={(e) => setDays({ ...days, days: e.target.value })}
+          />
           <LabelText>일</LabelText>
         </InputRow>
 
@@ -51,8 +61,13 @@ export default function Step3({ selected, selectedRegions, otherCity }) {
             width: '300px',
           }}
         >
-          {selected.flag} {selected.name},{' '}
-          {displayRegions.length > 0 ? displayRegions.join(', ') : ''}
+          <div>
+            {selected.flag} {selected.name},{" "}
+            {displayRegions.length > 0 ? displayRegions.join(", ") : ""}{" "}
+          </div>
+          <div>
+            {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}{" "}
+          </div>
         </DropdownHeader>
       </Container>
     </Wrapper>

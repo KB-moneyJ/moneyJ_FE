@@ -14,9 +14,11 @@ import Step4 from "./steps/Step4";
 
 export default function MakePlan() {
   const [step, setStep] = useState<number>(1);
-  const [selectedCountry, setSelectedCountry] = useState<any>(null); // 선택한 나라
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([]); // 선택한 도시
-  const [otherCity, setOtherCity] = useState(""); // 기타 입력값
+  const [selectedCountry, setSelectedCountry] = useState<any>(null);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [otherCity, setOtherCity] = useState("");
+  const [days, setDays] = useState({ nights: "", days: "" });
+  const [people, setPeople] = useState(1);
 
   const pageVariants = {
     initial: { x: "100%", opacity: 0 },
@@ -53,10 +55,21 @@ export default function MakePlan() {
             selected={selectedCountry}
             selectedRegions={selectedRegions}
             otherCity={otherCity}
+            days={days}
+            setDays={setDays}
           />
         );
       case 4:
-        return <Step4 />;
+        return (
+          <Step4
+            selected={selectedCountry}
+            selectedRegions={selectedRegions}
+            otherCity={otherCity}
+            days={days}
+            people={people}
+            setPeople={setPeople}
+          />
+        );
       default:
         return null;
     }

@@ -8,23 +8,28 @@ import {
   IndicatorButton2,
   Count,
   IdInput,
-  AddButton,
-} from "@/pages/StartPlan/steps/StepsStyle";
+  AddButton, InputWrapper, InputContainer, DropdownHeader,
+} from '@/pages/StartPlan/steps/StepsStyle';
 
-export default function Step4() {
+export default function Step4({ selected, selectedRegions, otherCity, days, people, setPeople }) {
   const [count, setCount] = useState(1);
-  const [inputs, setInputs] = useState<string[]>([""]); // ID 입력칸 상태
+  const [inputs, setInputs] = useState<string[]>([]); // 친구 ID 입력칸 상태
+
+  const handleIncrease = () => setPeople(people + 1);
 
   const handleDecrease = () => {
-    if (count > 1) setCount(count - 1);
-  };
-
-  const handleIncrease = () => {
-    setCount(count + 1);
+    if (people > 1) {
+      setPeople(people - 1);
+      if (inputs.length > people - 2) {
+        setInputs(inputs.slice(0, people - 2));
+      }
+    }
   };
 
   const handleAddInput = () => {
-    setInputs([...inputs, ""]);
+    if (inputs.length < people - 1) {
+      setInputs([...inputs, ""]);
+    }
   };
 
   const handleChangeInput = (index: number, value: string) => {
@@ -32,10 +37,10 @@ export default function Step4() {
     newInputs[index] = value;
     setInputs(newInputs);
   };
-
-  const handleRemoveInput = (index: number) => {
-    setInputs(inputs.filter((_, i) => i !== index));
-  };
+  const displayRegions = selectedRegions.filter((r) => r !== "기타");
+  if (otherCity.trim().length > 0) {
+    displayRegions.push(otherCity);
+  }
 
   return (
     <Wrapper>
@@ -56,7 +61,7 @@ export default function Step4() {
               />
             </svg>
           </IndicatorButton>
-          <Count>{count}명</Count>
+          <Count>{people}명</Count>
           <IndicatorButton2 onClick={handleIncrease}>
             <svg
               width="16"
@@ -73,92 +78,79 @@ export default function Step4() {
           </IndicatorButton2>
         </CounterBox>
 
-        {count >= 2 && (
-          <div style={{ marginTop: "20px", width: "100%" }}>
+        {people >= 2 && (
+          <div style={{ marginTop: "50px", width: "100%" }}>
+            <p
+              style={{
+                color: "#FF82FF",
+                marginBottom: "11px",
+                fontSize: "13px",
+                fontWeight:'normal',
+                lineHeight:"1.5"
+              }}
+            >
+              동행자도 Money J를 쓰고 있나요?<br/>
+              함께라면 목표 달성이 훨씬 재밌어져요!
+            </p>
             <p
               style={{
                 color: "white",
-                marginBottom: "10px",
+                marginBottom: "22px",
                 fontSize: "16px",
               }}
             >
               여행 계획을 공유할 친구를 초대해주세요
             </p>
-
-            {inputs.map((input, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "10px",
-                }}
-              >
-                <IdInput
-                  type="text"
-                  placeholder="ID 입력"
-                  value={input}
-                  onChange={(e) => handleChangeInput(idx, e.target.value)}
-                />
-                {count >= 3 && (
-                  <RemoveButton onClick={() => handleRemoveInput(idx)}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 4L4 12M4 4L12 12"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </RemoveButton>
-                )}
-              </div>
-            ))}
-
-            {count >= 3 && (
-              <AddButton onClick={handleAddInput}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+            <InputContainer>
+              {inputs.map((input, idx) => (
+                <InputWrapper
+                  key={idx}
                 >
-                  <path
-                    d="M20 10C20 10.3183 19.8736 10.6235 19.6485 10.8485C19.4235 11.0736 19.1183 11.2 18.8 11.2H11.2V18.8C11.2 19.1183 11.0736 19.4235 10.8485 19.6485C10.6235 19.8736 10.3183 20 10 20C9.68174 20 9.37652 19.8736 9.15147 19.6485C8.92643 19.4235 8.8 19.1183 8.8 18.8V11.2H1.2C0.88174 11.2 0.576516 11.0736 0.351472 10.8485C0.126428 10.6235 0 10.3183 0 10C0 9.68174 0.126428 9.37652 0.351472 9.15147C0.576516 8.92643 0.88174 8.8 1.2 8.8H8.8V1.2C8.8 0.88174 8.92643 0.576516 9.15147 0.351472C9.37652 0.126428 9.68174 0 10 0C10.3183 0 10.6235 0.126428 10.8485 0.351472C11.0736 0.576516 11.2 0.88174 11.2 1.2V8.8H18.8C19.1183 8.8 19.4235 8.92643 19.6485 9.15147C19.8736 9.37652 20 9.68174 20 10Z"
-                    fill="white"
+                  <IdInput
+                    type="text"
+                    placeholder="ID 입력"
+                    value={input}
+                    onChange={(e) => handleChangeInput(idx, e.target.value)}
                   />
-                </svg>
-              </AddButton>
-            )}
+                </InputWrapper>
+              ))}
+              {inputs.length < people - 1 && (
+                <AddButton onClick={handleAddInput}>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 10C20 10.3183 19.8736 10.6235 19.6485 10.8485C19.4235 11.0736 19.1183 11.2 18.8 11.2H11.2V18.8C11.2 19.1183 11.0736 19.4235 10.8485 19.6485C10.6235 19.8736 10.3183 20 10 20C9.68174 20 9.37652 19.8736 9.15147 19.6485C8.92643 19.4235 8.8 19.1183 8.8 18.8V11.2H1.2C0.88174 11.2 0.576516 11.0736 0.351472 10.8485C0.126428 10.6235 0 10.3183 0 10C0 9.68174 0.126428 9.37652 0.351472 9.15147C0.576516 8.92643 0.88174 8.8 1.2 8.8H8.8V1.2C8.8 0.88174 8.92643 0.576516 9.15147 0.351472C9.37652 0.126428 9.68174 0 10 0C10.3183 0 10.6235 0.126428 10.8485 0.351472C11.0736 0.576516 11.2 0.88174 11.2 1.2V8.8H18.8C19.1183 8.8 19.4235 8.92643 19.6485 9.15147C19.8736 9.37652 20 9.68174 20 10Z"
+                      fill="white"
+                    />
+                  </svg>
+                </AddButton>
+              )}
+            </InputContainer>
           </div>
         )}
+        <DropdownHeader
+          style={{
+            position: 'absolute',
+            top: '675px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '300px',
+          }}
+        >
+          <div>
+            {selected.flag} {selected.name},{" "}
+            {displayRegions.length > 0 ? displayRegions.join(", ") : ""}{" "}
+          </div>
+          <div>
+            {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}{" "}
+          </div>
+        </DropdownHeader>
       </Container>
     </Wrapper>
   );
 }
-
-// 삭제 버튼 스타일
-const RemoveButton = styled.button`
-  margin-left: 8px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    pointer-events: none;
-  }
-
-  &:hover {
-    opacity: 0.7;
-  }
-`;
