@@ -1,11 +1,15 @@
-import { ReactNode } from 'react';
-import styles from './Card.module.css';
+import { ReactNode, HTMLAttributes } from 'react';
+import { GlassCard } from './Card.style';
 
-interface CardProps {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   className?: string;
 }
 
-export default function Card({ children, className }: CardProps) {
-  return <div className={`${styles.glassCard} ${className ?? ''}`}>{children}</div>;
+export default function Card({ children, className, ...rest }: CardProps) {
+  return (
+    <GlassCard className={className} {...rest}>
+      {children}
+    </GlassCard>
+  );
 }
