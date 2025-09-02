@@ -1,12 +1,16 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from '@/pages/MainPage/Home';
-import About from "../pages/StartPlan/About";
+import About from '@/pages/StartPlan/About';
+import Splash from '@/pages/SplashPage/Splash';
+import Login from '@/pages/LoginPage/Login';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Splash />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/about" element={<About />} />
       </Routes>
     </Router>
