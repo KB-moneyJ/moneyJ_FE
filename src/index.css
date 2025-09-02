@@ -7,34 +7,43 @@
 
 html,
 body {
-  height: 100%;
   margin: 0;
   padding: 0;
   background: #333333;
-}
-
-body {
+  min-height: 100vh;
   display: grid;
   place-items: center;
 }
 
 #root {
-  width: clamp(20rem, 90vw, 25.125rem);
-  aspect-ratio: 402 / 874;
-  max-height: 100dvh;
-  overflow: auto;
+  width: 402px;
+  height: 874px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 
   background: var(--gradient-main);
-  border-radius: clamp(0rem, 2vw, 1.25rem);
+  border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+  scrollbar-width: none;
+}
+#root::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 @media (max-width: 402px) {
   #root {
     width: 100vw;
     height: 100dvh;
-    aspect-ratio: auto;
     border-radius: 0;
     box-shadow: none;
+  }
+}
+
+@media (max-height: 874px) and (min-width: 403px) {
+  #root {
+    height: min(874px, 100dvh);
   }
 }
