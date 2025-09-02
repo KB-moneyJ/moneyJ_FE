@@ -37,7 +37,7 @@ export default function DetailPage() {
         onClickSave={() => console.log('저축하기 클릭')}
         tip="오늘 커피 한 잔을 줄이면, 단 7일 안에 목표를 이룰 수 있습니다."
       />
-      <ExpenseCard />
+      <ExpenseCard savedPercent={progress} />
     </div>
   );
 }

@@ -41,21 +41,23 @@ export const ItemList = styled.div`
   gap: 0.6rem;
 `;
 
-export const Item = styled.button<{ $selected?: boolean }>`
+export const Item = styled.button<{ $covered?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
   border-radius: var(--radius-card);
   border: 2px solid
-    ${({ $selected }) => ($selected ? 'var(--color-text-highlight)' : 'rgba(255,255,255,0.4)')};
+    ${({ $covered }) => ($covered ? 'var(--color-text-highlight)' : 'rgba(255,255,255,0.4)')};
   background: transparent;
   color: white;
-  cursor: pointer;
+  cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */
   font-size: 0.95rem;
 
   &:hover {
-    border-color: var(--color-text-highlight);
+    border-color: ${({ $covered }) =>
+      $covered ? 'var(--color-text-highlight)' : 'rgba(255,255,255,0.4)'};
+    background: ${({ $covered }) => ($covered ? 'rgba(61, 220, 90, 0.08)' : 'transparent')};
   }
 `;
 
@@ -71,5 +73,5 @@ export const Price = styled.span`
 
 export const CheckMark = styled.div`
   color: #00d000;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
 `;
