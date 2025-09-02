@@ -20,6 +20,41 @@ export const Container = styled.div`
     
 `;
 
+export const Container2 = styled.div`
+  font-family: Inter;
+  font-size: 24px;
+    width: 320px;
+  color: white;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+    margin-top: 20px;
+  flex-direction: column;
+  align-items: center;
+    max-height: 400px;
+    overflow-y: auto;   
+    overflow-x: hidden;
+    &::-webkit-scrollbar {
+        width: 6px;      /* 스크롤바 두께 */
+        display: none;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent; /* 트랙 배경 */
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #ffd94a;  /* 스크롤바 색상 */
+        border-radius: 10px;  /* 둥글게 */
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #ff7bfa;  /* hover 시 색상 */
+    }
+
+`;
+
 export const DropdownWrapper = styled.div`
   width: 300px;
     margin-top: 48px;
@@ -167,5 +202,149 @@ export const EtcInput = styled.input`
     border: 2px solid #FC49FF;
     margin-top: 8px;
     width: 250px;
+    color: white;
     background-color: transparent;
 `
+export const InputRow = styled.div`
+  display: flex;
+  align-items: flex-end;
+  margin-top: 50px;
+  gap: 6px;
+    font-weight: normal;
+    justify-content: center;
+`;
+
+export const InputRow2 = styled.div`
+  display: flex;
+  align-items: flex-end;
+  margin-top: 24px;
+  gap: 6px;
+    
+`;
+
+interface DateInputProps {
+  placeholder?: string;
+}
+
+export const DateInput = styled.input.attrs<DateInputProps>((props) => ({
+  placeholder: props.placeholder,
+}))<DateInputProps>`
+    width: ${({ placeholder }) => {
+        const length = placeholder ? placeholder.length : 2;
+        return `${Math.max(42, length * 14)}px`;
+    }};
+    max-width: 80px;
+    height: 40px;
+    border: 2px solid white;
+    border-radius: 10px;
+    background-color: transparent;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    margin-left: 4px;
+
+    &::placeholder {
+        color: #888;
+    }
+`;
+
+
+export const LabelText = styled.span`
+  font-size: 16px;
+  color: white;
+    margin-right: 4px;
+
+`;
+
+export const RangeWrapper = styled.div`
+  margin-top: 70px;
+  color: white;
+  display: flex;
+    font-weight: normal;
+    font-size: 16px;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const CounterBox = styled.div`
+  display: flex;
+  align-items: center;
+    justify-content: space-between;
+  border: 2px solid white;
+  border-radius: 10px;
+  overflow: hidden;
+    width: 298px;
+    height: 43px;
+`;
+export const IndicatorButton = styled.button`
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none; 
+    border-right: 2px solid white; 
+    background: transparent;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+`;
+
+export const IndicatorButton2 = styled.button`
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none; 
+    border-left: 2px solid white; 
+    background: transparent;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+`;
+
+
+export const Count = styled.div`
+  min-width: 80px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+`;
+
+export const IdInput = styled.input`
+  width: 298px;
+    height: 43px;
+  border: 2px solid white;
+  border-radius: 10px;
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+  margin-bottom: 10px;
+
+  &::placeholder {
+    color: #888;
+  }
+`;
+
+export const AddButton = styled.button`
+    width: 304px;
+    height: 43px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.22);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+
+
+`;

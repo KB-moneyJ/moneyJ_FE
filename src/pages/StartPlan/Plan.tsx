@@ -5,7 +5,7 @@ import {
   ContentsWrapper,
   ProgressBar,
   Progress,
-} from "./About.style";
+} from "./PlanStyle";
 
 import Step1 from "./steps/Step1";
 import Step2 from "./steps/Step2";
@@ -14,7 +14,9 @@ import Step4 from "./steps/Step4";
 
 export default function MakePlan() {
   const [step, setStep] = useState<number>(1);
-  const [selectedCountry, setSelectedCountry] = useState(null); // ✅ 선택한 나라
+  const [selectedCountry, setSelectedCountry] = useState<any>(null); // 선택한 나라
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]); // 선택한 도시
+  const [otherCity, setOtherCity] = useState(""); // 기타 입력값
 
   const pageVariants = {
     initial: { x: "100%", opacity: 0 },
@@ -32,13 +34,27 @@ export default function MakePlan() {
           <Step1
             onSelectCountry={setSelectedCountry}
             selected={selectedCountry}
-            goNext={goNext} // ✅ 내려오기 끝나면 Step2
+            goNext={goNext}
           />
         );
       case 2:
-        return <Step2 selected={selectedCountry} />;
+        return (
+          <Step2
+            selected={selectedCountry}
+            selectedRegions={selectedRegions}
+            setSelectedRegions={setSelectedRegions}
+            otherCity={otherCity}
+            setOtherCity={setOtherCity}
+          />
+        );
       case 3:
-        return <Step3 />;
+        return (
+          <Step3
+            selected={selectedCountry}
+            selectedRegions={selectedRegions}
+            otherCity={otherCity}
+          />
+        );
       case 4:
         return <Step4 />;
       default:
