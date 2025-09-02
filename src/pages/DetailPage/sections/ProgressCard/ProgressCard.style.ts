@@ -10,11 +10,14 @@ export const Wrapper = styled(Card)`
   margin: 1rem;
   padding: 1.4rem 1.5rem;
   color: white;
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.8rem;
 `;
 
 export const SaveBtn = styled(DetailBtn).attrs({ as: 'button' })`
   width: 100%;
-  margin: 0.5rem 0 1rem;
+  margin-top: auto;
 `;
 
 export const Title = styled.h3`
