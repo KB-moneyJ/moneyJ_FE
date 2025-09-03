@@ -75,17 +75,22 @@ export const CardWrap = styled.div`
 
 export const UsersBadge = styled.div`
   position: absolute;
-  top: 1.25rem;
-  right: 1.5rem;
+  top: 0;
+  right: 2rem;
+  transform: translateY(1.6rem);
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   color: white;
   font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
   pointer-events: none;
+
   svg {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 1rem;
+    height: 1rem;
+  }
+  span {
+    font-size: 0.8rem;
+    line-height: 1;
   }
 `;
