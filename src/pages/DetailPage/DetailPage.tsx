@@ -1,9 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+
 import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem } from './DetailPage.style';
 import ProgressCard from './sections/ProgressCard/ProgressCard';
 import ExpenseCard from './sections/ExpenseCard/ExpenseCard';
 import TripOverviewCard from './sections/TripOverviewCard/TripOverviewCard';
+import BeforeYouGoCard from './sections/BeforeYouGoCard/BeforeYouGoCard';
 import podiumUrl from '@/assets/images/podium.svg';
 
 export default function DetailPage() {
@@ -28,6 +30,22 @@ export default function DetailPage() {
     ],
     tip: '와우, 경비 반은 모았어요! 숙박비도 채워야 노숙투어 안 합니다 😎',
   };
+
+  const checklist = [
+    '여권, 항공권',
+    '엔화 현금',
+    '교통카드(Suica/PASMO)',
+    '포켓와이파이/eSIM',
+    '편한 신발, 보조배터리',
+  ];
+
+  const cautions = [
+    '지하철 안 통화 금지',
+    '소규모 가게는 현금만 가능',
+    '흡연은 지정 구역에서만',
+    '쓰레기통 적어 직접 챙겨야 함',
+    '팁 문화 없음',
+  ];
 
   useEffect(() => {
     // fetch(`/api/trips/${tripId}`).then(...);
@@ -65,6 +83,7 @@ export default function DetailPage() {
         podiumImageUrl={podiumUrl}
         tip={detail.tip}
       />
+      <BeforeYouGoCard destination={detail.destination} checklist={checklist} cautions={cautions} />
     </div>
   );
 }
