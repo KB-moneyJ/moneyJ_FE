@@ -61,36 +61,14 @@ export const SegTab = styled.button<{ $active?: boolean }>`
   cursor: pointer;
 
   font-weight: ${({ $active }) => ($active ? 600 : 400)};
-  color: ${({ $active }) => ($active ? '#1a1840' : 'rgba(255,255,255,0.9)')};
+  color: ${({ $active }) => ($active ? 'black' : 'white')};
 `;
 
 export const CardWrap = styled.div`
   position: relative;
   margin: clamp(0.75rem, 3vw, 1rem);
 
-  > :first-child {
-    margin: 0 !important;
-  }
-`;
-
-export const UsersBadge = styled.div`
-  position: absolute;
-  top: 0;
-  right: 2rem;
-  transform: translateY(26px);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  color: white;
-  font-weight: 500;
-  pointer-events: none;
-
-  svg {
-    width: 1rem;
-    height: 1rem;
-  }
-  span {
-    font-size: 0.8rem;
-    line-height: 1;
-  }
+  > *:first-child,
+  > *:first-child > *:first-child {
+   margin: 0 !important;+  }
 `;

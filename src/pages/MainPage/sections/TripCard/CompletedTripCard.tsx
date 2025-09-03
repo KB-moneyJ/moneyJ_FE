@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
 import TripCard from './TripCard';
+import UsersBadge from './UsersBadge';
 import CompletedStamp from '@/assets/images/completed-stamp.svg';
 
 type Props = React.ComponentProps<typeof TripCard>;

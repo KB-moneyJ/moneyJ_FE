@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Users } from 'lucide-react';
 import TripCard from '@/pages/MainPage/sections/TripCard/TripCard';
 import CompletedTripCard from '@/pages/MainPage/sections/TripCard/CompletedTripCard';
-import { Page, Tabs, Track, ActiveBg, SegTab, CardWrap, UsersBadge } from './Plan.style';
+import { Page, Tabs, Track, ActiveBg, SegTab, CardWrap } from './Plan.style';
+import UsersBadge from '@/pages/MainPage/sections/TripCard/UsersBadge';
 
 type Trip = {
   id: string;
@@ -54,7 +54,7 @@ export default function Plan() {
       thumbnailUrl:
         'https://images.unsplash.com/photo-1449452198679-05c7fd30f416?q=80&w=2070&auto=format&fit=crop',
       progressPercent: 100,
-      members: 2, // 완료 탭에만 보일 예정이라 영향 없음
+      members: 2,
     },
   ];
 
@@ -89,24 +89,23 @@ export default function Plan() {
               progressPercent={t.progressPercent}
               onClickDetail={() => console.log(`${t.destination} 상세보기`)}
             />
-            <UsersBadge>
-              <Users />
-              <span>{t.members ?? 1}</span>
-            </UsersBadge>
+            <UsersBadge count={t.members} />
           </CardWrap>
         ))}
 
       {tab === 'done' &&
         done.map((t) => (
-          <CompletedTripCard
-            key={t.id}
-            tripId={t.id}
-            destination={t.destination}
-            countryCode={t.countryCode}
-            period={t.period}
-            thumbnailUrl={t.thumbnailUrl}
-            onClickDetail={() => console.log(`${t.destination} 상세보기`)}
-          />
+          <CardWrap key={t.id}>
+            <CompletedTripCard
+              tripId={t.id}
+              destination={t.destination}
+              countryCode={t.countryCode}
+              period={t.period}
+              thumbnailUrl={t.thumbnailUrl}
+              onClickDetail={() => console.log(`${t.destination} 상세보기`)}
+            />
+            <UsersBadge count={t.members} />
+          </CardWrap>
         ))}
     </Page>
   );
