@@ -39,13 +39,14 @@
 }
 .kakaoLogo {
   width: 1vw;
-  margin-right: 1vw;
+  margin-right: 2vw;
 }
 .kakaoButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2vh 7vw;
+  width: 250px;
+  height: 45px;
   background-color: #ecb500;
   border-radius: var(--radius-card);
   text-align: center;
