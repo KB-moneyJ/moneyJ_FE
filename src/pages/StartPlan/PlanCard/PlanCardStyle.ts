@@ -6,23 +6,24 @@ import ReactCountryFlag from 'react-country-flag';
 export const Wrapper=styled.div`
     display: flex;
     justify-content: center;
+    
+    
 `
-export const TripCardContainer = styled(Card)`
-  color: white;
-    width: 343px;
-    height: 659px;
-    margin-top: 16px;
-`;
+
 
 export const GlassCard = styled.div`
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(20px);
+    /* CurrentTripCard */
+
+    margin-top: 104px;
+
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
     width: 343px;
     height: 659px;
     box-sizing: border-box;
 
-  border-radius: var(--radius-card);
   border: 1px solid rgba(255, 255, 255, 0.3);
 
   box-shadow:
@@ -31,11 +32,13 @@ export const GlassCard = styled.div`
     inset 0 -1px 0 rgba(255, 255, 255, 0.1),
     inset 0 0 4px 2px rgba(255, 255, 255, 0.2);
 
-  position: relative;
   overflow: hidden;
 
   color: #fff;
   padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
   &::before {
     content: '';
@@ -68,6 +71,19 @@ export const Header = styled.div`
   display: flex;
     justify-content: space-between;
   margin-top: 10px;
+    align-items: center;
+    width: 267px;
+`;
+export const Date = styled.div`
+    font-size: 12px;
+    margin-top: 8px;
+    width: 267px;
+`
+export const Divider = styled.hr`
+  border: none;
+  border-top: 0.5px solid rgba(255, 255, 255, 0.48);
+  margin: 12px auto;    
+  width: 90%;           
 `;
 
 export const DestinationBox = styled.div`
@@ -110,6 +126,7 @@ export const ImageFrame = styled.div`
   height: 10rem;
   border-radius: 0.75rem;
   overflow: hidden;
+    margin-top: 14px;
 `;
 
 export const DimImage = styled.img`
@@ -162,10 +179,11 @@ export const Period = styled.span`
 
 export const ProgressBar = styled.div`
   width: 100%;
-  height: 8px;
+  height: 7px;
   border-radius: 5px;
   background: white;
   overflow: hidden;
+    margin-top: 9px;
 `;
 
 export const ProgressFill = styled.div<{ $percent: number }>`
@@ -180,53 +198,84 @@ export const ProgressLabel = styled.div`
   display: flex;
   justify-content: flex-end;
   font-weight: 350;
-  font-size: 0.75rem;
-  margin-top: 0.5rem;
+  margin-top: 5px;
+    font-size: 10px;
+
 `;
 
-export const DetailBtn = styled.button`
-  border: 0;
+export const Amount = styled.h2`
+  margin: 0.2rem 0 0;
+  font-size: 28px;
+  font-weight: 800;
+    width: 267px;
+`;
+
+export const EditBtn = styled.button`
+  background: #fce5ff;
+  border: none;
   border-radius: var(--radius-button);
-  padding: 0.5rem;
-  background: var(--color-button-primary);
-  color: white;
-  font-weight: 400;
-  font-size: 0.75rem;
+    padding: 3px 8px;
+  font-size: 0.8rem;
   cursor: pointer;
-  text-align: center;
-  transition: filter 0.2s ease;
+`;
+
+export const CheckMark = styled.div`
+  color: #00d000;
+  font-size: 1.5rem;
+`;
+
+export const ItemList = styled.div`
+  margin-top: 1rem;
+  display: grid;
+  gap: 15px;
+    justify-content: center;
+`;
+
+export const Item = styled.button<{ $covered?: boolean }>`
+  display: flex;
+  align-items: center;
+    width: 267px;
+    height: 39px;
+  justify-content: space-between;
+  border-radius: var(--radius-card);
+  border: 0.4px solid white;
+    background: transparent;
+  color: white;
+  cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */
+  font-size: 0.95rem;
 
   &:hover {
-    filter: brightness(1.1);
-  }
-
-  &:active {
-    transform: translateY(1px);
+    border-color: ${({ $covered }) =>
+  $covered ? 'var(--color-text-highlight)' : 'rgba(255,255,255,0.4)'};
+    background: ${({ $covered }) => ($covered ? 'rgba(61, 220, 90, 0.08)' : 'transparent')};
   }
 `;
 
-export const PersonImg = styled.img`
-  width: 18px;
-    height: 16px;
-`
+export const Label = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 7px;
+    padding: 7px;
+`;
 
-export const ExpenseContainer = styled.div`
-  margin-top: 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  
-`
-export const ExpenseText = styled.div`
-  color: #cecece;
+export const Price = styled.span`
+  font-weight: 500;
+    padding:7px;
+`;
+
+export const Title = styled.h3`
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.9;
+`;
+
+export const Description = styled.div`
+    width: 267px;
     font-size: 16px;
-    font-weight: bold;
-`
-export const ModifyBtn = styled.button`
-  width: 53px;
-    height: 23px;
-    background-color: #FCE5FF;
-    color: black;
-    border-radius: 5px;
-    font-size: 12px;
+    color: #FFB1FF;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin-top: 24px;
 `

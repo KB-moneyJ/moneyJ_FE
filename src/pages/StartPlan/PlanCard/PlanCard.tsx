@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  TripCardContainer,
   Header,
   DestinationBox,
   DestinationText,
@@ -14,19 +13,24 @@ import {
   ProgressBar,
   ProgressFill,
   ProgressLabel,
-  DetailBtn, PersonImg, ExpenseContainer, ExpenseText, Wrapper, ModifyBtn, GlassCard,
+  Wrapper,
+  GlassCard, Amount, CheckMark, EditBtn, Item,
+  ItemList,
+  Label, Price,
+  Title, Date, Divider, Description,
 } from './PlanCardStyle';
-import person from '../../../assets/images/2person.png';
+import { Check, Home, Plane, Utensils } from 'lucide-react';
 
 const TILE_ROWS = 2;
 const TILE_COLS = 5;
 
-interface TripCardProps {
+interface PlanCardProps {
   destination: string;
   countryCode?: string;
   period: string;
   thumbnailUrl: string;
   progressPercent: number;
+  savedPercent?: number; // 선택적, 기본값 처리
   onClickDetail?: () => void;
 }
 
@@ -39,14 +43,27 @@ function shuffle<T>(array: T[]): T[] {
   return copy;
 }
 
+type ExpenseItem = {
+  id: string;
+  label: string;
+  amount: number;
+  icon: React.ReactNode;
+};
+
+const baseItems: ExpenseItem[] = [
+  { id: 'flight', label: '항공권', amount: 800000, icon: <Plane size={18} /> },
+  { id: 'hotel', label: '숙박', amount: 1000000, icon: <Home size={18} /> },
+  { id: 'food', label: '식비', amount: 400000, icon: <Utensils size={18} /> },
+];
+
 export default function PlanCard({
-  destination,
-  countryCode,
-  period,
-  thumbnailUrl,
-  progressPercent,
-  onClickDetail,
-}: TripCardProps) {
+                                   destination,
+                                   countryCode,
+                                   period,
+                                   thumbnailUrl,
+                                   progressPercent,
+                                   savedPercent = 0, // 기본값 0
+                                 }: PlanCardProps) {
   const totalTiles = TILE_ROWS * TILE_COLS;
 
   const orderRef = useRef<number[]>(shuffle([...Array(totalTiles).keys()]));
@@ -62,9 +79,25 @@ export default function PlanCard({
   useEffect(() => {
     setOpenedCount(initialCount);
     orderRef.current = shuffle([...Array(totalTiles).keys()]);
-  }, [thumbnailUrl /* 또는 destination */]);
+  }, [thumbnailUrl]);
 
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
+
+  const items = baseItems;
+  const total = items.reduce((sum, i) => sum + i.amount, 0);
+
+  const clamped = Math.max(0, Math.min(100, savedPercent));
+  let remaining = Math.round((total * clamped) / 100);
+
+  const coveredSet = new Set<string>();
+  for (const i of items) {
+    if (remaining >= i.amount) {
+      coveredSet.add(i.id);
+      remaining -= i.amount;
+    } else {
+      break;
+    }
+  }
 
   return (
     <Wrapper>
@@ -87,14 +120,42 @@ export default function PlanCard({
             2명
           </div>
         </Header>
-        <ExpenseContainer>
-          <div style={{ display: 'flex', justifyContent: 'space-between', width:'269px' }}>
-            <ExpenseText>
-              예상 1인 경비
-            </ExpenseText>
-            <ModifyBtn>수정하기</ModifyBtn>
+        <Date>{period}</Date>
+        <Divider />
+        <Header>
+          <div>
+            <Title>예상 1인 경비</Title>
           </div>
-        </ExpenseContainer>
+          <EditBtn>수정하기</EditBtn>
+        </Header>
+        <Amount>₩ {total.toLocaleString()}</Amount>
+
+        <ItemList>
+          {items.map((i) => {
+            const covered = coveredSet.has(i.id);
+            return (
+              <Item key={i.id} $covered={covered}>
+                <Label>
+                  {i.icon}
+                  {i.label}
+                </Label>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Price>₩{i.amount.toLocaleString()}</Price>
+                  {covered && (
+                    <CheckMark>
+                      <Check size={18} strokeWidth={2.5} />
+                    </CheckMark>
+                  )}
+                </div>
+              </Item>
+            );
+          })}
+        </ItemList>
+        <Description>
+          함께 저축해 목표를 채우고<br/>
+          여행지 그림을 완성해보세요!
+        </Description>
         <ImageFrame>
           <DimImage src={thumbnailUrl} alt={`${destination} 썸네일`} />
           <Tiles>
@@ -118,9 +179,8 @@ export default function PlanCard({
           </Tiles>
         </ImageFrame>
 
-        <Period>{period}</Period>
-
-        <div>
+        <div style={{width:'100%'}}>
+          <div style={{fontSize:'15px', marginTop:'8px'}}>목표금액 :{total.toLocaleString()}</div>
           <ProgressBar
             role="progressbar"
             aria-valuenow={progressPercent}
@@ -132,9 +192,6 @@ export default function PlanCard({
           <ProgressLabel>{progressPercent}%</ProgressLabel>
         </div>
 
-        <DetailBtn type="button" onClick={onClickDetail}>
-          상세보기
-        </DetailBtn>
       </GlassCard>
     </Wrapper>
   );
