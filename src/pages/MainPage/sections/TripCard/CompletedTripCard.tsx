@@ -22,7 +22,7 @@ const Wrap = styled.div`
 const StampImg = styled.img`
   position: absolute;
   top: 23%;
-  left: 25%;
+  left: 22%;
   width: clamp(180px, 40%, 300px);
   transform: rotate(-12deg);
   pointer-events: none;
