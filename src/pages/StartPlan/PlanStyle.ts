@@ -33,3 +33,5 @@ export const Progress = styled.div`
   border-radius: 5px;
   transition: margin-left 0.5s ease;
 `;
+
+
