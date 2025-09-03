@@ -77,7 +77,7 @@ export const UsersBadge = styled.div`
   position: absolute;
   top: 0;
   right: 2rem;
-  transform: translateY(1.6rem);
+  transform: translateY(26px);
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
