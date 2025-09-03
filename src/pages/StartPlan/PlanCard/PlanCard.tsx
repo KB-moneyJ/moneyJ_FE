@@ -14,7 +14,7 @@ import {
   ProgressBar,
   ProgressFill,
   ProgressLabel,
-  DetailBtn, PersonImg, ExpenseContainer, ExpenseText, Wrapper, ModifyBtn,
+  DetailBtn, PersonImg, ExpenseContainer, ExpenseText, Wrapper, ModifyBtn, GlassCard,
 } from './PlanCardStyle';
 import person from '../../../assets/images/2person.png';
 
@@ -68,7 +68,7 @@ export default function PlanCard({
 
   return (
     <Wrapper>
-      <TripCardContainer>
+      <GlassCard>
         <Header>
           <div style={{ display: 'flex'}}>
             <PlaneIcon />
@@ -135,7 +135,7 @@ export default function PlanCard({
         <DetailBtn type="button" onClick={onClickDetail}>
           상세보기
         </DetailBtn>
-      </TripCardContainer>
+      </GlassCard>
     </Wrapper>
   );
 }
