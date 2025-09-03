@@ -9,7 +9,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #333333;
+  background: #e6e6e6;
   min-height: 100vh;
   display: grid;
   place-items: center;
