@@ -126,9 +126,10 @@ export const ContentBox = styled.div<{ $open: boolean }>`
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 12px;
-  padding: ${({ $open }) => ($open ? '12px 14px' : '0 14px')};
-  margin: ${({ $open }) => ($open ? '4px 0 8px' : '0')};
+  border-radius: 10px;
+  padding: ${({ $open }) => ($open ? '10px' : '0')};
+  margin: ${({ $open }) => ($open ? '4px' : '0')};
+  font-size: 14px;
 
   ul {
     margin: 0 0 8px 18px;
@@ -140,7 +141,7 @@ export const ContentBox = styled.div<{ $open: boolean }>`
   }
 `;
 
-export const NextButton = styled.div`
+export const NextButton = styled.button`
   background: var(--color-button-primary);
   border-radius: var(--radius-button);
   width: 200px;
@@ -148,4 +149,5 @@ export const NextButton = styled.div`
   color: white;
   cursor: pointer;
   text-align: center;
+  border: none;
 `;

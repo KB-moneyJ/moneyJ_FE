@@ -1,5 +1,6 @@
 import logo from '@/assets/images/logo-j.png';
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Wrapper,
   LogoContainer,
@@ -56,6 +57,10 @@ export default function Agree() {
   const toggleOpen = (name: keyof typeof open) => {
     setOpen((prev) => ({ ...prev, [name]: !prev[name] }));
   };
+  const navigation = useNavigate();
+  const goToIntro = () => {
+    navigation('/intro');
+  };
 
   return (
     <Wrapper>
@@ -69,14 +74,12 @@ export default function Agree() {
       </TextContainer>
 
       <AgreementContainer>
-        {/* 전체 동의 (밑줄 구분선 포함) */}
         <AllAgreeLabel className="all-agree">
           <HiddenCheckbox
             id="allAgree"
             checked={agreements.all}
             onChange={() => handleChange('all')}
           />
-          {/* 체크박스 클릭 시에도 라벨 클릭 이벤트만 발생 (펼침 없음) */}
           <CustomCheckboxLabel
             htmlFor="allAgree"
             onClick={(e) => e.stopPropagation()}
@@ -87,16 +90,12 @@ export default function Agree() {
           약관 전체동의
         </AllAgreeLabel>
 
-        {/* (필수) 개인정보 수집 및 이용 동의 */}
         <Item>
-          {/* 실제 체크박스 (상태 보유) */}
           <HiddenCheckbox
             id="personalInfo"
             checked={agreements.personalInfo}
             onChange={() => handleChange('personalInfo')}
           />
-
-          {/* 헤더: 펼침 전용 클릭 영역 */}
           <HeaderRow
             role="button"
             tabIndex={0}
@@ -108,7 +107,6 @@ export default function Agree() {
             }}
           >
             <Left>
-              {/* 체크박스 비주얼: 클릭 시 체크만 (펼침 방지 위해 stopPropagation) */}
               <CustomCheckboxLabel
                 htmlFor="personalInfo"
                 onClick={(e) => e.stopPropagation()}
@@ -123,17 +121,14 @@ export default function Agree() {
             </Arrow>
           </HeaderRow>
 
-          {/* 펼침 내용 */}
           <ContentBox id="section-personalInfo" $open={open.personalInfo}>
             <ul>
-              <li>목적: 회원가입 시 본인 확인 및 이메일 인증 발송</li>
-              <li>항목: 이름, 이메일, 연락처</li>
-              <li>보유·이용 기간: 회원 탈퇴 시까지 (관련 법령에 따라 일정 기간 보관 가능)</li>
+              <p>목적: 회원가입 시 본인 확인 및 이메일 인증 발송</p>
+              <p>항목: 이름, 이메일, 연락처</p>
+              <p>보유·이용 기간: 회원 탈퇴 시까지 (관련 법령에 따라 일정 기간 보관 가능)</p>
             </ul>
           </ContentBox>
         </Item>
-
-        {/* (필수) 개인정보 처리 위탁 동의 */}
         <Item>
           <HiddenCheckbox
             id="processing"
@@ -168,14 +163,14 @@ export default function Agree() {
 
           <ContentBox id="section-processing" $open={open.processing}>
             <ul>
-              <li>위탁받는 자: ㈜OOO</li>
-              <li>위탁 업무: 서비스 운영, 고객 지원</li>
-              <li>보유·이용 기간: 회원 탈퇴 시까지</li>
+              <p>위탁받는 자: ㈜OOO</p>
+              <p>위탁 업무: 서비스 운영, 고객 지원</p>
+              <p>보유·이용 기간: 회원 탈퇴 시까지</p>
             </ul>
           </ContentBox>
         </Item>
       </AgreementContainer>
-      {isAllRequiredChecked && <NextButton>다음</NextButton>}
+      {isAllRequiredChecked && <NextButton onClick={goToIntro}>다음</NextButton>}
     </Wrapper>
   );
 }
