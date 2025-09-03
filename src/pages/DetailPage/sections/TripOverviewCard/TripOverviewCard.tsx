@@ -1,0 +1,157 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Wrapper,
+  Header,
+  DestinationBox,
+  DestinationText,
+  PlaneIcon,
+  Flag,
+  Period,
+  SectionTitle,
+  ImageFrame,
+  DimImage,
+  Tiles,
+  Tile,
+  ProgressRow,
+  ProgressBar,
+  ProgressFill,
+  ProgressRightLabel,
+  Divider,
+  Podium,
+  RankList,
+  RankItem,
+  RankNo,
+  RankUser,
+  RankPercent,
+  Tip,
+  TipLabel,
+  TipText,
+} from './TripOverviewCard.style';
+import { CircleUserRound } from 'lucide-react';
+
+type Member = { id: string; name: string; percent: number };
+
+type Props = {
+  destination: string;
+  countryCode?: string;
+  period: string;
+  thumbnailUrl: string;
+  progressPercent: number;
+  members: Member[];
+  tip?: string;
+  podiumImageUrl?: string;
+};
+
+const TILE_ROWS = 2;
+const TILE_COLS = 5;
+
+function shuffle<T>(array: T[]): T[] {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+export default function TripOverviewCard({
+  destination,
+  countryCode,
+  period,
+  thumbnailUrl,
+  progressPercent,
+  members,
+  tip,
+  podiumImageUrl,
+}: Props) {
+  const totalTiles = TILE_ROWS * TILE_COLS;
+  const orderRef = useRef<number[]>(shuffle([...Array(totalTiles).keys()]));
+  const initialCount = Math.max(0, Math.min(totalTiles, Math.floor(progressPercent / 10)));
+  const [openedCount, setOpenedCount] = useState<number>(initialCount);
+
+  useEffect(() => {
+    const next = Math.max(0, Math.min(totalTiles, Math.floor(progressPercent / 10)));
+    setOpenedCount((prev) => (next > prev ? next : prev));
+  }, [progressPercent]);
+
+  useEffect(() => {
+    setOpenedCount(initialCount);
+    orderRef.current = shuffle([...Array(totalTiles).keys()]);
+  }, [thumbnailUrl]);
+
+  const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
+
+  return (
+    <Wrapper>
+      <Header>
+        <PlaneIcon />
+        <DestinationBox>
+          <DestinationText>{destination}</DestinationText>
+          {countryCode && <Flag svg countryCode={countryCode} aria-label={countryCode} />}
+        </DestinationBox>
+      </Header>
+
+      <Period>{period}</Period>
+
+      <SectionTitle>현재 진행 상황</SectionTitle>
+
+      <ImageFrame>
+        <DimImage src={thumbnailUrl} alt={`${destination} 썸네일`} />
+        <Tiles>
+          {Array.from({ length: TILE_ROWS }).map((_, r) =>
+            Array.from({ length: TILE_COLS }).map((__, c) => {
+              const index = r * TILE_COLS + c;
+              return (
+                <Tile
+                  key={`${r}-${c}`}
+                  $url={thumbnailUrl}
+                  $rows={TILE_ROWS}
+                  $cols={TILE_COLS}
+                  $row={r}
+                  $col={c}
+                  $visible={visibleSet.has(index)}
+                  aria-hidden
+                />
+              );
+            }),
+          )}
+        </Tiles>
+      </ImageFrame>
+
+      <ProgressRow>
+        <ProgressBar
+          role="progressbar"
+          aria-valuenow={progressPercent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <ProgressFill $percent={progressPercent} />
+        </ProgressBar>
+        <ProgressRightLabel>{progressPercent}%</ProgressRightLabel>
+      </ProgressRow>
+
+      <Divider />
+
+      {podiumImageUrl && <Podium src={podiumImageUrl} alt="랭킹 단상" />}
+
+      <RankList>
+        {members.map((m, idx) => (
+          <RankItem key={m.id}>
+            <RankNo>{idx + 1}</RankNo>
+            <RankUser>
+              <CircleUserRound />
+              {m.name}
+            </RankUser>
+            <RankPercent>{m.percent}%</RankPercent>
+          </RankItem>
+        ))}
+      </RankList>
+
+      <Divider />
+      <Tip>
+        <TipLabel>TIP</TipLabel>
+        <TipText>{tip}</TipText>
+      </Tip>
+    </Wrapper>
+  );
+}
