@@ -6,7 +6,8 @@ export const Page = styled.div`
 `;
 
 export const Tabs = styled.div`
-  --rail-inset: 16px;
+  --tab-h: 2.75rem;
+  --rail-inset: clamp(12px, 4vw, 24px);
   --rail-width: calc(100% - (var(--rail-inset) * 2));
   --rail-height: 1px;
 
@@ -24,7 +25,6 @@ export const Tabs = styled.div`
     width: var(--rail-width);
     height: var(--rail-height);
     background: #e1dbff;
-    border-radius: 1px;
   }
 `;
 
@@ -38,19 +38,19 @@ export const Track = styled.div`
 
 export const ActiveBg = styled.div<{ $tab: 'ongoing' | 'done' }>`
   position: absolute;
-  bottom: calc(-1 * var(--rail-height));
+  bottom: var(--rail-height);
   left: ${({ $tab }) => ($tab === 'ongoing' ? '0%' : '50%')};
   width: 50%;
-  height: 44px;
+  height: var(--tab-h);
   background: #e1dbff;
-  z-index: 0;
   transition: left 0.2s ease;
+  pointer-events: none;
 `;
 
 export const SegTab = styled.button<{ $active?: boolean }>`
   position: relative;
   z-index: 1;
-  height: 44px;
+  height: var(--tab-h);
   width: 100%;
   display: flex;
   align-items: center;
@@ -66,7 +66,7 @@ export const SegTab = styled.button<{ $active?: boolean }>`
 
 export const CardWrap = styled.div`
   position: relative;
-  margin: 1rem;
+  margin: clamp(0.75rem, 3vw, 1rem);
 
   > :first-child {
     margin: 0 !important;
@@ -75,11 +75,11 @@ export const CardWrap = styled.div`
 
 export const UsersBadge = styled.div`
   position: absolute;
-  top: 24px;
-  right: 30px;
+  top: 1.25rem;
+  right: 1.5rem;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
   color: white;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
