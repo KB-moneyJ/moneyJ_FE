@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Wrapper,
-  Container,
+  Container2,
   DropdownHeader,
   RandomSpinner,
   Regionbutton,
-  InputMessage, BigM, SmallM, EtcInput,
+  InputMessage,
+  BigM,
+  SmallM,
+  EtcInput,
 } from './StepsStyle';
 
 const countryCodeMap: Record<string, string> = {
@@ -33,13 +35,30 @@ const countryCodeMap: Record<string, string> = {
   Turkey: "TR",
 };
 
-export default function Step2({ selected }) {
+interface Step2Props {
+  selected: any;
+  selectedRegions: string[];
+  setSelectedRegions: React.Dispatch<React.SetStateAction<string[]>>;
+  otherCity: string;
+  setOtherCity: React.Dispatch<React.SetStateAction<string>>;
+}
+
+export default function Step2({
+                                selected,
+                                selectedRegions,
+                                setSelectedRegions,
+                                otherCity,
+                                setOtherCity,
+                              }: Step2Props) {
   const [cities, setCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedCities, setSelectedCities] = useState<string[]>([]);
-  const [otherCity, setOtherCity] = useState(""); // 기타 입력값 상태
+  const etcInputRef = useRef<HTMLInputElement | null>(null);
 
+  // 나라 변경 시 초기화
   useEffect(() => {
+    setCities([]);
+    setSelectedRegions([]);
+    setOtherCity("");
     if (!selected) return;
 
     const countryCode = countryCodeMap[selected.name];
@@ -56,7 +75,7 @@ export default function Step2({ selected }) {
           {
             method: "GET",
             headers: {
-              "X-RapidAPI-Key": "4c6450c651mshda51bad5e02688cp150d1fjsnd8f36b69ed31",
+              "X-RapidAPI-Key":  "4c6450c651mshda51bad5e02688cp150d1fjsnd8f36b69ed31",
               "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
             },
           }
@@ -88,23 +107,35 @@ export default function Step2({ selected }) {
     fetchCities();
   }, [selected]);
 
-  // 토글 선택
+  // 도시 선택 토글
   const toggleCity = (city: string) => {
-    setSelectedCities((prev) =>
-      prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city]
-    );
+    setSelectedRegions((prev) => {
+      let newSelected = prev.includes(city)
+        ? prev.filter((c) => c !== city)
+        : [...prev, city];
 
-    // 기타 해제 시 입력값 초기화
-    if (city === "기타" && selectedCities.includes("기타")) {
-      setOtherCity("");
-    }
+      // 기타 선택 시 포커스
+      if (city === "기타" && !prev.includes("기타")) {
+        setTimeout(() => {
+          etcInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+          etcInputRef.current?.focus();
+        }, 100);
+      }
+
+      // 기타 해제 시 입력값 초기화
+      if (city === "기타" && prev.includes("기타")) {
+        setOtherCity("");
+      }
+
+      return newSelected;
+    });
   };
 
   if (!selected) return null;
 
   return (
     <Wrapper>
-      <Container>
+      <Container2>
         <div>어느지역에 가시나요?</div>
         <div
           style={{
@@ -113,7 +144,7 @@ export default function Step2({ selected }) {
             gap: "20px",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: "42px"
+            marginTop: "42px",
           }}
         >
           {loading ? (
@@ -122,7 +153,9 @@ export default function Step2({ selected }) {
             cities.map((city) => (
               <Regionbutton
                 key={city}
-                selected={selectedCities.includes(city)}
+                selected={
+                  city === "기타" ? otherCity.length > 0 : selectedRegions.includes(city)
+                }
                 onClick={() => toggleCity(city)}
               >
                 {city}
@@ -131,13 +164,14 @@ export default function Step2({ selected }) {
           )}
         </div>
 
-        {selectedCities.includes("기타") && (
+        {selectedRegions.includes("기타") && (
           <>
             <InputMessage>
               <BigM>여행지를 입력하세요. <span></span></BigM>
               <SmallM>여러 개 가능, 쉼표로 구분</SmallM>
             </InputMessage>
             <EtcInput
+              ref={etcInputRef}
               type="text"
               value={otherCity}
               onChange={(e) => setOtherCity(e.target.value)}
@@ -157,7 +191,7 @@ export default function Step2({ selected }) {
         >
           {selected.flag} {selected.name}
         </DropdownHeader>
-      </Container>
+      </Container2>
     </Wrapper>
   );
 }

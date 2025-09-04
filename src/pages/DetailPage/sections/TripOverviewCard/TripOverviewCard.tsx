@@ -1,35 +1,49 @@
-import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  TripCardContainer,
+  Wrapper,
   Header,
   DestinationBox,
   DestinationText,
   PlaneIcon,
   Flag,
+  Period,
+  SectionTitle,
   ImageFrame,
   DimImage,
   Tiles,
   Tile,
-  Period,
+  ProgressRow,
   ProgressBar,
   ProgressFill,
-  ProgressLabel,
-  DetailBtn,
-} from './TripCard.style';
+  ProgressRightLabel,
+  Divider,
+  Podium,
+  RankList,
+  RankItem,
+  RankNo,
+  RankUser,
+  RankPercent,
+  Tip,
+  TipLabel,
+  TipText,
+} from './TripOverviewCard.style';
+import { CircleUserRound } from 'lucide-react';
 
-const TILE_ROWS = 2;
-const TILE_COLS = 5;
+type Member = { id: string; name: string; percent: number };
 
-interface TripCardProps {
-  tripId: string;
+type Props = {
   destination: string;
   countryCode?: string;
   period: string;
   thumbnailUrl: string;
   progressPercent: number;
-  onClickDetail?: () => void;
-}
+  members: Member[];
+  tip?: string;
+  podiumImageUrl?: string;
+};
+
+const TILE_ROWS = 2;
+const TILE_COLS = 5;
 
 function shuffle<T>(array: T[]): T[] {
   const copy = [...array];
@@ -40,26 +54,25 @@ function shuffle<T>(array: T[]): T[] {
   return copy;
 }
 
-export default function TripCard({
-  tripId,
+export default function TripOverviewCard({
   destination,
   countryCode,
   period,
   thumbnailUrl,
   progressPercent,
-  onClickDetail,
-}: TripCardProps) {
+  members,
+  tip,
+  podiumImageUrl,
+}: Props) {
   const totalTiles = TILE_ROWS * TILE_COLS;
-
   const orderRef = useRef<number[]>(shuffle([...Array(totalTiles).keys()]));
-
   const initialCount = Math.max(0, Math.min(totalTiles, Math.floor(progressPercent / 10)));
   const [openedCount, setOpenedCount] = useState<number>(initialCount);
 
   useEffect(() => {
     const next = Math.max(0, Math.min(totalTiles, Math.floor(progressPercent / 10)));
     setOpenedCount((prev) => (next > prev ? next : prev));
-  }, [progressPercent, totalTiles]);
+  }, [progressPercent]);
 
   useEffect(() => {
     setOpenedCount(initialCount);
@@ -69,7 +82,7 @@ export default function TripCard({
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
 
   return (
-    <TripCardContainer>
+    <Wrapper>
       <Header>
         <PlaneIcon />
         <DestinationBox>
@@ -77,6 +90,10 @@ export default function TripCard({
           {countryCode && <Flag svg countryCode={countryCode} aria-label={countryCode} />}
         </DestinationBox>
       </Header>
+
+      <Period>{period}</Period>
+
+      <SectionTitle>현재 진행 상황</SectionTitle>
 
       <ImageFrame>
         <DimImage src={thumbnailUrl} alt={`${destination} 썸네일`} />
@@ -101,9 +118,7 @@ export default function TripCard({
         </Tiles>
       </ImageFrame>
 
-      <Period>{period}</Period>
-
-      <div>
+      <ProgressRow>
         <ProgressBar
           role="progressbar"
           aria-valuenow={progressPercent}
@@ -112,12 +127,31 @@ export default function TripCard({
         >
           <ProgressFill $percent={progressPercent} />
         </ProgressBar>
-        <ProgressLabel>{progressPercent}%</ProgressLabel>
-      </div>
+        <ProgressRightLabel>{progressPercent}%</ProgressRightLabel>
+      </ProgressRow>
 
-      <DetailBtn as={Link} to={`/trip/${tripId}`} onClick={onClickDetail}>
-        상세보기
-      </DetailBtn>
-    </TripCardContainer>
+      <Divider />
+
+      {podiumImageUrl && <Podium src={podiumImageUrl} alt="랭킹 단상" />}
+
+      <RankList>
+        {members.map((m, idx) => (
+          <RankItem key={m.id}>
+            <RankNo>{idx + 1}</RankNo>
+            <RankUser>
+              <CircleUserRound />
+              {m.name}
+            </RankUser>
+            <RankPercent>{m.percent}%</RankPercent>
+          </RankItem>
+        ))}
+      </RankList>
+
+      <Divider />
+      <Tip>
+        <TipLabel>TIP</TipLabel>
+        <TipText>{tip}</TipText>
+      </Tip>
+    </Wrapper>
   );
 }
