@@ -4,6 +4,8 @@ import About from '@/pages/StartPlan/Plan';
 import DetailPage from '@/pages/DetailPage/DetailPage';
 import Splash from '@/pages/SplashPage/Splash';
 import Login from '@/pages/LoginPage/Login';
+import Agree from '@/pages/SignUpPage/Agree';
+import Intro from '@/pages/IntroPage/Intro';
 import PlanCompelete from '@/pages/StartPlan/PlanCompelete';
 
 function App() {
@@ -13,6 +15,8 @@ function App() {
         {/* Auth (첫 시작) */}
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/agree" element={<Agree />} />
+        <Route path="/intro" element={<Intro />} />
 
         {/* Home */}
         <Route path="/home" element={<Home />} />
