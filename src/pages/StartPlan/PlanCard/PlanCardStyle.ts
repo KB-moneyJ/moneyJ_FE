@@ -18,13 +18,13 @@ export const GlassCard = styled.div`
 
     background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
-    backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
     width: 343px;
     height: 659px;
     box-sizing: border-box;
 
   border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.1),
@@ -242,7 +242,7 @@ export const Item = styled.button<{ $covered?: boolean }>`
     background: transparent;
   color: white;
   cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */
-  font-size: 0.95rem;
+  font-size: 15px;
 
   &:hover {
     border-color: ${({ $covered }) =>
@@ -279,3 +279,62 @@ export const Description = styled.div`
     text-align: center;
     margin-top: 24px;
 `
+export const ModalContent = styled.div`
+    padding: 2rem;
+    width: 307px;
+    max-height: 80vh;
+    overflow-y: auto;
+    
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+            inset 0 0 4px 2px rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+
+`
+export const CleanInput2 = styled.input`
+  width: 150px;
+  padding: 5px 2px;
+  border: none;
+  border-bottom: 2px solid white;
+  background: transparent;
+  outline: none;
+  text-align: center;
+  font-size: 28px;
+  color: white;
+    font-family: Inter;
+
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+`;
+
+
+export const CleanInput = styled.input`
+  width: 80px;
+  padding: 3px 2px;
+  border: none;
+  border-bottom: 1px solid white;
+  background: transparent;
+  outline: none;
+  text-align: center;
+    font-size: 15px;
+  color: white;
+
+  
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+`;

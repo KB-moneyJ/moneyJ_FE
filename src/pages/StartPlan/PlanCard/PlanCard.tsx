@@ -19,6 +19,7 @@ import {
   Label, Price,
   Title, Date, Divider, Description,
 } from './PlanCardStyle';
+import EditModal from '@/components/common/EditModeal';
 import { Check, Home, Plane, Utensils } from 'lucide-react';
 
 const TILE_ROWS = 2;
@@ -83,6 +84,7 @@ export default function PlanCard({
 
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
 
+  const [showModal, setShowModal] = useState(false);
   const items = baseItems;
   const total = items.reduce((sum, i) => sum + i.amount, 0);
 
@@ -126,7 +128,7 @@ export default function PlanCard({
           <div>
             <Title>예상 1인 경비</Title>
           </div>
-          <EditBtn>수정하기</EditBtn>
+          <EditBtn onClick={() => setShowModal(true)}>수정하기</EditBtn>
         </Header>
         <Amount>₩ {total.toLocaleString()}</Amount>
 
@@ -191,7 +193,14 @@ export default function PlanCard({
           </ProgressBar>
           <ProgressLabel>{progressPercent}%</ProgressLabel>
         </div>
-
+        {showModal && (
+          <EditModal
+            items={items}
+            coveredSet={coveredSet}
+            onSave={(updated) => setItems(updated)}
+            onClose={() => setShowModal(false)}
+          />
+        )}
       </GlassCard>
     </Wrapper>
   );
