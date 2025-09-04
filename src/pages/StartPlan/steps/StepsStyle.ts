@@ -204,6 +204,7 @@ export const EtcInput = styled.input`
     margin-top: 8px;
     width: 250px;
     color: white;
+    font-size: 16px;
     background-color: transparent;
 `
 export const InputRow = styled.div`
