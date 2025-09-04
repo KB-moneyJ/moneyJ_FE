@@ -4,6 +4,7 @@ import UsageCard from './sections/UsageCard/UsageCard';
 import TripCard from './sections/TripCard/TripCard';
 import AddTripCard from './sections/AddTripCard/AddTripCard';
 import { Container, Profile, UserIcon, Nickname, BellIcon } from './Home.style';
+import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ export default function Home() {
         />
       ))}
       <AddTripCard onClick={() => console.log('여행 생성 플로우로 이동')} />
+      <BottomNavigationBar />
     </div>
   );
 }
