@@ -9,6 +9,7 @@ import {
   Tip,
   TipLabel,
   TipText,
+  AccountText,
 } from './ProgressCard.style';
 
 type Props = {
@@ -20,6 +21,8 @@ type Props = {
 export default function ProgressCard({ progress, tip, onClickSave }: Props) {
   return (
     <Wrapper>
+      <SaveBtn onClick={onClickSave}>저축하기</SaveBtn>
+      <AccountText>국민은행 00-0000-000000</AccountText>
       <Title>나의 진행 상황</Title>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <ProgressBar
@@ -37,7 +40,6 @@ export default function ProgressCard({ progress, tip, onClickSave }: Props) {
         <TipLabel>TIP</TipLabel>
         <TipText>{tip ?? '오늘 커피 한 잔을 줄이면, 단 7일 안에 목표를 이룰 수 있습니다.'}</TipText>
       </Tip>
-      <SaveBtn onClick={onClickSave}>저축하기</SaveBtn>
     </Wrapper>
   );
 }
