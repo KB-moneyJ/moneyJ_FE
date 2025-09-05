@@ -1,4 +1,4 @@
-import logo from '@/assets/images/logo-j.png';
+import logo from '@/assets/images/moneyJ-Logo.png';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
