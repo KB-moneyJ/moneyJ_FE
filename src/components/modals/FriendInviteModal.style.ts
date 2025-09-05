@@ -14,6 +14,7 @@ export const Overlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 20;
 `;
 
 export const ModalContainer = styled(GlassCard)`
@@ -60,8 +61,11 @@ export const ConfirmButton = styled.button`
 `;
 
 export const InputContainer = BaseInputContainer;
-export const IdInput = BaseIdInput;
 export const AddButton = BaseAddButton;
+
+export const IdInput = styled(BaseIdInput)`
+  flex-shrink: 0;
+`;
 
 export const CloseButton = styled(X)`
   position: absolute;
