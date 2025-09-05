@@ -32,6 +32,7 @@ export const Dropdown = styled.div`
   border-radius: 0.5rem;
   overflow: hidden;
   min-width: 150px;
+  z-index: 10;
 `;
 
 export const DropdownItem = styled.button`
