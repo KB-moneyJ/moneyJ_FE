@@ -24,7 +24,7 @@ function App() {
         <Route path="/plan" element={<Plan />} />
 
         {/* Plan (설문/시작 플로우) */}
-        <Route path="/plan" element={<About />} />
+        <Route path="/startplan" element={<About />} />
         <Route path="/plancompelete" element={<PlanCompelete />} />
 
         {/* Trip (상세) */}

@@ -228,28 +228,72 @@ export const ItemList = styled.div`
   margin-top: 1rem;
   display: grid;
   gap: 15px;
-    justify-content: center;
+    justify-content: stretch;   
+`;
+
+// Wrapper: 전체 267px 유지
+export const ItemWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    width: 100%;
+    
 `;
 
 export const Item = styled.button<{ $covered?: boolean }>`
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
     width: 267px;
     height: 39px;
+    justify-content: space-between;
+    border-radius: var(--radius-card);
+    border: 0.4px solid white;
+    background: transparent;
+    color: white;
+    cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */
+    font-size: 15px;
+
+    &:hover {
+        border-color: ${({ $covered }) =>
+                $covered ? "var(--color-text-highlight)" : "rgba(255,255,255,0.4)"};
+        background: ${({ $covered }) =>
+                $covered ? "rgba(61, 220, 90, 0.08)" : "transparent"};
+    }
+`;
+
+export const Item2 = styled.div<{ $covered?: boolean }>`
+    width: 100%;
+    padding: 0 7px;
+  height: 39px;
+  display: flex;
+    align-items: center;
   justify-content: space-between;
   border-radius: var(--radius-card);
   border: 0.4px solid white;
-    background: transparent;
+  background: transparent;
   color: white;
-  cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */
   font-size: 15px;
+  cursor: default;
 
   &:hover {
     border-color: ${({ $covered }) =>
-  $covered ? 'var(--color-text-highlight)' : 'rgba(255,255,255,0.4)'};
-    background: ${({ $covered }) => ($covered ? 'rgba(61, 220, 90, 0.08)' : 'transparent')};
+  $covered ? "var(--color-text-highlight)" : "rgba(255,255,255,0.4)"};
+    background: ${({ $covered }) =>
+  $covered ? "rgba(61, 220, 90, 0.08)" : "transparent"};
   }
 `;
+// X 버튼: 고정 크기
+export const DeleteButton = styled.button`
+  width: 25px;
+  height: 39px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+   border: none;
+    background-color: transparent;
+  cursor: pointer;
+  color: white;
+`;
+
 
 export const Label = styled.div`
   display: flex;
@@ -265,7 +309,7 @@ export const Price = styled.span`
 
 export const Title = styled.h3`
   margin: 0;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
   opacity: 0.9;
 `;
@@ -308,7 +352,6 @@ export const CleanInput2 = styled.input`
   text-align: center;
   font-size: 28px;
   color: white;
-    font-family: Inter;
 
   -moz-appearance: textfield;
   &::-webkit-outer-spin-button,
@@ -337,4 +380,21 @@ export const CleanInput = styled.input`
     -webkit-appearance: none;
     margin: 0;
   }
+`;
+
+export const AddButton = styled.button`
+    width: 100%;
+    height: 39px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.22);
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-top: 15px;
+
+    bottom: 0;
+
+    flex-shrink: 0;    
+    align-self: center;
 `;
