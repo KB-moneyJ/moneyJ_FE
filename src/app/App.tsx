@@ -7,6 +7,7 @@ import Login from '@/pages/LoginPage/Login';
 import Agree from '@/pages/SignUpPage/Agree';
 import Intro from '@/pages/IntroPage/Intro';
 import PlanCompelete from '@/pages/StartPlan/PlanCompelete';
+import Myinfo from '@/pages/MyPage/MyInfo';
 
 function App() {
   return (
@@ -20,18 +21,21 @@ function App() {
 
         {/* Home */}
         <Route path="/home" element={<Home />} />
-        
+
         {/* Plan (설문/시작 플로우) */}
         <Route path="/plan" element={<About />} />
-        
+
         {/* Trip (상세) */}
         <Route path="/trip/:tripId" element={<DetailPage />} />
 
         {/* TODO: 404 
         <Route path="*" element={<NotFound />} /> 
         */}
-        
-        <Route path="/plancompelete" element={<PlanCompelete/>}/>
+
+        <Route path="/plancompelete" element={<PlanCompelete />} />
+
+        {/* MyPage */}
+        <Route path="/mypage" element={<Myinfo />} />
       </Routes>
     </Router>
   );
