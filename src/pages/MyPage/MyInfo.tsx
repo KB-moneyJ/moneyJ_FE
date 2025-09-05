@@ -19,8 +19,11 @@ import {
   BtnGroup,
   SecondaryBtn,
   PrimaryBtn,
+  LogoutBtn,
+  Item,
 } from './MyInfo.style';
 import { FiPower } from 'react-icons/fi';
+import { FiLogOut } from 'react-icons/fi';
 import { FiEdit2 } from 'react-icons/fi';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 
@@ -36,9 +39,6 @@ export default function Myinfo() {
       <Page>
         <Header>
           <div />
-          <PowerBtn aria-label="logout">
-            <FiPower size={22} />
-          </PowerBtn>
         </Header>
 
         <ProfileWrap>
@@ -51,8 +51,8 @@ export default function Myinfo() {
           <Username>USERNAME</Username>
         </ProfileWrap>
 
-        <Form>
-          {/* 닉네임 */}
+        {/* <Form> */}
+        {/* 닉네임
           <Field>
             <LabelRow>
               <Label>닉네임</Label>
@@ -62,15 +62,15 @@ export default function Myinfo() {
               onChange={(e) => setNickname(e.target.value)}
               placeholder="닉네임을 입력하세요"
             />
-          </Field>
+          </Field> */}
 
-          {/* 아이디 (읽기 전용) */}
+        {/* 아이디 (읽기 전용)
           <Field>
             <Label>아이디</Label>
             <InputUnderline value={userId} readOnly $readonly />
-          </Field>
+          </Field> */}
 
-          {/* 비밀번호 */}
+        {/* 비밀번호
           <Field>
             <Label>비밀번호</Label>
             <InputUnderline
@@ -80,9 +80,9 @@ export default function Myinfo() {
               placeholder="특수문자, 숫자/문자 포함 (8자 이상)"
             />
             <Helper>특수문자, 숫자/문자 포함 (8자 이상)</Helper>
-          </Field>
+          </Field> */}
 
-          {/* 비밀번호 확인 */}
+        {/* 비밀번호 확인
           <Field>
             <Label>비밀번호 확인</Label>
             <InputUnderline
@@ -91,9 +91,9 @@ export default function Myinfo() {
               onChange={(e) => setPassword2(e.target.value)}
               placeholder="비밀번호를 다시 입력하세요"
             />
-          </Field>
+          </Field> */}
 
-          {/* 이메일 + 인증 버튼 */}
+        {/* 이메일 + 인증 버튼
           <Field>
             <Label>이메일</Label>
             <EmailRow>
@@ -104,13 +104,19 @@ export default function Myinfo() {
               />
               <VerifyBtn type="button">인증</VerifyBtn>
             </EmailRow>
-          </Field>
-
+          </Field> */}
+        {/* 
           <BtnGroup>
             <SecondaryBtn type="button">수정하기</SecondaryBtn>
             <PrimaryBtn type="button">변경사항 저장</PrimaryBtn>
-          </BtnGroup>
-        </Form>
+          </BtnGroup> */}
+        {/* </Form> */}
+        <LogoutBtn type="button">
+          <Item>
+            <FiLogOut />
+            <span>로그아웃</span>
+          </Item>
+        </LogoutBtn>
       </Page>
       <BottomNavigationBar />
     </div>

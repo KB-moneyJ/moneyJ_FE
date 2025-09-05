@@ -52,7 +52,6 @@ export const NavItem = styled.div<{ $active?: boolean }>`
       }
       span {
         color: white;
-        font-weight: 600;
         opacity: 1;
       }
     `}

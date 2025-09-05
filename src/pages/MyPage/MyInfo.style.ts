@@ -1,10 +1,11 @@
 import styled, { css } from 'styled-components';
 
 export const Page = styled.div`
-  overflow-y: auto;
+  overflow-y: hidden;
+  overflow-x: hidden;
   padding: 16px 22px 0;
   color: white;
-  height: 84vh;
+  height: 100%;
 `;
 
 export const Header = styled.header`
@@ -29,12 +30,13 @@ export const ProfileWrap = styled.section`
   align-items: center;
   flex-direction: column;
   gap: 10px;
+  margin-top: 78px;
 `;
 
 export const AvatarCircle = styled.div`
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.35);
   display: grid;
@@ -49,7 +51,7 @@ export const AvatarCircle = styled.div`
 `;
 
 export const AvatarIcon = styled.div`
-  font-size: 35px;
+  font-size: 40px;
   user-select: none;
 `;
 
@@ -179,4 +181,22 @@ export const PrimaryBtn = styled.button`
   background: var(--color-button-primary);
   color: white;
   margin-bottom: 65px;
+`;
+
+export const Item = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  user-select: none;
+`;
+
+export const LogoutBtn = styled.button`
+  ${baseBtn};
+  background: #ff4d6d;
+  color: white;
+  width: 100%;
+  margin-top: 40%;
+  margin-bottom: 100%;
 `;
