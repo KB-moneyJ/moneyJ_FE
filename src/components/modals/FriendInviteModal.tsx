@@ -11,6 +11,8 @@ import {
   CloseButton,
 } from './FriendInviteModal.style';
 
+import { InputWrapper } from '@/pages/StartPlan/steps/StepsStyle';
+
 interface FriendInviteModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,9 +22,7 @@ export default function FriendInviteModal({ isOpen, onClose }: FriendInviteModal
   const [inputs, setInputs] = useState<string[]>([]);
 
   useEffect(() => {
-    if (isOpen) {
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    }
+    if (isOpen) window.scrollTo({ top: 0, behavior: 'auto' });
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -47,14 +47,16 @@ export default function FriendInviteModal({ isOpen, onClose }: FriendInviteModal
 
         <InputContainer>
           {inputs.map((input, idx) => (
-            <IdInput
-              key={idx}
-              type="text"
-              placeholder="ID 입력"
-              value={input}
-              onChange={(e) => handleChangeInput(idx, e.target.value)}
-            />
+            <InputWrapper key={idx}>
+              <IdInput
+                type="text"
+                placeholder="ID 입력"
+                value={input}
+                onChange={(e) => handleChangeInput(idx, e.target.value)}
+              />
+            </InputWrapper>
           ))}
+
           <AddButton onClick={handleAddInput}>+</AddButton>
         </InputContainer>
 
