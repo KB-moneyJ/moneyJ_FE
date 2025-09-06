@@ -1,4 +1,4 @@
-import logoJ from '@/assets/images/logo-j.png';
+import logoJ from '@/assets/images/moneyJ-Logo.png';
 import {
   AssetCardContainer,
   AssetHeader,

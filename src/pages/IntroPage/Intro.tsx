@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import logo from '@/assets/images/logo-j.png';
+import logo from '@/assets/images/moneyJ-Logo.png';
 import {
   Wrapper,
   LogoContainer,

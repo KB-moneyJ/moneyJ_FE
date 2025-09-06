@@ -75,7 +75,7 @@ export default function Step2({
           {
             method: "GET",
             headers: {
-              "X-RapidAPI-Key":  "4c6450c651mshda51bad5e02688cp150d1fjsnd8f36b69ed31",
+              "X-RapidAPI-Key": "4c6450c651mshda51bad5e02688cp150d1fjsnd8f36b69ed31",
               "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
             },
           }
@@ -84,6 +84,7 @@ export default function Step2({
         const cityNames: string[] = data.data.map((city: any) => city.city);
 
         // 번역
+        /*
         const translated: string[] = [];
         for (const city of cityNames) {
           const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q=${encodeURIComponent(
@@ -96,6 +97,10 @@ export default function Step2({
 
         translated.push("기타"); // 항상 기타 추가
         setCities(translated);
+        */
+
+        // 번역 없이 원본 cityNames 사용
+        setCities([...cityNames, "기타"]);
       } catch (err) {
         console.error(err);
         setCities(["데이터 불러오기 실패", "기타"]);
@@ -103,6 +108,7 @@ export default function Step2({
         setLoading(false);
       }
     };
+
 
     fetchCities();
   }, [selected]);
