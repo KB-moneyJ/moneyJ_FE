@@ -6,7 +6,7 @@ export const Container = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  margin-top: 1.25rem;
+  margin-top: 4.0625rem;
 `;
 
 export const Profile = styled.div`
