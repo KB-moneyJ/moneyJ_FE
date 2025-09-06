@@ -2,10 +2,16 @@ import React from "react";
 import {
   Container,
   DropdownHeader,
-  Wrapper, InputRow, DateInput, LabelText, RangeWrapper, InputRow2
-} from '@/pages/StartPlan/steps/StepsStyle';
+  Wrapper,
+  InputRow,
+  DateInput,
+  LabelText,
+  RangeWrapper,
+  InputRow2,
+} from "@/pages/StartPlan/steps/StepsStyle";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function Step3({ selected, selectedRegions, otherCity, days, setDays } ) {
+export default function Step3({ selected, selectedRegions, otherCity, days, setDays }) {
   const displayRegions = selectedRegions.filter((r) => r !== "기타");
   if (otherCity.trim().length > 0) {
     displayRegions.push(otherCity);
@@ -17,10 +23,20 @@ export default function Step3({ selected, selectedRegions, otherCity, days, setD
         <div>여행할 날짜는 언제인가요?</div>
 
         <InputRow>
-          <DateInput placeholder="YYYY" maxLength={4} />
+          <DateInput
+            placeholder="YYYY"
+            maxLength={4}
+            value={days.year}
+            onChange={(e) => setDays({ ...days, year: e.target.value })}
+          />
           <LabelText>년</LabelText>
 
-          <DateInput placeholder="MM" maxLength={2} />
+          <DateInput
+            placeholder="MM"
+            maxLength={2}
+            value={days.month}
+            onChange={(e) => setDays({ ...days, month: e.target.value })}
+          />
           <LabelText>월</LabelText>
 
           <DateInput
@@ -41,32 +57,75 @@ export default function Step3({ selected, selectedRegions, otherCity, days, setD
         </InputRow>
 
         {/* 두 번째: 세부 날짜 선택 */}
-        <RangeWrapper>
-          <div>세부 날짜까지 정하셨나요? (선택)</div>
-          <InputRow2>
-            <DateInput placeholder="DD" maxLength={2} />
-            <LabelText>일</LabelText>
-            <span> ~ </span>
-            <DateInput placeholder="DD" maxLength={2} />
-            <LabelText>일</LabelText>
-          </InputRow2>
-        </RangeWrapper>
+        <AnimatePresence>
+          {days.month && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            >
+              <RangeWrapper>
+                <div>세부 날짜까지 정하셨나요? (선택)</div>
+                <InputRow2>
+                  <DateInput
+                    placeholder="DD"
+                    maxLength={2}
+                    value={days.rangeStart}
+                    onChange={(e) => {
+                      const start = e.target.value;
+                      let end = "";
+
+                      if (start && days.nights) {
+                        const year = parseInt(days.year) || new Date().getFullYear();
+                        const month = parseInt(days.month) || new Date().getMonth() + 1;
+                        const nights = parseInt(days.nights);
+
+                        const startDay = parseInt(start);
+                        const lastDayOfMonth = new Date(year, month, 0).getDate();
+
+                        let calculatedEnd = startDay + nights;
+                        if (calculatedEnd > lastDayOfMonth) {
+                          // 다음 달로 넘어가는 경우
+                          calculatedEnd = calculatedEnd - lastDayOfMonth;
+                        }
+                        end = String(calculatedEnd);
+                      }
+
+                      setDays({ ...days, rangeStart: start, rangeEnd: end });
+                    }}
+                  />
+                  <LabelText>일</LabelText>
+                  <span> ~ </span>
+                  <DateInput
+                    placeholder="DD"
+                    maxLength={2}
+                    value={days.rangeEnd}
+                    readOnly
+                  />
+                  <LabelText>일</LabelText>
+                </InputRow2>
+              </RangeWrapper>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
 
         <DropdownHeader
           style={{
-            position: 'absolute',
-            top: '675px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '300px',
+            position: "absolute",
+            top: "500px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "300px",
           }}
         >
           <div>
             {selected.flag} {selected.name},{" "}
-            {displayRegions.length > 0 ? displayRegions.join(", ") : ""}{" "}
+            {displayRegions.length > 0 ? displayRegions.join(", ") : ""}
           </div>
           <div>
-            {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}{" "}
+            {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}
           </div>
         </DropdownHeader>
       </Container>

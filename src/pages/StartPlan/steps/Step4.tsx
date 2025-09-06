@@ -136,7 +136,7 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
         <DropdownHeader
           style={{
             position: 'absolute',
-            top: '675px',
+            top: '500px',
             left: '50%',
             transform: 'translateX(-50%)',
             width: '300px',
