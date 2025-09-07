@@ -28,9 +28,8 @@ interface EditModalProps {
 
 export default function EditModal({ items, coveredSet, onSave, onClose }: EditModalProps) {
   const [localItems, setLocalItems] = useState<ExpenseItem[]>(items);
-  const [total, setTotal] = useState<number>(
-    items.reduce((sum, i) => sum + i.amount, 0)
-  );
+
+  const total = localItems.reduce((sum, i) => sum + i.amount, 0);
 
   const handleAmountChange = (id: string, value: string) => {
     const numericValue = Number(value.replace(/,/g, "")) || 0;
@@ -40,6 +39,7 @@ export default function EditModal({ items, coveredSet, onSave, onClose }: EditMo
       )
     );
   };
+
 
   const handleLabelChange = (id: string, value: string) => {
     setLocalItems((prev) =>
@@ -95,8 +95,9 @@ export default function EditModal({ items, coveredSet, onSave, onClose }: EditMo
         <CleanInput2
           type="text"
           value={total.toLocaleString()}
-          onChange={(e) => handleTotalChange(e.target.value)}
+          readOnly
         />
+
 
         <ItemList>
           {localItems.map((i) => {

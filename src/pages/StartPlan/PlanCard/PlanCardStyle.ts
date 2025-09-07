@@ -14,7 +14,7 @@ export const Wrapper=styled.div`
 export const GlassCard = styled.div`
     /* CurrentTripCard */
 
-    margin-top: 104px;
+    margin-top: 16px;
 
     background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
@@ -218,11 +218,30 @@ export const EditBtn = styled.button`
   font-size: 0.8rem;
   cursor: pointer;
 `;
+export const ItemContainer = styled.div`
+    display: flex;
+    width: 267px;
+    align-items: center;
+    justify-content: space-between;
+`
+export const CheckMark = styled.div<{ $visible?: boolean }>`
+    display: ${({ $visible }) => ($visible ? "flex" : "none")};
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: transparent;;
+    color: #00D000FF;
 
-export const CheckMark = styled.div`
-  color: #00d000;
-  font-size: 1.5rem;
+    opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+    transform: ${({ $visible }) => ($visible ? "scale(1)" : "scale(0)")};
+    transition:
+            opacity 0.3s ease ${({ $visible }) => ($visible ? "0.4s" : "0s")},
+            transform 0.3s ease ${({ $visible }) => ($visible ? "0.4s" : "0s")};
 `;
+
+
 
 export const ItemList = styled.div`
   margin-top: 1rem;
@@ -231,6 +250,33 @@ export const ItemList = styled.div`
     justify-content: stretch;   
 `;
 
+export const ItemList2 = styled.div`
+    margin-top: 1rem;
+    display: grid;
+    gap: 15px;
+    justify-content: stretch;
+    max-height: 150px;
+    overflow-y: auto;
+    padding-right: 8px;
+
+    &::-webkit-scrollbar {
+        width: 5px; /* 스크롤바 두께 */
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent; /* 트랙 배경 */
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.49);
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #ff7bfa;
+    }
+
+`;
 // Wrapper: 전체 267px 유지
 export const ItemWrapper = styled.div`
     display: flex;
@@ -242,15 +288,17 @@ export const ItemWrapper = styled.div`
 export const Item = styled.button<{ $covered?: boolean }>`
     display: flex;
     align-items: center;
-    width: 267px;
+    width: ${({ $covered }) => ($covered ? "230px" : "267px")};
     height: 39px;
     justify-content: space-between;
     border-radius: var(--radius-card);
-    border: 0.4px solid white;
+    border: 0.4px solid
+    ${({ $covered }) => ($covered ? "var(--color-text-highlight)" : "white")};
     background: transparent;
     color: white;
     cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */
     font-size: 15px;
+    transition: width 0.2s ease;
 
     &:hover {
         border-color: ${({ $covered }) =>
