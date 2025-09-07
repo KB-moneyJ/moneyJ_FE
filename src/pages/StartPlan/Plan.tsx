@@ -16,7 +16,7 @@ import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
 
 export default function MakePlan() {
-  const navigate = useNavigate(); // 라우팅 훅
+  const navigate = useNavigate();
   const [step, setStep] = useState<number>(1);
   const [selectedCountry, setSelectedCountry] = useState<any>(null);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
@@ -55,7 +55,9 @@ export default function MakePlan() {
     if (step < 4) {
       setStep((prev) => prev + 1);
     } else if (step === 4) {
-      navigate("/plancompelete");
+      navigate("/plancompelete", {
+        state: { selectedCountry, selectedRegions, otherCity, days, people },
+      });
     }
   };
 
@@ -130,7 +132,7 @@ export default function MakePlan() {
               textAlign: "center",
               fontSize: "2rem",
               marginTop: "2rem",
-              position: "absolute", // ✅ 겹쳐서 애니메이션
+              position: "absolute",
               top: 0,
               left: 0,
               width: "100%",
@@ -151,9 +153,7 @@ export default function MakePlan() {
         }}
       >
         {step > 1 && <PrevBtn onClick={goPrev}>이전</PrevBtn>}
-        {step !== 1 && (
-          <NextBtn onClick={goNext}>다음</NextBtn>
-        )}
+        {step !== 1 && <NextBtn onClick={goNext}>다음</NextBtn>}
       </div>
     </Wrapper>
   );
