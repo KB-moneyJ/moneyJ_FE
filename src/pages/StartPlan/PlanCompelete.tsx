@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TripCard from './PlanCard/PlanCard';
+import { EndBtn } from '@/pages/StartPlan/PlanStyle';
 
 export default function PlanCompelete() {
   const [progress, setProgress] = useState(0);
@@ -34,6 +35,9 @@ export default function PlanCompelete() {
         savedPercent={progress} // 저축 퍼센트도 같이 올라가게
         onClickDetail={() => console.log('도쿄 상세보기 클릭')}
       />
+      <div style={{width:'100%', display:'flex', flexDirection:'column', justifyContent:'center', alignItems: 'center', marginTop:'27px'}}>
+        <EndBtn>완료</EndBtn>
+      </div>
     </div>
   );
 }
