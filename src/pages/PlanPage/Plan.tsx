@@ -3,6 +3,7 @@ import TripCard from '@/pages/MainPage/sections/TripCard/TripCard';
 import CompletedTripCard from '@/pages/MainPage/sections/TripCard/CompletedTripCard';
 import { Page, Tabs, Track, ActiveBg, SegTab, CardWrap } from './Plan.style';
 import UsersBadge from '@/pages/MainPage/sections/TripCard/UsersBadge';
+import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 
 type Trip = {
   id: string;
@@ -64,49 +65,52 @@ export default function Plan() {
   const done = useMemo(() => trips.filter((t) => t.progressPercent >= 100), [trips]);
 
   return (
-    <Page>
-      <Tabs>
-        <Track>
-          <ActiveBg $tab={tab} />
-          <SegTab $active={tab === 'ongoing'} onClick={() => setTab('ongoing')}>
-            진행중인 플랜
-          </SegTab>
-          <SegTab $active={tab === 'done'} onClick={() => setTab('done')}>
-            완료한 플랜
-          </SegTab>
-        </Track>
-      </Tabs>
+    <div>
+      <Page>
+        <Tabs>
+          <Track>
+            <ActiveBg $tab={tab} />
+            <SegTab $active={tab === 'ongoing'} onClick={() => setTab('ongoing')}>
+              진행중인 플랜
+            </SegTab>
+            <SegTab $active={tab === 'done'} onClick={() => setTab('done')}>
+              완료한 플랜
+            </SegTab>
+          </Track>
+        </Tabs>
 
-      {tab === 'ongoing' &&
-        ongoing.map((t) => (
-          <CardWrap key={t.id}>
-            <TripCard
-              tripId={t.id}
-              destination={t.destination}
-              countryCode={t.countryCode}
-              period={t.period}
-              thumbnailUrl={t.thumbnailUrl}
-              progressPercent={t.progressPercent}
-              onClickDetail={() => console.log(`${t.destination} 상세보기`)}
-            />
-            <UsersBadge count={t.members} />
-          </CardWrap>
-        ))}
+        {tab === 'ongoing' &&
+          ongoing.map((t) => (
+            <CardWrap key={t.id}>
+              <TripCard
+                tripId={t.id}
+                destination={t.destination}
+                countryCode={t.countryCode}
+                period={t.period}
+                thumbnailUrl={t.thumbnailUrl}
+                progressPercent={t.progressPercent}
+                onClickDetail={() => console.log(`${t.destination} 상세보기`)}
+              />
+              <UsersBadge count={t.members} />
+            </CardWrap>
+          ))}
 
-      {tab === 'done' &&
-        done.map((t) => (
-          <CardWrap key={t.id}>
-            <CompletedTripCard
-              tripId={t.id}
-              destination={t.destination}
-              countryCode={t.countryCode}
-              period={t.period}
-              thumbnailUrl={t.thumbnailUrl}
-              onClickDetail={() => console.log(`${t.destination} 상세보기`)}
-            />
-            <UsersBadge count={t.members} />
-          </CardWrap>
-        ))}
-    </Page>
+        {tab === 'done' &&
+          done.map((t) => (
+            <CardWrap key={t.id}>
+              <CompletedTripCard
+                tripId={t.id}
+                destination={t.destination}
+                countryCode={t.countryCode}
+                period={t.period}
+                thumbnailUrl={t.thumbnailUrl}
+                onClickDetail={() => console.log(`${t.destination} 상세보기`)}
+              />
+              <UsersBadge count={t.members} />
+            </CardWrap>
+          ))}
+      </Page>
+      <BottomNavigationBar />
+    </div>
   );
 }
