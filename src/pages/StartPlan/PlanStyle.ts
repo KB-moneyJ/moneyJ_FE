@@ -14,7 +14,7 @@ export const ContentsWrapper = styled.div`
     display: flex;             
     flex-direction: column;    
     align-items: center;
-    margin-top: 120px;
+    margin-top: 32px;
     height: 650px;
 `;
 export const NextBtn = styled.button`

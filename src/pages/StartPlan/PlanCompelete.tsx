@@ -65,6 +65,7 @@ export default function PlanCompelete() {
         destination={destination}
         countryCode="JP"
         period={period}
+        people={people}
         thumbnailUrl={thumbnailUrl}
         progressPercent={progress}
         savedPercent={progress}
