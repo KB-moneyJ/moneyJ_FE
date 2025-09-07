@@ -218,11 +218,30 @@ export const EditBtn = styled.button`
   font-size: 0.8rem;
   cursor: pointer;
 `;
+export const ItemContainer = styled.div`
+    display: flex;
+    width: 267px;
+    align-items: center;
+    justify-content: space-between;
+`
+export const CheckMark = styled.div<{ $visible?: boolean }>`
+    display: ${({ $visible }) => ($visible ? "flex" : "none")};
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: transparent;;
+    color: #00D000FF;
 
-export const CheckMark = styled.div`
-  color: #00d000;
-  font-size: 1.5rem;
+    opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+    transform: ${({ $visible }) => ($visible ? "scale(1)" : "scale(0)")};
+    transition:
+            opacity 0.3s ease ${({ $visible }) => ($visible ? "0.4s" : "0s")},
+            transform 0.3s ease ${({ $visible }) => ($visible ? "0.4s" : "0s")};
 `;
+
+
 
 export const ItemList = styled.div`
   margin-top: 1rem;
@@ -269,7 +288,7 @@ export const ItemWrapper = styled.div`
 export const Item = styled.button<{ $covered?: boolean }>`
     display: flex;
     align-items: center;
-    width: 267px;
+    width: ${({ $covered }) => ($covered ? "230px" : "267px")};
     height: 39px;
     justify-content: space-between;
     border-radius: var(--radius-card);
@@ -279,6 +298,7 @@ export const Item = styled.button<{ $covered?: boolean }>`
     color: white;
     cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */
     font-size: 15px;
+    transition: width 0.2s ease;
 
     &:hover {
         border-color: ${({ $covered }) =>
