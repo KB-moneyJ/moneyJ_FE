@@ -6,12 +6,14 @@ import ProgressCard from './sections/ProgressCard/ProgressCard';
 import ExpenseCard from './sections/ExpenseCard/ExpenseCard';
 import TripOverviewCard from './sections/TripOverviewCard/TripOverviewCard';
 import BeforeYouGoCard from './sections/BeforeYouGoCard/BeforeYouGoCard';
+import FriendInviteModal from '@/components/modals/FriendInviteModal';
 import podiumUrl from '@/assets/images/podium.svg';
 
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(false);
+  const [openInvite, setOpenInvite] = useState(false);
 
   // TODO: API 연동
   const [progress, setProgress] = useState(50);
@@ -59,7 +61,14 @@ export default function DetailPage() {
           <RightIcon onClick={() => setOpenMenu((p) => !p)} />
           {openMenu && (
             <Dropdown>
-              <DropdownItem onClick={() => console.log('친구 초대')}>친구 초대</DropdownItem>
+              <DropdownItem
+                onClick={() => {
+                  setOpenMenu(false);
+                  setOpenInvite(true);
+                }}
+              >
+                친구 초대
+              </DropdownItem>
               <DropdownItem onClick={() => console.log('플랜 삭제하기')}>
                 플랜 삭제하기
               </DropdownItem>
@@ -84,6 +93,7 @@ export default function DetailPage() {
         tip={detail.tip}
       />
       <BeforeYouGoCard destination={detail.destination} checklist={checklist} cautions={cautions} />
+      <FriendInviteModal isOpen={openInvite} onClose={() => setOpenInvite(false)} />
     </div>
   );
 }

@@ -17,7 +17,13 @@ export const Wrapper = styled(Card)`
 
 export const SaveBtn = styled(DetailBtn).attrs({ as: 'button' })`
   width: 100%;
-  margin-top: auto;
+`;
+
+export const AccountText = styled.div`
+  color: var(--color-text-highlight);
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.2px;
 `;
 
 export const Title = styled.h3`

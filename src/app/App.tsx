@@ -7,6 +7,7 @@ import Login from '@/pages/LoginPage/Login';
 import Agree from '@/pages/SignUpPage/Agree';
 import Intro from '@/pages/IntroPage/Intro';
 import PlanCompelete from '@/pages/StartPlan/PlanCompelete';
+import Myinfo from '@/pages/MyPage/MyInfo';
 import Plan from '@/pages/PlanPage/Plan';
 
 function App() {
@@ -33,6 +34,12 @@ function App() {
         {/* TODO: 404 
         <Route path="*" element={<NotFound />} /> 
         */}
+
+
+        <Route path="/plancompelete" element={<PlanCompelete />} />
+
+        {/* MyPage */}
+        <Route path="/mypage" element={<Myinfo />} />
       </Routes>
     </Router>
   );
