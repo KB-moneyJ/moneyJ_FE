@@ -152,7 +152,7 @@ export default function MakePlan() {
       >
         {step > 1 && <PrevBtn onClick={goPrev}>이전</PrevBtn>}
         {step !== 1 && (
-          <NextBtn onClick={goNext}>{step === 4 ? "완료" : "다음"}</NextBtn>
+          <NextBtn onClick={goNext}>다음</NextBtn>
         )}
       </div>
     </Wrapper>

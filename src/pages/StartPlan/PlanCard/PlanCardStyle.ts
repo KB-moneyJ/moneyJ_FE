@@ -231,6 +231,33 @@ export const ItemList = styled.div`
     justify-content: stretch;   
 `;
 
+export const ItemList2 = styled.div`
+    margin-top: 1rem;
+    display: grid;
+    gap: 15px;
+    justify-content: stretch;
+    max-height: 150px;
+    overflow-y: auto;
+    padding-right: 8px;
+
+    &::-webkit-scrollbar {
+        width: 5px; /* 스크롤바 두께 */
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent; /* 트랙 배경 */
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.49);
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #ff7bfa;
+    }
+
+`;
 // Wrapper: 전체 267px 유지
 export const ItemWrapper = styled.div`
     display: flex;

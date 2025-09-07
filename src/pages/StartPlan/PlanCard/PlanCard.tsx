@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Header,
   DestinationBox,
@@ -17,7 +17,7 @@ import {
   GlassCard, Amount, CheckMark, EditBtn, Item,
   ItemList,
   Label, Price,
-  Title, Date, Divider, Description,
+  Title, Date, Divider, Description, ItemList2,
 } from './PlanCardStyle';
 import EditModal from '@/components/common/EditModeal';
 import { Check, Home, Plane, Utensils } from 'lucide-react';
@@ -85,7 +85,7 @@ export default function PlanCard({
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
 
   const [showModal, setShowModal] = useState(false);
-  const items = baseItems;
+  const [items, setItems] = useState<ExpenseItem[]>(baseItems);
   const total = items.reduce((sum, i) => sum + i.amount, 0);
 
   const clamped = Math.max(0, Math.min(100, savedPercent));
@@ -132,7 +132,7 @@ export default function PlanCard({
         </Header>
         <Amount>₩ {total.toLocaleString()}</Amount>
 
-        <ItemList>
+        <ItemList2>
           {items.map((i) => {
             const covered = coveredSet.has(i.id);
             return (
@@ -153,7 +153,7 @@ export default function PlanCard({
               </Item>
             );
           })}
-        </ItemList>
+        </ItemList2>
         <Description>
           함께 저축해 목표를 채우고<br/>
           여행지 그림을 완성해보세요!
@@ -202,6 +202,7 @@ export default function PlanCard({
           />
         )}
       </GlassCard>
+
     </Wrapper>
   );
 }
