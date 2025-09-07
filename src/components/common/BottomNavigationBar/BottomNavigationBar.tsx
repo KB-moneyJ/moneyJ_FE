@@ -13,7 +13,7 @@ export default function BottomNavigationBar() {
 
   const goToHome = () => navigate('/home');
   const goToPlan = () => navigate('/plan');
-  const goToSpending = () => alert('아직 준비중인 기능입니다!');
+  const goToSpending = () => navigate('/spending');
   const goToProfile = () => navigate('/mypage');
 
   return (

@@ -9,6 +9,7 @@ import Intro from '@/pages/IntroPage/Intro';
 import PlanCompelete from '@/pages/StartPlan/PlanCompelete';
 import Myinfo from '@/pages/MyPage/MyInfo';
 import Plan from '@/pages/PlanPage/Plan';
+import SpendingPage from '@/pages/AnalysisPage/SpendingPage';
 
 function App() {
   return (
@@ -31,10 +32,11 @@ function App() {
         {/* Trip (상세) */}
         <Route path="/trip/:tripId" element={<DetailPage />} />
 
+        <Route path="/spending" element={<SpendingPage />} />
+
         {/* TODO: 404 
         <Route path="*" element={<NotFound />} /> 
         */}
-
 
         <Route path="/plancompelete" element={<PlanCompelete />} />
 
