@@ -14,7 +14,7 @@ export const Wrapper=styled.div`
 export const GlassCard = styled.div`
     /* CurrentTripCard */
 
-    margin-top: 104px;
+    margin-top: 16px;
 
     background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
