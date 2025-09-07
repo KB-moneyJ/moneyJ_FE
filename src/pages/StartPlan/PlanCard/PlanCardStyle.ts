@@ -273,7 +273,8 @@ export const Item = styled.button<{ $covered?: boolean }>`
     height: 39px;
     justify-content: space-between;
     border-radius: var(--radius-card);
-    border: 0.4px solid white;
+    border: 0.4px solid
+    ${({ $covered }) => ($covered ? "var(--color-text-highlight)" : "white")};
     background: transparent;
     color: white;
     cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */

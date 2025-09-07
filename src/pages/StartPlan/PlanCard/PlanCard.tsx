@@ -9,13 +9,11 @@ import {
   DimImage,
   Tiles,
   Tile,
-  Period,
   ProgressBar,
   ProgressFill,
   ProgressLabel,
   Wrapper,
   GlassCard, Amount, CheckMark, EditBtn, Item,
-  ItemList,
   Label, Price,
   Title, Date, Divider, Description, ItemList2,
 } from './PlanCardStyle';

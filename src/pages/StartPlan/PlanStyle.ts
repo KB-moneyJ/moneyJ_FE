@@ -26,6 +26,17 @@ export const NextBtn = styled.button`
     border-radius: 8px;
     background-color: #5B00B2;
 `
+
+export const EndBtn = styled.button`
+    width:129px;
+    height: 46px;
+    border: none;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 8px;
+    background-color: #5B00B2;
+`
 export const PrevBtn = styled.button`
     width: 88px;
     height: 45px;
