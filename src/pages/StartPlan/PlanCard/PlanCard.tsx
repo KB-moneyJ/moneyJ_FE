@@ -15,7 +15,7 @@ import {
   Wrapper,
   GlassCard, Amount, CheckMark, EditBtn, Item,
   Label, Price,
-  Title, Date, Divider, Description, ItemList2,
+  Title, Date, Divider, Description, ItemList2, ItemContainer,
 } from './PlanCardStyle';
 import EditModal from '@/components/common/EditModeal';
 import { Check, Home, Plane, Utensils } from 'lucide-react';
@@ -134,21 +134,21 @@ export default function PlanCard({
           {items.map((i) => {
             const covered = coveredSet.has(i.id);
             return (
-              <Item key={i.id} $covered={covered}>
-                <Label>
-                  {i.icon}
-                  {i.label}
-                </Label>
+              <ItemContainer>
+                <Item key={i.id} $covered={covered}>
+                  <Label>
+                    {i.icon}
+                    {i.label}
+                  </Label>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Price>₩{i.amount.toLocaleString()}</Price>
-                  {covered && (
-                    <CheckMark>
-                      <Check size={18} strokeWidth={2.5} />
-                    </CheckMark>
-                  )}
-                </div>
-              </Item>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Price>₩{i.amount.toLocaleString()}</Price>
+                  </div>
+                </Item>
+                <CheckMark $visible={covered}>
+                  <Check size={24} strokeWidth={4} />
+                </CheckMark>
+              </ItemContainer>
             );
           })}
         </ItemList2>
