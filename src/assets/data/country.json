@@ -1,0 +1,102 @@
+[
+  {
+    "countryCode": "KR",
+    "country": "South Korea",
+    "cities": ["Seoul", "Busan", "Jeju", "Incheon", "Daegu", "Gwangju", "Jeonju", "Gangneung"]
+  },
+  {
+    "countryCode": "JP",
+    "country": "Japan",
+    "cities": ["Tokyo", "Osaka", "Kyoto", "Fukuoka", "Sapporo", "Nagoya", "Okinawa", "Hiroshima"]
+  },
+  {
+    "countryCode": "CN",
+    "country": "China",
+    "cities": ["Beijing", "Shanghai", "Guangzhou", "Chengdu", "Xi'an", "Hangzhou", "Chongqing", "Harbin"]
+  },
+  {
+    "countryCode": "TH",
+    "country": "Thailand",
+    "cities": ["Bangkok", "Chiang Mai", "Phuket", "Pattaya", "Koh Samui", "Krabi", "Hua Hin", "Chiang Rai"]
+  },
+  {
+    "countryCode": "VN",
+    "country": "Vietnam",
+    "cities": ["Hanoi", "Ho Chi Minh City", "Da Nang", "Nha Trang", "Hoi An", "Ha Long", "Hue", "Phan Thiet"]
+  },
+  {
+    "countryCode": "US",
+    "country": "United States",
+    "cities": ["New York", "Los Angeles", "Las Vegas", "San Francisco", "Miami", "Chicago", "Washington D.C.", "Boston"]
+  },
+  {
+    "countryCode": "FR",
+    "country": "France",
+    "cities": ["Paris", "Marseille", "Lyon", "Nice", "Bordeaux", "Toulouse", "Strasbourg", "Lille"]
+  },
+  {
+    "countryCode": "IT",
+    "country": "Italy",
+    "cities": ["Rome", "Milan", "Venice", "Florence", "Naples", "Turin", "Bologna", "Genoa"]
+  },
+  {
+    "countryCode": "ES",
+    "country": "Spain",
+    "cities": ["Barcelona", "Madrid", "Seville", "Valencia", "Malaga", "Bilbao", "Granada", "Toledo"]
+  },
+  {
+    "countryCode": "GB",
+    "country": "United Kingdom",
+    "cities": ["London", "Manchester", "Liverpool", "Oxford", "Cambridge", "Edinburgh", "Glasgow", "Bristol"]
+  },
+  {
+    "countryCode": "DE",
+    "country": "Germany",
+    "cities": ["Berlin", "Munich", "Frankfurt", "Hamburg", "Cologne", "Dresden", "Stuttgart", "Heidelberg"]
+  },
+  {
+    "countryCode": "CH",
+    "country": "Switzerland",
+    "cities": ["Zurich", "Geneva", "Lucerne", "Interlaken", "Bern", "Basel", "Zermatt", "Lauterbrunnen"]
+  },
+  {
+    "countryCode": "NL",
+    "country": "Netherlands",
+    "cities": ["Amsterdam", "Rotterdam", "The Hague", "Utrecht", "Maastricht", "Leiden", "Haarlem", "Eindhoven"]
+  },
+  {
+    "countryCode": "AT",
+    "country": "Austria",
+    "cities": ["Vienna", "Salzburg", "Innsbruck", "Graz", "Linz", "Hallstatt", "Klagenfurt", "Bregenz"]
+  },
+  {
+    "countryCode": "CZ",
+    "country": "Czech Republic",
+    "cities": ["Prague", "Brno", "Český Krumlov", "Ostrava", "Plzeň", "Karlovy Vary", "Olomouc", "Liberec"]
+  },
+  {
+    "countryCode": "AU",
+    "country": "Australia",
+    "cities": ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Cairns", "Gold Coast", "Hobart"]
+  },
+  {
+    "countryCode": "CA",
+    "country": "Canada",
+    "cities": ["Vancouver", "Toronto", "Montreal", "Quebec City", "Ottawa", "Calgary", "Edmonton", "Niagara Falls"]
+  },
+  {
+    "countryCode": "BR",
+    "country": "Brazil",
+    "cities": ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador", "Recife", "Curitiba", "Porto Alegre", "Fortaleza"]
+  },
+  {
+    "countryCode": "AE",
+    "country": "United Arab Emirates",
+    "cities": ["Dubai", "Abu Dhabi", "Sharjah", "Al Ain", "Ras Al Khaimah", "Fujairah", "Ajman", "Umm Al Quwain"]
+  },
+  {
+    "countryCode": "TR",
+    "country": "Turkey",
+    "cities": ["Istanbul", "Ankara", "Izmir", "Antalya", "Cappadocia", "Bursa", "Konya", "Trabzon"]
+  }
+]
