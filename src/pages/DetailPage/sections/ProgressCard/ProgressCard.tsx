@@ -15,14 +15,30 @@ import {
 type Props = {
   progress: number;
   tip?: string;
+  linked?: boolean;
+  accountLabel?: string;
   onClickSave?: () => void;
+  onClickLink?: () => void;
 };
 
-export default function ProgressCard({ progress, tip, onClickSave }: Props) {
+export default function ProgressCard({
+  progress,
+  tip,
+  linked,
+  accountLabel,
+  onClickSave,
+  onClickLink,
+}: Props) {
+  const isLinked = !!linked;
+
   return (
     <Wrapper>
-      <SaveBtn onClick={onClickSave}>저축하기</SaveBtn>
-      <AccountText>국민은행 00-0000-000000</AccountText>
+      <SaveBtn onClick={isLinked ? onClickSave : onClickLink}>
+        {isLinked ? '저축하기' : '계좌 연동하기'}
+      </SaveBtn>
+
+      {isLinked && accountLabel && <AccountText>{accountLabel}</AccountText>}
+
       <Title>나의 진행 상황</Title>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <ProgressBar
