@@ -23,6 +23,7 @@ export default function PlanCompelete() {
 
   const [progress, setProgress] = useState(0);
   const [items, setItems] = useState<any[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false); // ✅ 로딩 완료 여부 추가
 
   useEffect(() => {
     const fetchBudget = async () => {
@@ -46,19 +47,16 @@ export default function PlanCompelete() {
         if (!res.ok) throw new Error("비용 정보 불러오기 실패");
 
         const data = await res.json();
-        console.log("백엔드 응답 데이터:", data); // ← 여기 추가
+        console.log("백엔드 응답 데이터:", data);
 
-        setItems([
+        const newItems = [
           { id: "flight", label: "항공권", amount: data.flightCost, icon: <Plane size={18} /> },
           { id: "hotel", label: "숙박", amount: data.accommodationCost, icon: <Home size={18} /> },
           { id: "food", label: "식비", amount: data.foodCost, icon: <Utensils size={18} /> },
-        ]);
-        console.log("items 상태로 세팅됨:", [
-          { id: "flight", label: "항공권", amount: data.flightCost },
-          { id: "hotel", label: "숙박", amount: data.accommodationCost },
-          { id: "food", label: "식비", amount: data.foodCost },
-        ]);
+        ];
 
+        setItems(newItems);
+        setIsLoaded(true); // ✅ 데이터 로딩 끝났음을 표시
       } catch (err) {
         console.error(err);
       }
@@ -68,8 +66,10 @@ export default function PlanCompelete() {
   }, [selectedCountry, selectedRegions, otherCity, days]);
 
 
-  // 진행 애니메이션
-  const animateProgress = () => {
+  // ✅ 데이터 로딩이 끝났을 때만 애니메이션 시작
+  useEffect(() => {
+    if (!isLoaded) return;
+
     let start = 0;
     const target = 100;
     const duration = 2500;
@@ -84,11 +84,11 @@ export default function PlanCompelete() {
       }
       setProgress(Math.round(start));
     }, stepTime);
-  };
 
-  useEffect(() => {
-    animateProgress();
-  }, []);
+    return () => clearInterval(interval);
+  }, [isLoaded]);
+
+
 
   return (
     <div>

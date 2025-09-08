@@ -55,7 +55,7 @@ interface PlanCardProps {
   progressPercent: number;
   savedPercent?: number;
   onClickDetail?: () => void;
-  items: ExpenseItem[]; // ✅ props로 받도록 변경
+  items: ExpenseItem[];
 }
 
 function shuffle<T>(array: T[]): T[] {
@@ -75,8 +75,8 @@ export default function PlanCard({
                                     people,
                                    thumbnailUrl,
                                    progressPercent,
-                                   savedPercent = 0, // 기본값 0
-                                   items: initialItems, // ✅ props로 받은 items
+                                   savedPercent = 0,
+                                   items: initialItems,
                                  }: PlanCardProps) {
   const totalTiles = TILE_ROWS * TILE_COLS;
 
