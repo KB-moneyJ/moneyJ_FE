@@ -159,7 +159,7 @@ export default function PlanCard({
                       </div>
                     </Item>
                     <CheckMark $visible={covered}>
-                      <Check size={24} strokeWidth={4} />
+                      <Check size={24} strokeWidth={6} />
                     </CheckMark>
                   </ItemContainer>
                 );
