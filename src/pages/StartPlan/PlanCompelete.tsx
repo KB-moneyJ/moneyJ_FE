@@ -3,21 +3,72 @@ import { useLocation, useNavigate } from "react-router-dom";
 import TripCard from "./PlanCard/PlanCard";
 import { EndBtn } from "@/pages/StartPlan/PlanStyle";
 
+import { Plane, Home, Utensils } from "lucide-react";
+
 export default function PlanCompelete() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedCountry, selectedRegions, otherCity, days, people } = location.state;
+  const { selectedCountry, selectedRegions, otherCity, days, people } =
+    location.state;
 
   const destination = otherCity
-    ? `${selectedCountry.name}, ${selectedRegions.join(", ")}, ${otherCity}`
-    : `${selectedCountry.name}, ${selectedRegions.join(", ")}`;
+    ? `${selectedCountry.country}, ${selectedRegions.join(", ")}, ${otherCity}`
+    : `${selectedCountry.country}, ${selectedRegions.join(", ")}`;
 
-  const countryCode = selectedCountry.code;
+  const countryCode = selectedCountry.countryCode;
+
   const period = `${days.year}.${days.month}.${days.rangeStart} - ${days.year}.${days.month}.${days.rangeEnd}`;
-  const thumbnailUrl="https://images.unsplash.com/photo-1503899036084-c55cdd92da26?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80";
+  const thumbnailUrl =
+    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80";
 
   const [progress, setProgress] = useState(0);
+  const [items, setItems] = useState<any[]>([]);
 
+  useEffect(() => {
+    const fetchBudget = async () => {
+      try {
+        const formatDate = (year: string, month: string, day: string) =>
+          `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+        const res = await fetch("http://localhost:8080/trip-plans/budget", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            country: selectedCountry.country,
+            city: otherCity || selectedRegions[0],
+            nights: Number(days.nights),
+            days: Number(days.days),
+            startDate: formatDate(days.year, days.month, days.rangeStart),
+            endDate: formatDate(days.year, days.month, days.rangeEnd),
+          }),
+        });
+
+        if (!res.ok) throw new Error("비용 정보 불러오기 실패");
+
+        const data = await res.json();
+        console.log("백엔드 응답 데이터:", data); // ← 여기 추가
+
+        setItems([
+          { id: "flight", label: "항공권", amount: data.flightCost, icon: <Plane size={18} /> },
+          { id: "hotel", label: "숙박", amount: data.accommodationCost, icon: <Home size={18} /> },
+          { id: "food", label: "식비", amount: data.foodCost, icon: <Utensils size={18} /> },
+        ]);
+        console.log("items 상태로 세팅됨:", [
+          { id: "flight", label: "항공권", amount: data.flightCost },
+          { id: "hotel", label: "숙박", amount: data.accommodationCost },
+          { id: "food", label: "식비", amount: data.foodCost },
+        ]);
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchBudget();
+  }, [selectedCountry, selectedRegions, otherCity, days]);
+
+
+  // 진행 애니메이션
   const animateProgress = () => {
     let start = 0;
     const target = 100;
@@ -41,8 +92,14 @@ export default function PlanCompelete() {
 
   return (
     <div>
+      {/* 홈 버튼 */}
       <div
-        style={{ marginTop: "63px", marginLeft: "42px", cursor: "pointer", width:'24.5px' }}
+        style={{
+          marginTop: "63px",
+          marginLeft: "42px",
+          cursor: "pointer",
+          width: "24.5px",
+        }}
         onClick={() => navigate("/home")}
       >
         <svg
@@ -63,12 +120,13 @@ export default function PlanCompelete() {
 
       <TripCard
         destination={destination}
-        countryCode="JP"
+        countryCode={countryCode}
         period={period}
         people={people}
         thumbnailUrl={thumbnailUrl}
         progressPercent={progress}
         savedPercent={progress}
+        items={items}
         onClickDetail={() => console.log(`${destination} 상세보기 클릭`)}
       />
 

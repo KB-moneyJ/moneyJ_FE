@@ -58,13 +58,15 @@ export default function MakePlan() {
       setStep((prev) => prev + 1);
     } else if (step === 4) {
       console.log({
-        selectedCountry,
-        selectedRegions,
-        otherCity,
+        country: selectedCountry?.country,
+        countryCode: selectedCountry?.countryCode,
+        selectedRegions,  // 사용자가 선택한 지역
+        otherCity,        // 기타 입력한 도시
         days,
         people,
         friendIds
       });
+
 
       navigate("/plancompelete", {
         state: { selectedCountry, selectedRegions, otherCity, days, people },

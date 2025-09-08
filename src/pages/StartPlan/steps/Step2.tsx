@@ -10,30 +10,8 @@ import {
   SmallM,
   EtcInput,
 } from './StepsStyle';
-
-const countryCodeMap: Record<string, string> = {
-  "South Korea": "KR",
-  Japan: "JP",
-  Thailand: "TH",
-  USA: "US",
-  France: "FR",
-  Italy: "IT",
-  Spain: "ES",
-  Germany: "DE",
-  UK: "GB",
-  Canada: "CA",
-  Australia: "AU",
-  China: "CN",
-  Vietnam: "VN",
-  Singapore: "SG",
-  Malaysia: "MY",
-  Indonesia: "ID",
-  Philippines: "PH",
-  Mexico: "MX",
-  Brazil: "BR",
-  Egypt: "EG",
-  Turkey: "TR",
-};
+import countriesData from "../../../assets/data/country.json";
+import ReactCountryFlag from "react-country-flag";
 
 interface Step2Props {
   selected: any;
@@ -51,76 +29,29 @@ export default function Step2({
                                 setOtherCity,
                               }: Step2Props) {
   const [cities, setCities] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
   const etcInputRef = useRef<HTMLInputElement | null>(null);
 
-  // 나라 변경 시 초기화
   useEffect(() => {
-    setCities([]);
     setSelectedRegions([]);
     setOtherCity("");
+
     if (!selected) return;
 
-    const countryCode = countryCodeMap[selected.name];
-    if (!countryCode) {
+    // ✅ country.json에서 해당 국가 찾기
+    const found = countriesData.find((c) => c.countryCode === selected.countryCode);
+    if (found) {
+      setCities([...found.cities, "기타"]);
+    } else {
       setCities(["대표 관광지가 준비중입니다.", "기타"]);
-      return;
     }
-
-    const fetchCities = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=${countryCode}&limit=8&sort=-population`,
-          {
-            method: "GET",
-            headers: {
-              "X-RapidAPI-Key": "4c6450c651mshda51bad5e02688cp150d1fjsnd8f36b69ed31",
-              "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
-            },
-          }
-        );
-        const data = await response.json();
-        const cityNames: string[] = data.data.map((city: any) => city.city);
-
-        // 번역
-        /*
-        const translated: string[] = [];
-        for (const city of cityNames) {
-          const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q=${encodeURIComponent(
-            city
-          )}`;
-          const res = await fetch(url);
-          const result = await res.json();
-          translated.push(result[0][0][0]);
-        }
-
-        translated.push("기타"); // 항상 기타 추가
-        setCities(translated);
-        */
-
-        // 번역 없이 원본 cityNames 사용
-        setCities([...cityNames, "기타"]);
-      } catch (err) {
-        console.error(err);
-        setCities(["데이터 불러오기 실패", "기타"]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-
-    fetchCities();
   }, [selected]);
 
-  // 도시 선택 토글
   const toggleCity = (city: string) => {
     setSelectedRegions((prev) => {
       let newSelected = prev.includes(city)
         ? prev.filter((c) => c !== city)
         : [...prev, city];
 
-      // 기타 선택 시 포커스
       if (city === "기타" && !prev.includes("기타")) {
         setTimeout(() => {
           etcInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -128,7 +59,6 @@ export default function Step2({
         }, 100);
       }
 
-      // 기타 해제 시 입력값 초기화
       if (city === "기타" && prev.includes("기타")) {
         setOtherCity("");
       }
@@ -153,27 +83,23 @@ export default function Step2({
             marginTop: "42px",
           }}
         >
-          {loading ? (
-            <RandomSpinner />
-          ) : (
-            cities.map((city) => (
-              <Regionbutton
-                key={city}
-                selected={
-                  city === "기타" ? otherCity.length > 0 : selectedRegions.includes(city)
-                }
-                onClick={() => toggleCity(city)}
-              >
-                {city}
-              </Regionbutton>
-            ))
-          )}
+          {cities.map((city) => (
+            <Regionbutton
+              key={city}
+              selected={
+                city === "기타" ? otherCity.length > 0 : selectedRegions.includes(city)
+              }
+              onClick={() => toggleCity(city)}
+            >
+              {city}
+            </Regionbutton>
+          ))}
         </div>
 
         {selectedRegions.includes("기타") && (
           <>
             <InputMessage>
-              <BigM>여행지를 입력하세요. <span></span></BigM>
+              <BigM>여행지를 입력하세요.</BigM>
               <SmallM>여러 개 가능, 쉼표로 구분</SmallM>
             </InputMessage>
             <EtcInput
@@ -195,8 +121,21 @@ export default function Step2({
             width: "300px",
           }}
         >
-          {selected.flag} {selected.name}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {selected?.countryCode && (
+              <ReactCountryFlag
+                countryCode={selected.countryCode}
+                svg
+                style={{ width: "20px", height: "20px" }}
+              />
+            )}
+            <span>{selected?.country}</span> {/* country */}
+            {selectedRegions.length > 0 && (
+              <span>, {selectedRegions.join(", ")}</span>
+            )}
+          </div>
         </DropdownHeader>
+
       </Container2>
     </Wrapper>
   );

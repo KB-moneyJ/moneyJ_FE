@@ -12,6 +12,7 @@ import {
   InputContainer,
   DropdownHeader,
 } from "@/pages/StartPlan/steps/StepsStyle";
+import ReactCountryFlag from 'react-country-flag';
 
 export default function Step4({
                                 selected,
@@ -157,7 +158,6 @@ export default function Step4({
           </div>
         )}
 
-        {/* 여행 정보 */}
         <DropdownHeader
           style={{
             position: "absolute",
@@ -167,14 +167,24 @@ export default function Step4({
             width: "300px",
           }}
         >
-          <div>
-            {selected.flag} {selected.name},{" "}
-            {displayRegions.length > 0 ? displayRegions.join(", ") : ""}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {selected?.countryCode && (
+              <ReactCountryFlag
+                countryCode={selected.countryCode}
+                svg
+                style={{ width: "20px", height: "20px" }}
+              />
+            )}
+            <span>{selected?.country}</span>
+            {displayRegions.length > 0 && (
+              <span>, {displayRegions.join(", ")}</span>
+            )}
           </div>
           <div>
             {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}
           </div>
         </DropdownHeader>
+
       </Container>
     </Wrapper>
   );
