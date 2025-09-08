@@ -12,7 +12,7 @@ import {
 } from './SpendingPage.style';
 import { BarChart, Bar, XAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { LegendProps } from 'recharts';
-import { TextContainer } from '../SignUpPage/Agree.style';
+import CardConnectModal from '@/components/modals/CardConnectModal';
 
 type CatKey = '식비' | '교통비' | '카페';
 
@@ -59,6 +59,7 @@ const toK = (v: number) => {
 export default function SpendingPage() {
   const [selected, setSelected] = useState<CatKey>('식비');
   const [isCard, setisCard] = useState(true);
+  const [isConnectOpen, setIsConnectOpen] = useState(false);
 
   const curr = data[data.length - 1];
   const prev = data[data.length - 2];
@@ -135,7 +136,7 @@ export default function SpendingPage() {
             <br />
             소비 분석을 위해 카드를 연동해주세요
           </Text>
-          <CardButton>카드 연동하기</CardButton>
+          <CardButton onClick={() => setIsConnectOpen(true)}>카드 연동하기</CardButton>
         </Wrapper>
       ) : (
         <Wrapper>
@@ -191,6 +192,7 @@ export default function SpendingPage() {
           </SavingsBanner>
         </Wrapper>
       )}
+      <CardConnectModal isOpen={isConnectOpen} onClose={() => setIsConnectOpen(false)} />
       <BottomNavigationBar />
     </div>
   );

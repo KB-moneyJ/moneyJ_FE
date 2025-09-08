@@ -207,4 +207,5 @@ export const CardButton = styled.div`
 export const Text = styled.div`
   color: white;
   margin-bottom: 30px;
+  text-align: center;
 `;
