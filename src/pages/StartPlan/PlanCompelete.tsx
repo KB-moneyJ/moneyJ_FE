@@ -31,9 +31,30 @@ export default function PlanCompelete() {
         const formatDate = (year: string, month: string, day: string) =>
           `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 
+        // ✅ 도시 리스트 합치기
         const cities = [...selectedRegions];
         if (otherCity) cities.push(otherCity);
         const cityString = cities.join(", ");
+
+        // 날짜 계산
+        let startDate: string;
+        let endDate: string;
+
+        if (days.rangeStart && days.rangeEnd) {
+          // 사용자가 일자까지 선택한 경우
+          startDate = formatDate(days.year, days.month, days.rangeStart);
+          endDate = formatDate(days.year, days.month, days.rangeEnd);
+        } else {
+          // 사용자가 '월'까지만 선택한 경우
+          const lastDayOfMonth = new Date(
+            Number(days.year),
+            Number(days.month), // 다음달 0일 → 이번달 마지막날
+            0
+          ).getDate();
+
+          startDate = formatDate(days.year, days.month, "01");
+          endDate = formatDate(days.year, days.month, String(lastDayOfMonth));
+        }
 
         const res = await fetch("http://localhost:8080/trip-plans/budget", {
           method: "POST",
@@ -43,8 +64,8 @@ export default function PlanCompelete() {
             city: cityString,
             nights: Number(days.nights),
             days: Number(days.days),
-            startDate: formatDate(days.year, days.month, days.rangeStart),
-            endDate: formatDate(days.year, days.month, days.rangeEnd),
+            startDate,
+            endDate,
           }),
         });
 
