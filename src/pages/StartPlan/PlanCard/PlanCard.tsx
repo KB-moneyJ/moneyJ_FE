@@ -26,7 +26,7 @@ const TILE_COLS = 5;
 
 
 
-interface ExpenseItem {  // ✅ 추가
+interface ExpenseItem {
   id: string;
   label: string;
   amount: number;
@@ -42,21 +42,9 @@ interface PlanCardProps {
   progressPercent: number;
   savedPercent?: number;
   onClickDetail?: () => void;
-  items: ExpenseItem[]; // ✅ props로 받도록 변경
-}
-
-
-interface PlanCardProps {
-  destination: string;
-  countryCode?: string;
-  period: string;
-  people: string | number;
-  thumbnailUrl: string;
-  progressPercent: number;
-  savedPercent?: number;
-  onClickDetail?: () => void;
   items: ExpenseItem[];
 }
+
 
 function shuffle<T>(array: T[]): T[] {
   const copy = [...array];

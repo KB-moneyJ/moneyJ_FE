@@ -31,12 +31,16 @@ export default function PlanCompelete() {
         const formatDate = (year: string, month: string, day: string) =>
           `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 
+        const cities = [...selectedRegions];
+        if (otherCity) cities.push(otherCity);
+        const cityString = cities.join(", ");
+
         const res = await fetch("http://localhost:8080/trip-plans/budget", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             country: selectedCountry.country,
-            city: otherCity || selectedRegions[0],
+            city: cityString,
             nights: Number(days.nights),
             days: Number(days.days),
             startDate: formatDate(days.year, days.month, days.rangeStart),
@@ -56,7 +60,7 @@ export default function PlanCompelete() {
         ];
 
         setItems(newItems);
-        setIsLoaded(true); // ✅ 데이터 로딩 끝났음을 표시
+        setIsLoaded(true);
       } catch (err) {
         console.error(err);
       }
@@ -65,8 +69,6 @@ export default function PlanCompelete() {
     fetchBudget();
   }, [selectedCountry, selectedRegions, otherCity, days]);
 
-
-  // ✅ 데이터 로딩이 끝났을 때만 애니메이션 시작
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -92,7 +94,6 @@ export default function PlanCompelete() {
 
   return (
     <div>
-      {/* 홈 버튼 */}
       <div
         style={{
           marginTop: "63px",
