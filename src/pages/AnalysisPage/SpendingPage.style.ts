@@ -1,5 +1,13 @@
 import styled from 'styled-components';
 
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  justify-content: center;
+  align-items: center;
+`;
+
 export const TitleContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -181,4 +189,22 @@ export const SavingsBanner = styled.div`
   .emoji {
     font-size: 18px;
   }
+`;
+
+export const CardButton = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  height: 10%;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-button-primary);
+  border-radius: var(--radius-button);
+  color: white;
+`;
+
+export const Text = styled.div`
+  color: white;
+  margin-bottom: 30px;
 `;
