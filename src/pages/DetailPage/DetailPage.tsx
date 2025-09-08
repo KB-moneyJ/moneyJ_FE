@@ -7,6 +7,7 @@ import ExpenseCard from './sections/ExpenseCard/ExpenseCard';
 import TripOverviewCard from './sections/TripOverviewCard/TripOverviewCard';
 import BeforeYouGoCard from './sections/BeforeYouGoCard/BeforeYouGoCard';
 import FriendInviteModal from '@/components/modals/FriendInviteModal';
+import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
 
 export default function DetailPage() {
@@ -14,6 +15,7 @@ export default function DetailPage() {
   const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(false);
   const [openInvite, setOpenInvite] = useState(false);
+  const [openBank, setOpenBank] = useState(false);
 
   // TODO: API 연동
   const [progress, setProgress] = useState(50);
@@ -78,7 +80,7 @@ export default function DetailPage() {
       </Container>
       <ProgressCard
         progress={progress}
-        onClickSave={() => console.log('저축하기 클릭')}
+        onClickSave={() => setOpenBank(true)}
         tip="오늘 커피 한 잔을 줄이면, 단 7일 안에 목표를 이룰 수 있습니다."
       />
       <ExpenseCard savedPercent={progress} />
@@ -94,6 +96,7 @@ export default function DetailPage() {
       />
       <BeforeYouGoCard destination={detail.destination} checklist={checklist} cautions={cautions} />
       <FriendInviteModal isOpen={openInvite} onClose={() => setOpenInvite(false)} />
+      <BankConnectModal isOpen={openBank} onClose={() => setOpenBank(false)} />
     </div>
   );
 }
