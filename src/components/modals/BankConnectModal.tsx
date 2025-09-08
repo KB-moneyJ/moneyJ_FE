@@ -15,9 +15,11 @@ import {
 interface BankConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** 연동 성공 시 부모에 알림 (은행코드, 계좌번호) */
+  onConnected?: (bankCode: string, accountNumber: string) => void;
 }
 
-export default function BankConnectModal({ isOpen, onClose }: BankConnectModalProps) {
+export default function BankConnectModal({ isOpen, onClose, onConnected }: BankConnectModalProps) {
   const [accountNumber, setAccountNumber] = useState('');
   const [bank, setBank] = useState('');
   const [bankId, setBankId] = useState('');
@@ -30,9 +32,12 @@ export default function BankConnectModal({ isOpen, onClose }: BankConnectModalPr
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    console.log({ accountNumber, bank, bankId, password });
+    // TODO: 실제 API 연동 성공 시에만 아래 콜백 호출하도록 변경
+    onConnected?.(bank, accountNumber);
     onClose();
   };
+
+  const disabled = !bank || !accountNumber.trim() || !bankId.trim() || !password.trim();
 
   return (
     <Overlay onClick={onClose}>
@@ -85,7 +90,9 @@ export default function BankConnectModal({ isOpen, onClose }: BankConnectModalPr
           />
         </FieldWrapper>
 
-        <ConfirmButton onClick={handleSubmit}>확인</ConfirmButton>
+        <ConfirmButton onClick={handleSubmit} disabled={disabled}>
+          확인
+        </ConfirmButton>
       </ModalContainer>
     </Overlay>
   );
