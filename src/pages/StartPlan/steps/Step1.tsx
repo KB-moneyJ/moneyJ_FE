@@ -76,7 +76,7 @@ export default function Step1({ onSelectCountry, selected, goNext }) {
                   {selected.flag} {selected.name}
                 </>
               )}
-              <ArrowIcon isOpen={isOpen} />
+              <ArrowIcon $isOpen={isOpen} />
             </DropdownHeader>
           </motion.div>
 
@@ -94,3 +94,4 @@ export default function Step1({ onSelectCountry, selected, goNext }) {
     </Wrapper>
   );
 }
+

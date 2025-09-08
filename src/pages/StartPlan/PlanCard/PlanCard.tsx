@@ -136,8 +136,8 @@ export default function PlanCard({
           {items.map((i) => {
             const covered = coveredSet.has(i.id);
             return (
-              <ItemContainer>
-                <Item key={i.id} $covered={covered}>
+              <ItemContainer key={i.id}>
+                <Item $covered={covered}>
                   <Label>
                     {i.icon}
                     {i.label}
