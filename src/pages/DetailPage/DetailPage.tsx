@@ -7,15 +7,20 @@ import ExpenseCard from './sections/ExpenseCard/ExpenseCard';
 import TripOverviewCard from './sections/TripOverviewCard/TripOverviewCard';
 import BeforeYouGoCard from './sections/BeforeYouGoCard/BeforeYouGoCard';
 import FriendInviteModal from '@/components/modals/FriendInviteModal';
+import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
+import { BANK_NAME_BY_CODE } from '@/constants/banks';
 
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(false);
   const [openInvite, setOpenInvite] = useState(false);
+  const [openBank, setOpenBank] = useState(false);
 
-  // TODO: API 연동
+  const [isAccountLinked, setIsAccountLinked] = useState(false);
+  const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
+
   const [progress, setProgress] = useState(50);
 
   const detail = {
@@ -50,8 +55,18 @@ export default function DetailPage() {
   ];
 
   useEffect(() => {
+    // TODO: 초기 연동 상태를 API로 불러와서 setIsAccountLinked / setAccountLabel 설정
     // fetch(`/api/trips/${tripId}`).then(...);
   }, [tripId]);
+
+  const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
+
+  const handleBankConnected = (bankCode: string, acct: string) => {
+    const bankName = BANK_NAME_BY_CODE[bankCode] ?? '연동 계좌';
+    setIsAccountLinked(true);
+    setAccountLabel(`${bankName} ${maskAccount(acct)}`);
+    setOpenBank(false);
+  };
 
   return (
     <div>
@@ -78,10 +93,17 @@ export default function DetailPage() {
       </Container>
       <ProgressCard
         progress={progress}
-        onClickSave={() => console.log('저축하기 클릭')}
         tip="오늘 커피 한 잔을 줄이면, 단 7일 안에 목표를 이룰 수 있습니다."
+        linked={isAccountLinked}
+        accountLabel={accountLabel}
+        onClickSave={() => {
+          console.log('저축하기 클릭');
+        }}
+        onClickLink={() => setOpenBank(true)}
       />
+
       <ExpenseCard savedPercent={progress} />
+
       <TripOverviewCard
         destination={detail.destination}
         countryCode={detail.countryCode}
@@ -92,8 +114,14 @@ export default function DetailPage() {
         podiumImageUrl={podiumUrl}
         tip={detail.tip}
       />
+
       <BeforeYouGoCard destination={detail.destination} checklist={checklist} cautions={cautions} />
       <FriendInviteModal isOpen={openInvite} onClose={() => setOpenInvite(false)} />
+      <BankConnectModal
+        isOpen={openBank}
+        onClose={() => setOpenBank(false)}
+        onConnected={handleBankConnected}
+      />
     </div>
   );
 }
