@@ -1,14 +1,18 @@
 import { useMemo, useState } from 'react';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import {
+  Wrapper,
   TitleContainer,
   ChartContainer,
   LegendWrapper,
   CategoryPanel,
   SavingsBanner,
+  CardButton,
+  Text,
 } from './SpendingPage.style';
 import { BarChart, Bar, XAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { LegendProps } from 'recharts';
+import { TextContainer } from '../SignUpPage/Agree.style';
 
 type CatKey = '식비' | '교통비' | '카페';
 
@@ -54,6 +58,7 @@ const toK = (v: number) => {
 
 export default function SpendingPage() {
   const [selected, setSelected] = useState<CatKey>('식비');
+  const [isCard, setisCard] = useState(true);
 
   const curr = data[data.length - 1];
   const prev = data[data.length - 2];
@@ -123,58 +128,69 @@ export default function SpendingPage() {
       <TitleContainer>
         <div>CONSUMPTION ANALYSIS</div>
       </TitleContainer>
+      {isCard ? (
+        <Wrapper>
+          <Text>
+            연결된 카드가 없습니다
+            <br />
+            소비 분석을 위해 카드를 연동해주세요
+          </Text>
+          <CardButton>카드 연동하기</CardButton>
+        </Wrapper>
+      ) : (
+        <Wrapper>
+          <ChartContainer>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={data} barCategoryGap="30%">
+                <XAxis dataKey="month" />
 
-      <ChartContainer>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} barCategoryGap="30%">
-            <XAxis dataKey="month" />
+                <Legend verticalAlign="bottom" align="center" content={<CustomLegend />} />
+                <Bar dataKey="식비" stackId="a" fill={COLORS['식비']} />
+                <Bar dataKey="교통비" stackId="a" fill={COLORS['교통비']} />
+                <Bar dataKey="카페" stackId="a" fill={COLORS['카페']} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
 
-            <Legend verticalAlign="bottom" align="center" content={<CustomLegend />} />
-            <Bar dataKey="식비" stackId="a" fill={COLORS['식비']} />
-            <Bar dataKey="교통비" stackId="a" fill={COLORS['교통비']} />
-            <Bar dataKey="카페" stackId="a" fill={COLORS['카페']} />
-          </BarChart>
-        </ResponsiveContainer>
-      </ChartContainer>
+          <CategoryPanel>
+            <div className="section-title">CATEGORY GOALS</div>
+            <div className="line1">
+              <span>경서님이 선택한 카테고리:</span>
+              <span className="chip" style={{ background: COLORS[selected] }}>
+                {selected}
+              </span>
+            </div>
+            <div className="helper">한 달 동안 하루 평균 이렇게 썼어요!</div>
 
-      <CategoryPanel>
-        <div className="section-title">CATEGORY GOALS</div>
-        <div className="line1">
-          <span>경서님이 선택한 카테고리:</span>
-          <span className="chip" style={{ background: COLORS[selected] }}>
-            {selected}
-          </span>
-        </div>
-        <div className="helper">한 달 동안 하루 평균 이렇게 썼어요!</div>
+            <div className="row">
+              <span className="month">{metrics.prevMonth}</span>
+              <span
+                className="color-chip"
+                style={{ background: COLORS[selected], width: `${prevWidth}px` }}
+              />
+              <span className="amount">{toCurrency(Math.round(metrics.prevAvg))} 원</span>
+            </div>
 
-        <div className="row">
-          <span className="month">{metrics.prevMonth}</span>
-          <span
-            className="color-chip"
-            style={{ background: COLORS[selected], width: `${prevWidth}px` }}
-          />
-          <span className="amount">{toCurrency(Math.round(metrics.prevAvg))} 원</span>
-        </div>
+            <div className="row current">
+              <span className="month">{metrics.currMonth}</span>
+              <span
+                className="color-chip"
+                style={{ background: COLORS[selected], width: `${currWidth}px` }}
+              />
+              <span className="amount current">{toCurrency(Math.round(metrics.currAvg))} 원</span>
+            </div>
+          </CategoryPanel>
 
-        <div className="row current">
-          <span className="month">{metrics.currMonth}</span>
-          <span
-            className="color-chip"
-            style={{ background: COLORS[selected], width: `${currWidth}px` }}
-          />
-          <span className="amount current">{toCurrency(Math.round(metrics.currAvg))} 원</span>
-        </div>
-      </CategoryPanel>
-
-      <SavingsBanner className={metrics.isSaving ? 'saving' : 'increase'}>
-        <span className="emoji">🎉</span>
-        <span>
-          {metrics.isSaving
-            ? `${metrics.prevMonth}보다 ${toCurrency(Math.round(metrics.savingAbs))}원 절약중`
-            : `${metrics.prevMonth}보다 ${toCurrency(Math.round(metrics.savingAbs))}원 증가`}
-        </span>
-      </SavingsBanner>
-
+          <SavingsBanner className={metrics.isSaving ? 'saving' : 'increase'}>
+            <span className="emoji">🎉</span>
+            <span>
+              {metrics.isSaving
+                ? `${metrics.prevMonth}보다 ${toCurrency(Math.round(metrics.savingAbs))}원 절약중`
+                : `${metrics.prevMonth}보다 ${toCurrency(Math.round(metrics.savingAbs))}원 증가`}
+            </span>
+          </SavingsBanner>
+        </Wrapper>
+      )}
       <BottomNavigationBar />
     </div>
   );
