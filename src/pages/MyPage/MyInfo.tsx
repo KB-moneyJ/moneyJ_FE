@@ -8,18 +8,20 @@ import {
   Username,
   LogoutBtn,
   Item,
+  Wrapper,
 } from './MyInfo.style';
 import { FiLogOut } from 'react-icons/fi';
 import { FiEdit2 } from 'react-icons/fi';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import ConfirmModal from '@/components/modals/ConfirmModal';
 import { useState } from 'react';
+import { logout } from '@/api/auth';
 
 export default function Myinfo() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div>
+    <Wrapper>
       <Page>
         <Header>
           <div />
@@ -55,10 +57,10 @@ export default function Myinfo() {
         confirmText="로그아웃"
         onCancel={() => setOpen(false)}
         onConfirm={() => {
-          console.log('로그아웃');
+          logout();
           setOpen(false);
         }}
       />
-    </div>
+    </Wrapper>
   );
 }
