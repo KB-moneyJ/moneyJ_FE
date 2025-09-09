@@ -211,8 +211,10 @@ export default function PlanCompelete() {
         progressPercent={progress}
         savedPercent={progress}
         items={items}
+        onUpdateItems={setItems}
         onClickDetail={() => console.log(`${destination} 상세보기 클릭`)}
       />
+
 
       <div
         style={{
