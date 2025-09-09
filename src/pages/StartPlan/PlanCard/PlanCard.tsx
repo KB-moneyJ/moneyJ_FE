@@ -18,21 +18,33 @@ import {
   Title, Date, Divider, Description, ItemList2, ItemContainer,
 } from './PlanCardStyle';
 import EditModal from '@/components/common/EditModeal';
-import { Check, Home, Plane, Utensils } from 'lucide-react';
+import { Check} from 'lucide-react';
+import {  RandomSpinner} from '../steps/StepsStyle'
 
 const TILE_ROWS = 2;
 const TILE_COLS = 5;
+
+
+
+interface ExpenseItem {
+  id: string;
+  label: string;
+  amount: number;
+  icon?: React.ReactNode;
+}
 
 interface PlanCardProps {
   destination: string;
   countryCode?: string;
   period: string;
-  people: string;
+  people: string | number;
   thumbnailUrl: string;
   progressPercent: number;
-  savedPercent?: number; // 선택적, 기본값 처리
+  savedPercent?: number;
   onClickDetail?: () => void;
+  items: ExpenseItem[];
 }
+
 
 function shuffle<T>(array: T[]): T[] {
   const copy = [...array];
@@ -43,18 +55,6 @@ function shuffle<T>(array: T[]): T[] {
   return copy;
 }
 
-type ExpenseItem = {
-  id: string;
-  label: string;
-  amount: number;
-  icon: React.ReactNode;
-};
-
-const baseItems: ExpenseItem[] = [
-  { id: 'flight', label: '항공권', amount: 800000, icon: <Plane size={18} /> },
-  { id: 'hotel', label: '숙박', amount: 1000000, icon: <Home size={18} /> },
-  { id: 'food', label: '식비', amount: 400000, icon: <Utensils size={18} /> },
-];
 
 export default function PlanCard({
                                    destination,
@@ -63,7 +63,8 @@ export default function PlanCard({
                                     people,
                                    thumbnailUrl,
                                    progressPercent,
-                                   savedPercent = 0, // 기본값 0
+                                   savedPercent = 0,
+                                   items: initialItems,
                                  }: PlanCardProps) {
   const totalTiles = TILE_ROWS * TILE_COLS;
 
@@ -85,7 +86,11 @@ export default function PlanCard({
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
 
   const [showModal, setShowModal] = useState(false);
-  const [items, setItems] = useState<ExpenseItem[]>(baseItems);
+  const [items, setItems] = useState<ExpenseItem[]>(initialItems);
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   const total = items.reduce((sum, i) => sum + i.amount, 0);
 
   const clamped = Math.max(0, Math.min(100, savedPercent));
@@ -124,75 +129,86 @@ export default function PlanCard({
         </Header>
         <Date>{period}</Date>
         <Divider />
-        <Header>
-          <div>
-            <Title>예상 1인 경비</Title>
+
+        {items.length === 0 ? (
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '50px 0' }}>
+            <RandomSpinner />
           </div>
-          <EditBtn onClick={() => setShowModal(true)}>수정하기</EditBtn>
-        </Header>
-        <Amount>₩ {total.toLocaleString()}</Amount>
+        ) : (
+          <>
+            <Header>
+              <div>
+                <Title>예상 1인 경비</Title>
+              </div>
+              <EditBtn onClick={() => setShowModal(true)}>수정하기</EditBtn>
+            </Header>
+            <Amount>₩ {total.toLocaleString()}</Amount>
 
-        <ItemList2>
-          {items.map((i) => {
-            const covered = coveredSet.has(i.id);
-            return (
-              <ItemContainer>
-                <Item key={i.id} $covered={covered}>
-                  <Label>
-                    {i.icon}
-                    {i.label}
-                  </Label>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Price>₩{i.amount.toLocaleString()}</Price>
-                  </div>
-                </Item>
-                <CheckMark $visible={covered}>
-                  <Check size={24} strokeWidth={4} />
-                </CheckMark>
-              </ItemContainer>
-            );
-          })}
-        </ItemList2>
-        <Description>
-          함께 저축해 목표를 채우고<br/>
-          여행지 그림을 완성해보세요!
-        </Description>
-        <ImageFrame>
-          <DimImage src={thumbnailUrl} alt={`${destination} 썸네일`} />
-          <Tiles>
-            {Array.from({ length: TILE_ROWS }).map((_, r) =>
-              Array.from({ length: TILE_COLS }).map((__, c) => {
-                const index = r * TILE_COLS + c;
+            <ItemList2>
+              {items.map((i) => {
+                const covered = coveredSet.has(i.id);
                 return (
-                  <Tile
-                    key={`${r}-${c}`}
-                    $url={thumbnailUrl}
-                    $rows={TILE_ROWS}
-                    $cols={TILE_COLS}
-                    $row={r}
-                    $col={c}
-                    $visible={visibleSet.has(index)}
-                    aria-hidden
-                  />
+                  <ItemContainer key={i.id}>
+                    <Item $covered={covered}>
+                      <Label>
+                        {i.icon}
+                        {i.label}
+                      </Label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Price>₩{i.amount.toLocaleString()}</Price>
+                      </div>
+                    </Item>
+                    <CheckMark $visible={covered}>
+                      <Check size={24} strokeWidth={6} />
+                    </CheckMark>
+                  </ItemContainer>
                 );
-              }),
-            )}
-          </Tiles>
-        </ImageFrame>
+              })}
+            </ItemList2>
 
-        <div style={{width:'100%'}}>
-          <div style={{fontSize:'15px', marginTop:'8px'}}>목표금액 :{total.toLocaleString()}</div>
-          <ProgressBar
-            role="progressbar"
-            aria-valuenow={progressPercent}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <ProgressFill $percent={progressPercent} />
-          </ProgressBar>
-          <ProgressLabel>{progressPercent}%</ProgressLabel>
-        </div>
+            <Description>
+              함께 저축해 목표를 채우고<br/>
+              여행지 그림을 완성해보세요!
+            </Description>
+
+            <ImageFrame>
+              <DimImage src={thumbnailUrl} alt={`${destination} 썸네일`} />
+              <Tiles>
+                {Array.from({ length: TILE_ROWS }).map((_, r) =>
+                  Array.from({ length: TILE_COLS }).map((__, c) => {
+                    const index = r * TILE_COLS + c;
+                    return (
+                      <Tile
+                        key={`${r}-${c}`}
+                        $url={thumbnailUrl}
+                        $rows={TILE_ROWS}
+                        $cols={TILE_COLS}
+                        $row={r}
+                        $col={c}
+                        $visible={visibleSet.has(index)}
+                        aria-hidden
+                      />
+                    );
+                  }),
+                )}
+              </Tiles>
+            </ImageFrame>
+
+            <div style={{width:'100%'}}>
+              <div style={{fontSize:'15px', marginTop:'8px'}}>목표금액 : {total.toLocaleString()}</div>
+              <ProgressBar
+                role="progressbar"
+                aria-valuenow={progressPercent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <ProgressFill $percent={progressPercent} />
+              </ProgressBar>
+              <ProgressLabel>{progressPercent}%</ProgressLabel>
+            </div>
+          </>
+        )}
+
         {showModal && (
           <EditModal
             items={items}

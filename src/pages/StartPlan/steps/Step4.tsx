@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import styled from "styled-components";
 import {
   Container,
   Wrapper,
@@ -8,11 +7,23 @@ import {
   IndicatorButton2,
   Count,
   IdInput,
-  AddButton, InputWrapper, InputContainer, DropdownHeader,
-} from '@/pages/StartPlan/steps/StepsStyle';
+  AddButton,
+  InputWrapper,
+  InputContainer,
+  DropdownHeader,
+} from "@/pages/StartPlan/steps/StepsStyle";
+import ReactCountryFlag from 'react-country-flag';
 
-export default function Step4({ selected, selectedRegions, otherCity, days, people, setPeople }) {
-  const [count, setCount] = useState(1);
+export default function Step4({
+                                selected,
+                                selectedRegions,
+                                otherCity,
+                                days,
+                                people,
+                                setPeople,
+                                friendIds,
+                                setFriendIds,
+                              }) {
   const [inputs, setInputs] = useState<string[]>([]); // 친구 ID 입력칸 상태
 
   const handleIncrease = () => setPeople(people + 1);
@@ -29,6 +40,7 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
   const handleAddInput = () => {
     if (inputs.length < people - 1) {
       setInputs([...inputs, ""]);
+      setFriendIds([...friendIds, ""]); // friendIds도 함께 업데이트
     }
   };
 
@@ -36,7 +48,12 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
     const newInputs = [...inputs];
     newInputs[index] = value;
     setInputs(newInputs);
+
+    const newFriendIds = [...friendIds];
+    newFriendIds[index] = value;
+    setFriendIds(newFriendIds);
   };
+
   const displayRegions = selectedRegions.filter((r) => r !== "기타");
   if (otherCity.trim().length > 0) {
     displayRegions.push(otherCity);
@@ -47,6 +64,7 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
       <Container>
         <div>인원수는 몇명인가요?</div>
         <CounterBox>
+          {/* - 버튼 */}
           <IndicatorButton onClick={handleDecrease}>
             <svg
               width="18"
@@ -61,7 +79,11 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
               />
             </svg>
           </IndicatorButton>
+
+          {/* 인원수 */}
           <Count>{people}명</Count>
+
+          {/* + 버튼 */}
           <IndicatorButton2 onClick={handleIncrease}>
             <svg
               width="16"
@@ -78,6 +100,7 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
           </IndicatorButton2>
         </CounterBox>
 
+        {/* 동행자 입력칸 */}
         {people >= 2 && (
           <div style={{ marginTop: "50px", width: "100%" }}>
             <p
@@ -85,11 +108,12 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
                 color: "#FF82FF",
                 marginBottom: "11px",
                 fontSize: "13px",
-                fontWeight:'normal',
-                lineHeight:"1.5"
+                fontWeight: "normal",
+                lineHeight: "1.5",
               }}
             >
-              동행자도 Money J를 쓰고 있나요?<br/>
+              동행자도 Money J를 쓰고 있나요?
+              <br />
               함께라면 목표 달성이 훨씬 재밌어져요!
             </p>
             <p
@@ -101,11 +125,10 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
             >
               여행 계획을 공유할 친구를 초대해주세요
             </p>
+
             <InputContainer>
               {inputs.map((input, idx) => (
-                <InputWrapper
-                  key={idx}
-                >
+                <InputWrapper key={idx}>
                   <IdInput
                     type="text"
                     placeholder="ID 입력"
@@ -114,6 +137,7 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
                   />
                 </InputWrapper>
               ))}
+
               {inputs.length < people - 1 && (
                 <AddButton onClick={handleAddInput}>
                   <svg
@@ -133,23 +157,34 @@ export default function Step4({ selected, selectedRegions, otherCity, days, peop
             </InputContainer>
           </div>
         )}
+
         <DropdownHeader
           style={{
-            position: 'absolute',
-            top: '500px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '300px',
+            position: "absolute",
+            top: "500px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "300px",
           }}
         >
-          <div>
-            {selected.flag} {selected.name},{" "}
-            {displayRegions.length > 0 ? displayRegions.join(", ") : ""}{" "}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {selected?.countryCode && (
+              <ReactCountryFlag
+                countryCode={selected.countryCode}
+                svg
+                style={{ width: "20px", height: "20px" }}
+              />
+            )}
+            <span>{selected?.country}</span>
+            {displayRegions.length > 0 && (
+              <span>, {displayRegions.join(", ")}</span>
+            )}
           </div>
           <div>
-            {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}{" "}
+            {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}
           </div>
         </DropdownHeader>
+
       </Container>
     </Wrapper>
   );

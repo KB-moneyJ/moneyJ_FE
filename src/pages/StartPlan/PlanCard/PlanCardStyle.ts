@@ -111,6 +111,7 @@ export const Flag = styled(ReactCountryFlag)`
   margin-bottom: 0.1rem;
   border-radius: 0.125rem;
   line-height: 1;
+    margin-left: 5px;
 
   svg,
   img {

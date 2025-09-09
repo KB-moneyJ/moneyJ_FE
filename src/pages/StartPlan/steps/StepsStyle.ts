@@ -78,16 +78,16 @@ export const DropdownHeader = styled.div`
   border: 2px solid white;
 `;
 
-export const ArrowIcon = styled.span`
-  margin-left: auto;
-  width: 11px;
-  height: 11px;
-  border-right: 2px solid white;
-  border-bottom: 2px solid white;
-  transform: ${({ isOpen }) =>
-  isOpen ? "rotate(-135deg)" : "rotate(45deg)"};
-  transition: transform 0.2s ease;
+export const ArrowIcon = styled.span<{ $isOpen: boolean }>`
+    margin-left: auto;
+    width: 11px;
+    height: 11px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: ${({ $isOpen }) => ($isOpen ? "rotate(-135deg)" : "rotate(45deg)")};
+    transition: transform 0.2s ease;
 `;
+
 
 export const DropdownList = styled.ul`
   margin: 0;

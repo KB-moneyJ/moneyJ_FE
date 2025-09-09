@@ -10,6 +10,8 @@ import {
   InputRow2,
 } from "@/pages/StartPlan/steps/StepsStyle";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactCountryFlag from "react-country-flag";
+
 
 export default function Step3({ selected, selectedRegions, otherCity, days, setDays }) {
   const displayRegions = selectedRegions.filter((r) => r !== "기타");
@@ -76,15 +78,15 @@ export default function Step3({ selected, selectedRegions, otherCity, days, setD
                       const start = e.target.value;
                       let end = "";
 
-                      if (start && days.nights) {
+                      if (start && days.days) {
                         const year = parseInt(days.year) || new Date().getFullYear();
                         const month = parseInt(days.month) || new Date().getMonth() + 1;
-                        const nights = parseInt(days.nights);
+                        const tripDays = parseInt(days.days);
 
                         const startDay = parseInt(start);
                         const lastDayOfMonth = new Date(year, month, 0).getDate();
 
-                        let calculatedEnd = startDay + nights;
+                        let calculatedEnd = startDay + tripDays - 1;
                         if (calculatedEnd > lastDayOfMonth) {
                           // 다음 달로 넘어가는 경우
                           calculatedEnd = calculatedEnd - lastDayOfMonth;
@@ -120,14 +122,24 @@ export default function Step3({ selected, selectedRegions, otherCity, days, setD
             width: "300px",
           }}
         >
-          <div>
-            {selected.flag} {selected.name},{" "}
-            {displayRegions.length > 0 ? displayRegions.join(", ") : ""}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {selected?.countryCode && (
+              <ReactCountryFlag
+                countryCode={selected.countryCode}
+                svg
+                style={{ width: "20px", height: "20px" }}
+              />
+            )}
+            <span>{selected?.country}</span>
+            {displayRegions.length > 0 && (
+              <span>, {displayRegions.join(", ")}</span>
+            )}
           </div>
           <div>
             {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}
           </div>
         </DropdownHeader>
+
       </Container>
     </Wrapper>
   );
