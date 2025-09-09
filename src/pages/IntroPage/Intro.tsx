@@ -18,6 +18,7 @@ import {
   StepDesc,
   StartButton,
 } from './Intro.style';
+import { useNavigate } from 'react-router-dom';
 
 const STEPS = [
   {
@@ -41,6 +42,7 @@ const STEPS = [
 export default function Intro() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [started, setStarted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (activeIndex >= STEPS.length - 1) {
@@ -54,6 +56,10 @@ export default function Intro() {
   }, [activeIndex]);
 
   const allDone = useMemo(() => started, [started]);
+
+  const goToHome = () => {
+    navigate('/home');
+  };
 
   return (
     <Wrapper>
@@ -91,7 +97,9 @@ export default function Intro() {
         })}
       </Timeline>
 
-      <StartButton disabled={!allDone}>바로 시작하기</StartButton>
+      <StartButton disabled={!allDone} onClick={goToHome}>
+        바로 시작하기
+      </StartButton>
     </Wrapper>
   );
 }

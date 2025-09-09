@@ -2,8 +2,10 @@ import logo from '@/assets/images/moneyJ-Logo.png';
 import kakaologo from '@/assets/images/kakao-Logo.png';
 import styles from './Login.module.css';
 
-const goToKakaoLogin = () => {
-  alert('아직 구현되지 않은 기능입니다! - 카카오 로그인');
+import { loginWithKakao } from '@/api/auth';
+
+const goToKakaoLogin = async () => {
+  loginWithKakao();
 };
 
 export default function Login() {

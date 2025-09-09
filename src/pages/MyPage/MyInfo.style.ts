@@ -1,11 +1,14 @@
 import styled, { css } from 'styled-components';
 
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 export const Page = styled.div`
   overflow-y: hidden;
   overflow-x: hidden;
   padding: 16px 22px 0;
   color: white;
-  height: 100%;
 `;
 
 export const Header = styled.header`
@@ -198,5 +201,5 @@ export const LogoutBtn = styled.button`
   color: white;
   width: 100%;
   margin-top: 40%;
-  margin-bottom: 100%;
+  margin-bottom: 400px;
 `;
