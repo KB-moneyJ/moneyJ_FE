@@ -14,7 +14,6 @@ export async function logout() {
         withCredentials: true,
       },
     );
-    console.log('로그아웃 성공:', res.data);
     return res.data;
   } catch (err) {
     console.error('로그아웃 실패:', err);

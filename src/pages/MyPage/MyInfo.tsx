@@ -16,9 +16,24 @@ import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomN
 import ConfirmModal from '@/components/modals/ConfirmModal';
 import { useState } from 'react';
 import { logout } from '@/api/auth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Myinfo() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const goLogout = async () => {
+    try {
+      const result = await logout();
+      console.log('로그아웃 성공:', result);
+      if (result.status === 'success') {
+        navigate('/login');
+      } else {
+        alert('로그아웃에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('로그아웃 중 오류 발생:', err);
+    }
+  };
 
   return (
     <Wrapper>
@@ -57,7 +72,7 @@ export default function Myinfo() {
         confirmText="로그아웃"
         onCancel={() => setOpen(false)}
         onConfirm={() => {
-          logout();
+          goLogout();
           setOpen(false);
         }}
       />
