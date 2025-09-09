@@ -8,7 +8,7 @@ import { Plane, Home, Utensils } from "lucide-react";
 export default function PlanCompelete() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedCountry, selectedRegions, otherCity, days, people } =
+  const { selectedCountry, selectedRegions, otherCity, days, people, friendIds } =
     location.state;
 
   const destination = otherCity
@@ -23,32 +23,29 @@ export default function PlanCompelete() {
 
   const [progress, setProgress] = useState(0);
   const [items, setItems] = useState<any[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false); // ✅ 로딩 완료 여부 추가
+  const [isLoaded, setIsLoaded] = useState(false);
 
+  // 비용 조회
   useEffect(() => {
     const fetchBudget = async () => {
       try {
         const formatDate = (year: string, month: string, day: string) =>
           `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 
-        // ✅ 도시 리스트 합치기
         const cities = [...selectedRegions];
         if (otherCity) cities.push(otherCity);
         const cityString = cities.join(", ");
 
-        // 날짜 계산
         let startDate: string;
         let endDate: string;
 
         if (days.rangeStart && days.rangeEnd) {
-          // 사용자가 일자까지 선택한 경우
           startDate = formatDate(days.year, days.month, days.rangeStart);
           endDate = formatDate(days.year, days.month, days.rangeEnd);
         } else {
-          // 사용자가 '월'까지만 선택한 경우
           const lastDayOfMonth = new Date(
             Number(days.year),
-            Number(days.month), // 다음달 0일 → 이번달 마지막날
+            Number(days.month),
             0
           ).getDate();
 
@@ -72,10 +69,9 @@ export default function PlanCompelete() {
         if (!res.ok) throw new Error("비용 정보 불러오기 실패");
 
         const data = await res.json();
-        console.log("백엔드 응답 데이터:", data);
 
         const newItems = [
-          { id: "flight", label: "항공권", amount: data.flightCost, icon: <Plane size={18} /> },
+          { id: "flight", label: "항공비", amount: data.flightCost, icon: <Plane size={18} /> },
           { id: "hotel", label: "숙박", amount: data.accommodationCost, icon: <Home size={18} /> },
           { id: "food", label: "식비", amount: data.foodCost, icon: <Utensils size={18} /> },
         ];
@@ -90,6 +86,7 @@ export default function PlanCompelete() {
     fetchBudget();
   }, [selectedCountry, selectedRegions, otherCity, days]);
 
+  // 진행률 애니메이션
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -111,6 +108,71 @@ export default function PlanCompelete() {
     return () => clearInterval(interval);
   }, [isLoaded]);
 
+  const handleSavePlan = async () => {
+    try {
+      const formatDate = (year: string, month: string, day: string) =>
+        `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+      const cities = [...selectedRegions];
+      if (otherCity) cities.push(otherCity);
+      const cityString = cities.join(", ");
+
+      const tripStartDate = formatDate(days.year, days.month, days.rangeStart);
+      const tripEndDate = formatDate(days.year, days.month, days.rangeEnd);
+
+      const categoryDTOList = items.map((item) => ({
+        categoryName: item.label,
+        amount: item.amount,
+      }));
+
+      const totalBudget = categoryDTOList.reduce(
+        (sum, item) => sum + item.amount,
+        0
+      );
+
+      //  startDate: 오늘
+      const today = new Date();
+      const startDate = today.toISOString().split("T")[0]; // yyyy-MM-dd
+
+      //  targetDate: tripStartDate - 7일
+      const tripStart = new Date(tripStartDate);
+      tripStart.setDate(tripStart.getDate() - 7);
+      const targetDate = tripStart.toISOString().split("T")[0];
+
+      const payload = {
+        country: selectedCountry.country,
+        countryCode,
+        city: cityString,
+        categoryDTOList,
+        // nights: Number(days.nights),   //  테스트용이라 주석 처리
+        // days: Number(days.days),       //  테스트용이라 주석 처리
+        duration: Number(days.days),      //  days → duration으로 임시 변환
+        tripStartDate,
+        tripEndDate,
+        totalBudget,
+        startDate,
+        targetDate,  // 여행 7일 전
+        tripMemberEmail: friendIds, //  Step4에서 입력받은 친구 이메일 리스트
+      };
+
+
+      console.log("최종 POST 데이터:", payload);
+
+      const res = await fetch("http://localhost:8080/trip-plans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("여행 저장 실패");
+
+      alert("여행 계획이 성공적으로 저장되었습니다!");
+      navigate("/home");
+    } catch (err) {
+      console.error(err);
+      alert("저장 중 오류가 발생했습니다.");
+    }
+  };
 
 
   return (
@@ -162,7 +224,7 @@ export default function PlanCompelete() {
           marginTop: "27px",
         }}
       >
-        <EndBtn>완료</EndBtn>
+        <EndBtn onClick={handleSavePlan}>완료</EndBtn>
       </div>
     </div>
   );
