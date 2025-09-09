@@ -11,6 +11,7 @@ import {
   ConfirmButton,
   CloseButton,
 } from './BankConnectModal.style';
+import { set } from '@vueuse/core';
 interface CardConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,13 +23,21 @@ export default function CardConnectModal({ isOpen, onClose }: CardConnectModalPr
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    if (isOpen) window.scrollTo({ top: 0, behavior: 'auto' });
+    if (isOpen) {
+      setCardCompany('');
+      setBankId('');
+      setPassword('');
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = () => {
     console.log({ cardCompany, bankId, password });
+    setCardCompany('');
+    setBankId('');
+    setPassword('');
     onClose();
   };
 
