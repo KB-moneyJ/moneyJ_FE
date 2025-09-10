@@ -19,6 +19,10 @@ export const SaveBtn = styled(DetailBtn).attrs({ as: 'button' })`
   width: 100%;
 `;
 
+export const CardLinkBtn = styled(DetailBtn).attrs({ as: 'button' })`
+  width: 100%;
+`;
+
 export const AccountText = styled.div`
   color: var(--color-text-highlight);
   font-weight: 500;
