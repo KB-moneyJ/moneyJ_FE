@@ -45,7 +45,6 @@ type Props = {
   members: Member[];
   tip?: string;
   podiumImageUrl?: string;
-  /** balances 기반 TOP3 (percent desc). 없으면 단상 위 아바타 미표시 */
   podiumTop3?: Member[];
 };
 
