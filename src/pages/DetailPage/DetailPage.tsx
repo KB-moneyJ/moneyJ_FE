@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 
@@ -17,6 +17,9 @@ import { useMe } from '@/api/users/queries';
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
+
+  const location = useLocation() as { state?: { thumbnailUrl?: string } };
+  const thumbFromList = location.state?.thumbnailUrl;
 
   const { data, isLoading, isError, error } = useTripPlanDetail(tripId);
   const { data: balances = [] } = useTripPlanBalances(tripId);
@@ -63,12 +66,12 @@ export default function DetailPage() {
       destination: data.destination,
       countryCode: data.countryCode,
       period: data.period + (data.members.length ? ` (${data.members.length}명)` : ''),
-      thumbnailUrl: data.thumbnailUrl,
+      thumbnailUrl: thumbFromList ?? data.thumbnailUrl,
       progressPercent: data.progressPercent,
       members: data.members,
       tip: data.overviewTip,
     };
-  }, [data]);
+  }, [data, thumbFromList]);
 
   const checklist = data?.checklist ?? [];
   const cautions = data?.cautions ?? [];
@@ -152,7 +155,6 @@ export default function DetailPage() {
         }}
         onClickLink={() => setOpenBank(true)}
       />
-      {/* 예상 경비(저축률만 사용 중) */}
       <ExpenseCard savedPercent={progress} tripId={Number(tripId)} />
       {overview && (
         <TripOverviewCard
@@ -168,7 +170,6 @@ export default function DetailPage() {
         />
       )}
       <BeforeYouGoCard destination={data.destination} checklist={checklist} cautions={cautions} />
-      {/* 모달들 */}
       <FriendInviteModal
         isOpen={openInvite}
         onClose={() => setOpenInvite(false)}
