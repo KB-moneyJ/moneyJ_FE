@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import axios from "axios";
 import {
   Wrapper,
   ContentsWrapper,
@@ -39,7 +40,7 @@ export default function MakePlan() {
     exit: { x: "-100%", opacity: 0, transition: { duration: 0.5 } },
   };
 
-  const goNext = () => {
+  const goNext = async () => {
     if (step === 2) {
       if (selectedRegions.length === 0 && otherCity.trim() === "") {
         alert("최소 한 개의 여행지를 선택해주세요!");
@@ -57,22 +58,35 @@ export default function MakePlan() {
     if (step < 4) {
       setStep((prev) => prev + 1);
     } else if (step === 4) {
-      console.log({
-        country: selectedCountry?.country,
-        countryCode: selectedCountry?.countryCode,
-        selectedRegions,  // 사용자가 선택한 지역
-        otherCity,        // 기타 입력한 도시
-        days,
-        people,
-        friendIds
-      });
+      try {
+        // ✅ 사용자 검증 요청 (POST, JSON 바디)
+        const response = await axios.post(
+          "http://localhost:8080/users/check",
+          { emails: friendIds }, // 여기 JSON 바디로
+          { withCredentials: true }
+        );
 
+        const result = response.data;
 
-      navigate("/plancompelete", {
-        state: { selectedCountry, selectedRegions, otherCity, days, people },
-      });
+        const invalidUsers = result
+          .filter((user: any) => !user.exists)
+          .map((user: any) => user.email);
+
+        if (invalidUsers.length > 0) {
+          alert(`가입하지 않은 사용자입니다:\n${invalidUsers.join("\n")}`);
+          return;
+        }
+
+        navigate("/plancompelete", {
+          state: { selectedCountry, selectedRegions, otherCity, days, people, friendIds },
+        });
+      } catch (error) {
+        console.error("사용자 검증 실패:", error);
+        alert("사용자 검증 중 오류가 발생했습니다.");
+      }
     }
   };
+
 
   const goPrev = () => step > 1 && setStep((prev) => prev - 1);
 

@@ -10,8 +10,7 @@ const ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
 export default function PlanCompelete() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedCountry, selectedRegions, otherCity, days, people, friendIds } =
-    location.state;
+  const { selectedCountry, selectedRegions, otherCity, days, people, friendIds } = location.state;
 
   const destination = otherCity
     ? `${selectedCountry.country}, ${selectedRegions.join(", ")}, ${otherCity}`
@@ -199,6 +198,7 @@ export default function PlanCompelete() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error("여행 저장 실패");
