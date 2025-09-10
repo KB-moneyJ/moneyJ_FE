@@ -256,7 +256,7 @@ export const ItemList2 = styled.div`
     display: grid;
     gap: 15px;
     justify-content: stretch;
-    max-height: 150px;
+    max-height: 152px;
     overflow-y: auto;
     padding-right: 8px;
 
