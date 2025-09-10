@@ -196,13 +196,10 @@ export default function TripOverviewCard({
                 alt={`${podiumTop3[2].name} 프로필`}
               />
             )}
-
-            {/* 단상 이미지 */}
             <Podium src={podiumImageUrl} alt="랭킹 단상" />
           </PodiumStage>
         </PodiumWrap>
       )}
-
       <RankList>
         {members.map((m, idx) => (
           <RankItem key={m.id}>
@@ -215,11 +212,6 @@ export default function TripOverviewCard({
           </RankItem>
         ))}
       </RankList>
-      <Divider />
-      <Tip>
-        <TipLabel>TIP</TipLabel>
-        <TipText>{tip}</TipText>
-      </Tip>
     </Wrapper>
   );
 }
