@@ -286,7 +286,7 @@ export const ItemWrapper = styled.div`
     
 `;
 
-export const Item = styled.button<{ $covered?: boolean }>`
+export const Item = styled.div<{ $covered?: boolean }>`
     display: flex;
     align-items: center;
     width: ${({ $covered }) => ($covered ? "230px" : "267px")};

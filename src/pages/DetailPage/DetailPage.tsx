@@ -129,7 +129,7 @@ export default function DetailPage() {
       />
 
       {/* 예상 경비(저축률만 사용 중) */}
-      <ExpenseCard savedPercent={progress} />
+      <ExpenseCard savedPercent={progress} tripId={Number(tripId)} />
 
       {/* 개요 카드 */}
       {overview && (
