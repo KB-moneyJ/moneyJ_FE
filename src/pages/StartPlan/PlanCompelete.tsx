@@ -161,36 +161,41 @@ export default function PlanCompelete() {
         amount: item.amount,
       }));
 
-      const totalBudget = categoryDTOList.reduce(
-        (sum, item) => sum + item.amount,
-        0
-      );
+      const totalBudget = categoryDTOList.reduce((sum, item) => sum + item.amount, 0);
 
-      //  startDate: 오늘
+      // startDate: 오늘
       const today = new Date();
       const startDate = today.toISOString().split("T")[0]; // yyyy-MM-dd
 
-      //  targetDate: tripStartDate - 7일
+      // targetDate: tripStartDate - 7일
       const tripStart = new Date(tripStartDate);
       tripStart.setDate(tripStart.getDate() - 7);
       const targetDate = tripStart.toISOString().split("T")[0];
+
+      // 로컬스토리지에서 내 이메일 가져오기
+      const meString = localStorage.getItem("me.public");
+      let myEmail = "";
+      if (meString) {
+        const me = JSON.parse(meString);
+        myEmail = me.email;
+      }
+
+      // 친구 이메일 + 내 이메일 합치기
+      const allEmails = [myEmail, ...friendIds];
 
       const payload = {
         country: selectedCountry.country,
         countryCode,
         city: cityString,
         categoryDTOList,
-        // nights: Number(days.nights),   //  테스트용이라 주석 처리
-        // days: Number(days.days),       //  테스트용이라 주석 처리
-        duration: Number(days.days),      //  days → duration으로 임시 변환
+        duration: Number(days.days),
         tripStartDate,
         tripEndDate,
         totalBudget,
         startDate,
-        targetDate,  // 여행 7일 전
-        tripMemberEmail: friendIds, //  Step4에서 입력받은 친구 이메일 리스트
+        targetDate, // 여행 7일 전
+        tripMemberEmail: allEmails, // 내 이메일 + 친구 이메일
       };
-
 
       console.log("최종 POST 데이터:", payload);
 
@@ -210,6 +215,7 @@ export default function PlanCompelete() {
       alert("저장 중 오류가 발생했습니다.");
     }
   };
+
 
 
   return (

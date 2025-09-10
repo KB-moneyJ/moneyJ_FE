@@ -41,6 +41,7 @@ export default function MakePlan() {
   };
 
   const goNext = async () => {
+    // Step2: 여행지 선택 검증
     if (step === 2) {
       if (selectedRegions.length === 0 && otherCity.trim() === "") {
         alert("최소 한 개의 여행지를 선택해주세요!");
@@ -48,6 +49,7 @@ export default function MakePlan() {
       }
     }
 
+    // Step3: 날짜 및 기간 검증
     if (step === 3) {
       if (!days.year || !days.month || !days.nights || !days.days) {
         alert("년, 월, 몇박 몇일을 모두 입력해주세요!");
@@ -55,28 +57,36 @@ export default function MakePlan() {
       }
     }
 
+    // Step1~3: 다음 단계로 이동
     if (step < 4) {
       setStep((prev) => prev + 1);
-    } else if (step === 4) {
+      return;
+    }
+
+    // Step4: 친구 이메일 검증 후 플랜 완료 페이지로 이동
+    if (step === 4) {
       try {
-        // ✅ 사용자 검증 요청 (POST, JSON 바디)
-        const response = await axios.post(
-          "http://localhost:8080/users/check",
-          { emails: friendIds }, // 여기 JSON 바디로
-          { withCredentials: true }
-        );
+        // friendIds가 존재할 때만 서버 검증
+        if (friendIds.length > 0) {
+          const response = await axios.post(
+            "http://localhost:8080/users/check",
+            { emails: friendIds },
+            { withCredentials: true }
+          );
 
-        const result = response.data;
+          const result = response.data;
 
-        const invalidUsers = result
-          .filter((user: any) => !user.exists)
-          .map((user: any) => user.email);
+          const invalidUsers = result
+            .filter((user: any) => !user.exists)
+            .map((user: any) => user.email);
 
-        if (invalidUsers.length > 0) {
-          alert(`가입하지 않은 사용자입니다:\n${invalidUsers.join("\n")}`);
-          return;
+          if (invalidUsers.length > 0) {
+            alert(`가입하지 않은 사용자입니다:\n${invalidUsers.join("\n")}`);
+            return; // 검증 실패 시 진행 중단
+          }
         }
 
+        // 검증 통과 또는 친구 없음 → PlanComplete 페이지로 이동
         navigate("/plancompelete", {
           state: { selectedCountry, selectedRegions, otherCity, days, people, friendIds },
         });
@@ -86,7 +96,6 @@ export default function MakePlan() {
       }
     }
   };
-
 
   const goPrev = () => step > 1 && setStep((prev) => prev - 1);
 
