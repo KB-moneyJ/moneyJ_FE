@@ -14,6 +14,28 @@ import {
 } from "@/pages/StartPlan/steps/StepsStyle";
 import ReactCountryFlag from 'react-country-flag';
 
+interface Step4Props {
+  selected: {
+    country?: string;
+    countryCode?: string;
+  } | null;
+  selectedRegions: string[];
+  otherCity: string;
+  days: {
+    year: string;
+    month: string;
+    nights: string;
+    days: string;
+    rangeStart: string;
+    rangeEnd: string;
+  };
+  people: number;
+  setPeople: React.Dispatch<React.SetStateAction<number>>;
+  friendIds: string[];
+  setFriendIds: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+
 export default function Step4({
                                 selected,
                                 selectedRegions,
@@ -23,7 +45,7 @@ export default function Step4({
                                 setPeople,
                                 friendIds,
                                 setFriendIds,
-                              }) {
+                              }: Step4Props) {
   const [inputs, setInputs] = useState<string[]>([]); // 친구 ID 입력칸 상태
 
   const handleIncrease = () => setPeople(people + 1);

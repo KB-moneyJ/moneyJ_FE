@@ -41,21 +41,31 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 export default function TripCard({
-  tripId,
-  destination,
-  countryCode,
-  period,
-  thumbnailUrl,
-  progressPercent,
-  onClickDetail,
-}: TripCardProps) {
+                                   tripId,
+                                   destination,
+                                   countryCode,
+                                   period,
+                                   thumbnailUrl: initialThumbnailUrl,
+                                   progressPercent,
+                                   onClickDetail,
+                                   // 추가적으로 지역, 도시, 나라를 props로 받아야 함
+                                   selectedCountry,
+                                   selectedRegions,
+                                   otherCity,
+                                 }: TripCardProps & {
+  selectedCountry: { country: string; countryCode: string };
+  selectedRegions: string[];
+  otherCity?: string;
+}) {
   const totalTiles = TILE_ROWS * TILE_COLS;
-
   const orderRef = useRef<number[]>(shuffle([...Array(totalTiles).keys()]));
 
   const initialCount = Math.max(0, Math.min(totalTiles, Math.floor(progressPercent / 10)));
   const [openedCount, setOpenedCount] = useState<number>(initialCount);
 
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>(initialThumbnailUrl);
+
+  // 기존 openedCount 관련 로직
   useEffect(() => {
     const next = Math.max(0, Math.min(totalTiles, Math.floor(progressPercent / 10)));
     setOpenedCount((prev) => (next > prev ? next : prev));
@@ -67,6 +77,35 @@ export default function TripCard({
   }, [thumbnailUrl]);
 
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
+
+  // ✅ Unsplash 썸네일 불러오기
+  useEffect(() => {
+    const fetchThumbnail = async () => {
+      try {
+        const ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
+        if (!destination) return; // destination 없으면 그냥 return
+
+        const query = destination + " landmark"; // destination 기반 검색
+
+        const res = await fetch(
+          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
+            query
+          )}&client_id=${ACCESS_KEY}&per_page=1`
+        );
+
+        if (!res.ok) throw new Error("썸네일 불러오기 실패");
+
+        const data = await res.json();
+        if (data.results.length > 0) {
+          setThumbnailUrl(data.results[0].urls.small);
+        }
+      } catch (err) {
+        console.error("썸네일 로드 에러:", err);
+      }
+    };
+
+    fetchThumbnail();
+  }, [destination]);
 
   return (
     <TripCardContainer>

@@ -5,11 +5,12 @@ import { EndBtn } from "@/pages/StartPlan/PlanStyle";
 
 import { Plane, Home, Utensils } from "lucide-react";
 
+const ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
+
 export default function PlanCompelete() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedCountry, selectedRegions, otherCity, days, people, friendIds } =
-    location.state;
+  const { selectedCountry, selectedRegions, otherCity, days, people, friendIds } = location.state;
 
   const destination = otherCity
     ? `${selectedCountry.country}, ${selectedRegions.join(", ")}, ${otherCity}`
@@ -18,12 +19,47 @@ export default function PlanCompelete() {
   const countryCode = selectedCountry.countryCode;
 
   const period = `${days.year}.${days.month}.${days.rangeStart} - ${days.year}.${days.month}.${days.rangeEnd}`;
-  const thumbnailUrl =
-    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80";
+  const [thumbnailUrl, setThumbnailUrl] = useState(
+    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80"
+  );
 
   const [progress, setProgress] = useState(0);
   const [items, setItems] = useState<any[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetchThumbnail = async () => {
+      try {
+        // 검색 키워드 구성: 도시(있으면) + 지역들 + 나라
+        const queryParts = [];
+        if (otherCity) queryParts.push(otherCity);
+        if (selectedRegions && selectedRegions.length > 0) {
+          queryParts.push(selectedRegions.join(" "));
+        }
+        queryParts.push(selectedCountry.country);
+
+        const query = queryParts.join(" ");
+
+        const res = await fetch(
+          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
+            query + "landmark"
+          )}&client_id=${ACCESS_KEY}&per_page=1`
+        );
+
+        if (!res.ok) throw new Error("썸네일 불러오기 실패");
+        const data = await res.json();
+
+        if (data.results.length > 0) {
+          setThumbnailUrl(data.results[0].urls.small);
+        }
+      } catch (err) {
+        console.error("썸네일 로드 에러:", err);
+      }
+    };
+
+    fetchThumbnail();
+  }, [selectedCountry, selectedRegions, otherCity]);
+
 
   // 비용 조회
   useEffect(() => {
@@ -125,36 +161,41 @@ export default function PlanCompelete() {
         amount: item.amount,
       }));
 
-      const totalBudget = categoryDTOList.reduce(
-        (sum, item) => sum + item.amount,
-        0
-      );
+      const totalBudget = categoryDTOList.reduce((sum, item) => sum + item.amount, 0);
 
-      //  startDate: 오늘
+      // startDate: 오늘
       const today = new Date();
       const startDate = today.toISOString().split("T")[0]; // yyyy-MM-dd
 
-      //  targetDate: tripStartDate - 7일
+      // targetDate: tripStartDate - 7일
       const tripStart = new Date(tripStartDate);
       tripStart.setDate(tripStart.getDate() - 7);
       const targetDate = tripStart.toISOString().split("T")[0];
+
+      // 로컬스토리지에서 내 이메일 가져오기
+      const meString = localStorage.getItem("me.public");
+      let myEmail = "";
+      if (meString) {
+        const me = JSON.parse(meString);
+        myEmail = me.email;
+      }
+
+      // 친구 이메일 + 내 이메일 합치기
+      const allEmails = [myEmail, ...friendIds];
 
       const payload = {
         country: selectedCountry.country,
         countryCode,
         city: cityString,
         categoryDTOList,
-        // nights: Number(days.nights),   //  테스트용이라 주석 처리
-        // days: Number(days.days),       //  테스트용이라 주석 처리
-        duration: Number(days.days),      //  days → duration으로 임시 변환
+        duration: Number(days.days),
         tripStartDate,
         tripEndDate,
         totalBudget,
         startDate,
-        targetDate,  // 여행 7일 전
-        tripMemberEmail: friendIds, //  Step4에서 입력받은 친구 이메일 리스트
+        targetDate, // 여행 7일 전
+        tripMemberEmail: allEmails, // 내 이메일 + 친구 이메일
       };
-
 
       console.log("최종 POST 데이터:", payload);
 
@@ -162,6 +203,7 @@ export default function PlanCompelete() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error("여행 저장 실패");
@@ -173,6 +215,7 @@ export default function PlanCompelete() {
       alert("저장 중 오류가 발생했습니다.");
     }
   };
+
 
 
   return (
