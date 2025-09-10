@@ -5,6 +5,8 @@ import { EndBtn } from "@/pages/StartPlan/PlanStyle";
 
 import { Plane, Home, Utensils } from "lucide-react";
 
+const ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
+
 export default function PlanCompelete() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -18,12 +20,47 @@ export default function PlanCompelete() {
   const countryCode = selectedCountry.countryCode;
 
   const period = `${days.year}.${days.month}.${days.rangeStart} - ${days.year}.${days.month}.${days.rangeEnd}`;
-  const thumbnailUrl =
-    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80";
+  const [thumbnailUrl, setThumbnailUrl] = useState(
+    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80"
+  );
 
   const [progress, setProgress] = useState(0);
   const [items, setItems] = useState<any[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetchThumbnail = async () => {
+      try {
+        // 검색 키워드 구성: 도시(있으면) + 지역들 + 나라
+        const queryParts = [];
+        if (otherCity) queryParts.push(otherCity);
+        if (selectedRegions && selectedRegions.length > 0) {
+          queryParts.push(selectedRegions.join(" "));
+        }
+        queryParts.push(selectedCountry.country);
+
+        const query = queryParts.join(" ");
+
+        const res = await fetch(
+          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
+            query + "landmark"
+          )}&client_id=${ACCESS_KEY}&per_page=1`
+        );
+
+        if (!res.ok) throw new Error("썸네일 불러오기 실패");
+        const data = await res.json();
+
+        if (data.results.length > 0) {
+          setThumbnailUrl(data.results[0].urls.small);
+        }
+      } catch (err) {
+        console.error("썸네일 로드 에러:", err);
+      }
+    };
+
+    fetchThumbnail();
+  }, [selectedCountry, selectedRegions, otherCity]);
+
 
   // 비용 조회
   useEffect(() => {
