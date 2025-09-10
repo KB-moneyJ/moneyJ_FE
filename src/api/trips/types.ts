@@ -54,3 +54,19 @@ export type TripDetailModel = {
   cautions: string[];
   categories?: { name: string; amount: number }[];
 };
+
+export type TripBalanceApi = {
+  userId: number;
+  nickname: string;
+  profileImage?: string;
+  balance: number;
+  progress: number;
+};
+
+export type TripBalanceModel = {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  balance: number;
+  percent: number;
+};
