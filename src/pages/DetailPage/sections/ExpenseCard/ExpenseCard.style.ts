@@ -36,42 +36,92 @@ export const EditBtn = styled.button`
 `;
 
 export const ItemList = styled.div`
-  margin-top: 1rem;
-  display: grid;
-  gap: 0.6rem;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 15px;
+    justify-content: space-between;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 8px;
+
+    &::-webkit-scrollbar {
+        width: 5px; /* 스크롤바 두께 */
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent; /* 트랙 배경 */
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.49);
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #ff7bfa;
+    }
+
 `;
 
-export const Item = styled.button<{ $covered?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-card);
-  border: 2px solid
-    ${({ $covered }) => ($covered ? 'var(--color-text-highlight)' : 'rgba(255,255,255,0.4)')};
-  background: transparent;
-  color: white;
-  cursor: default; /* 자동 계산이니 포인터는 유지하지 않음 */
-  font-size: 0.95rem;
+export const Item = styled.div<{ $covered?: boolean; $purchased?: boolean }>`
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 45px;
+    justify-content: space-between;
+    border-radius: var(--radius-card);
+    border: 0.4px solid
+    ${({ $covered, $purchased }) =>
+      $purchased
+        ? "#9f9f9f" /* 짙은 보라 */
+        : $covered
+          ? "var(--color-text-highlight)"
+          : "white"};
+    color: ${({ $purchased }) => ($purchased ? "#9f9f9f" : "white")};
+    cursor: default;
+    font-size: 15px;
+    transition: all 0.2s ease;
 
-  &:hover {
-    border-color: ${({ $covered }) =>
-      $covered ? 'var(--color-text-highlight)' : 'rgba(255,255,255,0.4)'};
-    background: ${({ $covered }) => ($covered ? 'rgba(61, 220, 90, 0.08)' : 'transparent')};
-  }
+    &:hover {
+        border-color: ${({ $purchased, $covered }) =>
+          $purchased
+            ? "#9f9f9f"
+            : $covered
+              ? "var(--color-text-highlight)"
+              : "rgba(255,255,255,0.4)"};
+        background: ${({ $covered, $purchased }) =>
+          $purchased
+            ? "rgba(75,0,130,0.1)" /* 보라색 반투명 */
+            : $covered
+              ? "rgba(61, 220, 90, 0.08)"
+              : "transparent"};
+    }
 `;
 
-export const Label = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+
+export const CheckMark = styled.div<{ $visible?: boolean }>`
+    display: ${({ $visible }) => ($visible ? "flex" : "none")};
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-left: 5px;
+    border-radius: 50%;
+    background-color: transparent;;
+    color: #00D000FF;
+
+    opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+    transform: ${({ $visible }) => ($visible ? "scale(1)" : "scale(0)")};
+    transition:
+            opacity 0.3s ease ${({ $visible }) => ($visible ? "0.4s" : "0s")},
+            transform 0.3s ease ${({ $visible }) => ($visible ? "0.4s" : "0s")};
 `;
 
-export const Price = styled.span`
-  font-weight: 500;
-`;
-
-export const CheckMark = styled.div`
-  color: #00d000;
-  font-size: 1.5rem;
-`;
+export const ItemContainer = styled.div`
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+`

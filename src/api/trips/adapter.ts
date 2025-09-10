@@ -1,10 +1,27 @@
-// src/api/trips/adapter.ts
-import type { TripPlanApi, TripCardModel, TripPlanDetailApi, TripDetailModel } from './types';
+import axios from '@/api/core/axiosInstance';
+import type {
+  TripPlanApi,
+  TripCardModel,
+  TripPlanDetailApi,
+  TripDetailModel,
+  TripBalanceApi,
+  TripBalanceModel,
+} from './types';
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const fmtDate = (d?: string | null) => (d ? d.slice(0, 10).replaceAll('-', '.') : '');
 
-// --- 리스트용 기존 어댑터(그대로 유지) ---
+function absolutize(url?: string): string | undefined {
+  if (!url) return undefined;
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = (axios as any)?.defaults?.baseURL ?? '';
+  try {
+    return base ? new URL(url, base).toString() : url;
+  } catch {
+    return url;
+  }
+}
+
 export function toTripCardModel(p: TripPlanApi): TripCardModel {
   const progress =
     p.totalBudget > 0 ? Math.round(clamp01(p.currentSavings / p.totalBudget) * 100) : 0;
@@ -23,7 +40,6 @@ export function toTripCardModel(p: TripPlanApi): TripCardModel {
   };
 }
 
-// --- 상세용 새 어댑터 ---
 export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
   const total = typeof p.totalBudget === 'number' ? p.totalBudget : 0;
   const saved = typeof p.currentSavings === 'number' ? p.currentSavings : 0;
@@ -34,7 +50,7 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
       id: String(m.userId),
       name: m.nickname || m.email,
       percent: progress,
-      avatarUrl: m.image_url,
+      avatarUrl: absolutize(m.image_url),
     })) ?? [];
 
   const checklist = p.tripTip ?? [];
@@ -55,5 +71,15 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
     checklist,
     cautions,
     categories: p.categoryDTOList?.map((c) => ({ name: c.categoryName, amount: c.amount })),
+  };
+}
+
+export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
+  return {
+    id: String(api.userId),
+    name: api.nickname,
+    avatarUrl: absolutize(api.profileImage),
+    balance: api.balance,
+    percent: Math.round(api.progress * 10) / 10,
   };
 }
