@@ -168,7 +168,12 @@ export default function DetailPage() {
         />
       )}
       <BeforeYouGoCard destination={data.destination} checklist={checklist} cautions={cautions} />
-      <FriendInviteModal isOpen={openInvite} onClose={() => setOpenInvite(false)} />
+      {/* 모달들 */}
+      <FriendInviteModal
+        isOpen={openInvite}
+        onClose={() => setOpenInvite(false)}
+        planId={tripId ?? ''}
+      />
       <BankConnectModal
         isOpen={openBank}
         onClose={() => setOpenBank(false)}

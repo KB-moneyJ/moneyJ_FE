@@ -9,7 +9,6 @@ export default function ProtectedRoute({ children }: { children: JSX.Element }) 
     const checkAuth = async () => {
       try {
         const res = await isValid();
-        console.log(res.data);
         if (!res.data.valid) {
           navigate('/login');
         }
