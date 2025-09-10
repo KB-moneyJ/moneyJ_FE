@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import Card from '@/components/common/Card/Card';
+import { Crown as CrownSvg } from 'lucide-react';
 import {
   Header as BaseHeader,
   DestinationBox,
@@ -80,11 +81,71 @@ export const Divider = styled.hr`
   );
 `;
 
+export const PodiumStage = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
 export const Podium = styled.img`
-  width: 160px;
+  width: 180px;
   display: block;
-  margin: 3rem auto 2rem;
+  margin: 0;
   opacity: 0.95;
+`;
+
+export const PodiumWrap = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 5rem 0 1.5rem;
+`;
+
+export const TopAvatar = styled.div<{ $pos: 'first' | 'second' | 'third' }>`
+  position: absolute;
+  z-index: 2;
+
+  bottom: ${({ $pos }) => ($pos === 'first' ? '87%' : $pos === 'second' ? '58%' : '50%')};
+  left: ${({ $pos }) => ($pos === 'first' ? '50%' : $pos === 'second' ? '15%' : '85.5%')};
+  transform: translate(-50%, 0%);
+
+  width: ${({ $pos }) => ($pos === 'first' ? '50px' : '40px')};
+  height: ${({ $pos }) => ($pos === 'first' ? '50px' : '40px')};
+  border-radius: 50%;
+  overflow: visible;
+  border: 2px solid ${({ $pos }) => ($pos === 'first' ? '#edd718ff' : 'rgba(255, 255, 255, 0.9)')};
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+
+  & > svg:not(.crown) {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    color: #cfcfcf;
+  }
+`;
+
+export const CrownIcon = styled(CrownSvg).attrs({ className: 'crown' })`
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 27px;
+  height: 25px;
+
+  stroke: #edd718ff;
+  fill: none;
+  pointer-events: none;
+`;
+
+export const AvatarImg = styled.img`
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  background: #2b2b2b;
 `;
 
 export const RankList = styled.ul`
@@ -110,16 +171,21 @@ export const RankNo = styled.span`
 `;
 
 export const RankUser = styled.span`
+  --rank-avatar-size: 2rem;
+  --rank-gap: 0.6rem;
+
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--rank-gap);
+  font-weight: 600;
+  letter-spacing: 0.2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
   & > svg {
-    width: 1.125rem;
-    height: 1.125rem;
+    width: var(--rank-avatar-size);
+    height: var(--rank-avatar-size);
     color: #bdbdbd;
     flex-shrink: 0;
   }
@@ -144,4 +210,14 @@ export const TipText = styled.p`
   margin: 0;
   line-height: 1.45;
   opacity: 0.95;
+`;
+
+export const RankAvatarImg = styled.img`
+  width: var(--rank-avatar-size);
+  height: var(--rank-avatar-size);
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  background: #2b2b2b;
 `;

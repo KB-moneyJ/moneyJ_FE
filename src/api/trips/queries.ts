@@ -1,13 +1,14 @@
-// src/api/trips/queries.ts
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
-import { fetchTripPlans, fetchTripPlanDetail } from './index';
+import { fetchTripPlans, fetchTripPlanDetail, fetchTripPlanBalances } from './index';
 import { toTripCardModel, toTripDetailModel } from './adapter';
-import type { TripCardModel, TripDetailModel } from './types';
+import { toBalanceModel } from './adapter';
+import type { TripCardModel, TripDetailModel, TripBalanceModel } from './types';
 
 export const TRIP_KEYS = {
   all: ['tripPlans'] as const,
   detail: (id: number | string) => ['tripPlan', id] as const,
+  balances: (id: number | string) => ['tripPlan', id, 'balances'] as const,
 };
 
 export function useTripPlans() {
@@ -32,7 +33,6 @@ export function useTripPlanDetail(id?: number | string) {
         const data = await fetchTripPlanDetail(id!);
         return toTripDetailModel(data);
       } catch (e) {
-        // 404 또는 백엔드가 500으로 던지지만 메시지가 "저축 플랜이 존재하지 않습니다!"인 경우
         if (axios.isAxiosError(e)) {
           const status = e.response?.status;
           const msg = e.response?.data?.message as string | undefined;
@@ -46,8 +46,22 @@ export function useTripPlanDetail(id?: number | string) {
         throw e;
       }
     },
-    retry: false, // 존재하지 않으면 재시도 불필요
+    retry: false,
     staleTime: 60_000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+  });
+}
+
+export function useTripPlanBalances(id?: number | string) {
+  return useQuery({
+    queryKey: id ? TRIP_KEYS.balances(id) : ['tripPlan', 'empty', 'balances'],
+    enabled: !!id,
+    queryFn: async (): Promise<TripBalanceModel[]> => {
+      const data = await fetchTripPlanBalances(id!);
+      return data.map(toBalanceModel).sort((a, b) => b.percent - a.percent);
+    },
+    staleTime: 30_000,
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
   });

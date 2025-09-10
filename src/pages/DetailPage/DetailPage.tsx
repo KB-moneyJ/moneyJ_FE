@@ -11,13 +11,16 @@ import FriendInviteModal from '@/components/modals/FriendInviteModal';
 import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
-import { useTripPlanDetail } from '@/api/trips/queries';
+import { useTripPlanDetail, useTripPlanBalances } from '@/api/trips/queries';
+import { useMe } from '@/api/users/queries';
 
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
 
   const { data, isLoading, isError, error } = useTripPlanDetail(tripId);
+  const { data: balances = [] } = useTripPlanBalances(tripId);
+  const { data: me } = useMe();
 
   const [openMenu, setOpenMenu] = useState(false);
   const [openInvite, setOpenInvite] = useState(false);
@@ -26,10 +29,34 @@ export default function DetailPage() {
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
 
-  // 진행률은 서버 값 기반으로
   const progress = data?.progressPercent ?? 0;
 
-  // Overview/BeforeYouGoCard에 들어갈 값 메모
+  const podiumTop3 = useMemo(() => {
+    if (balances.length) {
+      return balances.slice(0, 3).map((b) => ({
+        id: b.id,
+        name: b.name,
+        percent: b.percent,
+        avatarUrl: b.avatarUrl,
+      }));
+    }
+    if (data?.members?.length) {
+      const sorted = [...data.members].sort((a, b) => b.percent - a.percent);
+      return sorted.slice(0, 3);
+    }
+    if (me) {
+      return [
+        {
+          id: String(me.id ?? 'me'),
+          name: me.nickname ?? me.email ?? 'Me',
+          percent: progress,
+          avatarUrl: me.profileImage,
+        },
+      ];
+    }
+    return [];
+  }, [balances, data?.members, me, progress]);
+
   const overview = useMemo(() => {
     if (!data) return null;
     return {
@@ -115,8 +142,6 @@ export default function DetailPage() {
           )}
         </div>
       </Container>
-
-      {/* 진행 상황 + 계좌 연동 */}
       <ProgressCard
         progress={progress}
         tip={data.overviewTip ?? '오늘도 한 걸음! 목표가 가까워지고 있어요.'}
@@ -127,11 +152,8 @@ export default function DetailPage() {
         }}
         onClickLink={() => setOpenBank(true)}
       />
-
       {/* 예상 경비(저축률만 사용 중) */}
       <ExpenseCard savedPercent={progress} tripId={Number(tripId)} />
-
-      {/* 개요 카드 */}
       {overview && (
         <TripOverviewCard
           destination={overview.destination}
@@ -142,13 +164,10 @@ export default function DetailPage() {
           members={overview.members}
           podiumImageUrl={podiumUrl}
           tip={overview.tip}
+          podiumTop3={podiumTop3}
         />
       )}
-
-      {/* 체크리스트/주의사항 (백 응답에 없으면 빈 배열) */}
       <BeforeYouGoCard destination={data.destination} checklist={checklist} cautions={cautions} />
-
-      {/* 모달들 */}
       <FriendInviteModal isOpen={openInvite} onClose={() => setOpenInvite(false)} />
       <BankConnectModal
         isOpen={openBank}
