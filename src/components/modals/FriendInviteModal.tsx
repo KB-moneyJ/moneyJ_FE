@@ -12,15 +12,16 @@ import {
 } from './FriendInviteModal.style';
 
 import { InputWrapper } from '@/pages/StartPlan/steps/StepsStyle';
+import { inviteTripMembers } from '@/api/trips/invite';
 
 interface FriendInviteModalProps {
   isOpen: boolean;
   onClose: () => void;
+  planId: string;
 }
 
-export default function FriendInviteModal({ isOpen, onClose }: FriendInviteModalProps) {
+export default function FriendInviteModal({ isOpen, onClose, planId }: FriendInviteModalProps) {
   const [inputs, setInputs] = useState<string[]>([]);
-
   useEffect(() => {
     if (isOpen) window.scrollTo({ top: 0, behavior: 'auto' });
   }, [isOpen]);
@@ -34,10 +35,19 @@ export default function FriendInviteModal({ isOpen, onClose }: FriendInviteModal
     setInputs(copy);
   };
 
+  const invite = () => {
+    inviteTripMembers(planId, inputs);
+  };
+
+  const handleClose = () => {
+    setInputs([]);
+    onClose();
+  };
+
   return (
-    <Overlay onClick={onClose}>
+    <Overlay onClick={handleClose}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
-        <CloseButton onClick={onClose} />
+        <CloseButton onClick={handleClose} />
         <SubTitle>
           동행자도 Money J를 쓰고 있나요?
           <br />
@@ -60,7 +70,7 @@ export default function FriendInviteModal({ isOpen, onClose }: FriendInviteModal
           <AddButton onClick={handleAddInput}>+</AddButton>
         </InputContainer>
 
-        <ConfirmButton onClick={onClose}>확인</ConfirmButton>
+        <ConfirmButton onClick={invite}>확인</ConfirmButton>
       </ModalContainer>
     </Overlay>
   );

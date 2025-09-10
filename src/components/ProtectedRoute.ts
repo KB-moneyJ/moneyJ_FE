@@ -1,17 +1,24 @@
 import { JSX, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isValid } from '@/api/auth/auth';
 
 export default function ProtectedRoute({ children }: { children: JSX.Element }) {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    if (!token) {
-      alert('로그인이 필요합니다.');
-      navigate('/login', { replace: true });
-    }
-  }, [token, navigate]);
+    const checkAuth = async () => {
+      try {
+        const res = await isValid();
+        if (!res.data.valid) {
+          navigate('/login');
+        }
+      } catch (error) {
+        navigate('/login');
+      }
+    };
 
-  if (!token) return null;
+    checkAuth();
+  }, [navigate]);
+
   return children;
 }

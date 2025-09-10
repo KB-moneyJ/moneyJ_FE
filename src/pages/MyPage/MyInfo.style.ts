@@ -29,6 +29,8 @@ export const PowerBtn = styled.button`
 `;
 
 export const ProfileWrap = styled.section`
+  --avatar-size: clamp(10.5rem, 6vw, 3rem);
+
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -38,45 +40,40 @@ export const ProfileWrap = styled.section`
 
 export const AvatarCircle = styled.div`
   position: relative;
-  width: 100px;
-  height: 100px;
+
+  /* 고정값 → 변수 사용 */
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.35);
   display: grid;
   place-items: center;
   backdrop-filter: blur(6px);
+
+  /* 내부 하이라이트도 크기에 맞춰 비율로 */
   background: radial-gradient(
-    120px 120px at 30% 20%,
+    calc(var(--avatar-size) * 1.2) calc(var(--avatar-size) * 1.2) at 30% 20%,
     rgba(255, 255, 255, 0.12),
     rgba(255, 255, 255, 0.04) 60%,
     transparent 100%
   );
 `;
 
-export const AvatarIcon = styled.div`
-  font-size: 40px;
-  user-select: none;
-`;
-
-export const EditBadge = styled.div`
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 22px;
-  height: 22px;
+export const AvatarIcon = styled.img`
+  width: var(--avatar-size);
+  height: var(--avatar-size);
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #9b4dff;
-  color: #fff;
-  border: 2px solid #2c1146;
+  object-fit: cover;
+  display: block;
+  flex: 0 0 var(--avatar-size);
+  background: #2b2b2b;
 `;
 
 export const Username = styled.div`
-  margin-top: 5px;
-  font-size: 13px;
-  letter-spacing: 1.8px;
-  opacity: 0.9;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: white;
 `;
 
 export const Form = styled.form`

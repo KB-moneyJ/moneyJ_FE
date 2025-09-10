@@ -18,6 +18,8 @@ import {
   ProgressRightLabel,
   Divider,
   Podium,
+  PodiumWrap,
+  TopAvatar,
   RankList,
   RankItem,
   RankNo,
@@ -26,10 +28,14 @@ import {
   Tip,
   TipLabel,
   TipText,
+  AvatarImg,
+  RankAvatarImg,
+  PodiumStage,
+  CrownIcon,
 } from './TripOverviewCard.style';
 import { CircleUserRound } from 'lucide-react';
 
-type Member = { id: string; name: string; percent: number };
+type Member = { id: string; name: string; percent: number; avatarUrl?: string };
 
 type Props = {
   destination: string;
@@ -40,6 +46,7 @@ type Props = {
   members: Member[];
   tip?: string;
   podiumImageUrl?: string;
+  podiumTop3?: Member[];
 };
 
 const TILE_ROWS = 2;
@@ -54,6 +61,38 @@ function shuffle<T>(array: T[]): T[] {
   return copy;
 }
 
+function RankAvatar({ url, alt }: { url?: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  return url && !failed ? (
+    <RankAvatarImg src={url} alt={alt} onError={() => setFailed(true)} />
+  ) : (
+    <CircleUserRound />
+  );
+}
+
+function PodiumAvatar({
+  url,
+  alt,
+  pos,
+}: {
+  url?: string;
+  alt: string;
+  pos: 'first' | 'second' | 'third';
+}) {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <TopAvatar $pos={pos} aria-label={alt}>
+      {pos === 'first' && <CrownIcon aria-hidden="true" />}
+      {url && !failed ? (
+        <AvatarImg src={url} alt={alt} onError={() => setFailed(true)} />
+      ) : (
+        <CircleUserRound />
+      )}
+    </TopAvatar>
+  );
+}
+
 export default function TripOverviewCard({
   destination,
   countryCode,
@@ -63,6 +102,7 @@ export default function TripOverviewCard({
   members,
   tip,
   podiumImageUrl,
+  podiumTop3,
 }: Props) {
   const totalTiles = TILE_ROWS * TILE_COLS;
   const orderRef = useRef<number[]>(shuffle([...Array(totalTiles).keys()]));
@@ -132,21 +172,49 @@ export default function TripOverviewCard({
 
       <Divider />
 
-      {podiumImageUrl && <Podium src={podiumImageUrl} alt="랭킹 단상" />}
+      {podiumImageUrl && (
+        <PodiumWrap>
+          <PodiumStage>
+            {podiumTop3?.[1] && (
+              <PodiumAvatar
+                pos="second"
+                url={podiumTop3[1].avatarUrl}
+                alt={`${podiumTop3[1].name} 프로필`}
+              />
+            )}
+            {podiumTop3?.[0] && (
+              <PodiumAvatar
+                pos="first"
+                url={podiumTop3[0].avatarUrl}
+                alt={`${podiumTop3[0].name} 프로필`}
+              />
+            )}
+            {podiumTop3?.[2] && (
+              <PodiumAvatar
+                pos="third"
+                url={podiumTop3[2].avatarUrl}
+                alt={`${podiumTop3[2].name} 프로필`}
+              />
+            )}
+
+            {/* 단상 이미지 */}
+            <Podium src={podiumImageUrl} alt="랭킹 단상" />
+          </PodiumStage>
+        </PodiumWrap>
+      )}
 
       <RankList>
         {members.map((m, idx) => (
           <RankItem key={m.id}>
             <RankNo>{idx + 1}</RankNo>
             <RankUser>
-              <CircleUserRound />
+              <RankAvatar url={m.avatarUrl} alt={`${m.name} 프로필`} />
               {m.name}
             </RankUser>
             <RankPercent>{m.percent}%</RankPercent>
           </RankItem>
         ))}
       </RankList>
-
       <Divider />
       <Tip>
         <TipLabel>TIP</TipLabel>
