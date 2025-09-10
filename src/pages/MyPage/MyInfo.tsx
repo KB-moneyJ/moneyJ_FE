@@ -15,7 +15,7 @@ import { FiEdit2 } from 'react-icons/fi';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import ConfirmModal from '@/components/modals/ConfirmModal';
 import { useState } from 'react';
-import { logout } from '@/api/auth';
+import { logout } from '@/api/auth/auth';
 import { useNavigate } from 'react-router-dom';
 
 export default function Myinfo() {
@@ -26,6 +26,7 @@ export default function Myinfo() {
       const result = await logout();
       console.log('로그아웃 성공:', result);
       if (result.status === 'success') {
+        localStorage.removeItem('token');
         navigate('/login');
       } else {
         alert('로그아웃에 실패했습니다.');

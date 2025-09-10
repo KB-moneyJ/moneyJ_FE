@@ -10,6 +10,7 @@ import PlanCompelete from '@/pages/StartPlan/PlanCompelete';
 import Myinfo from '@/pages/MyPage/MyInfo';
 import Plan from '@/pages/PlanPage/Plan';
 import SpendingPage from '@/pages/AnalysisPage/SpendingPage';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 function App() {
   return (
@@ -22,26 +23,73 @@ function App() {
         <Route path="/intro" element={<Intro />} />
 
         {/* Home */}
-        <Route path="/home" element={<Home />} />
-        <Route path="/plan" element={<Plan />} />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/plan"
+          element={
+            <ProtectedRoute>
+              <Plan />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Plan (설문/시작 플로우) */}
-        <Route path="/startplan" element={<About />} />
-        <Route path="/plancompelete" element={<PlanCompelete />} />
+        <Route
+          path="/startplan"
+          element={
+            <ProtectedRoute>
+              <About />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/plancompelete"
+          element={
+            <ProtectedRoute>
+              <PlanCompelete />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Trip (상세) */}
-        <Route path="/trip/:tripId" element={<DetailPage />} />
+        <Route
+          path="/trip/:tripId"
+          element={
+            <ProtectedRoute>
+              <DetailPage />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/spending" element={<SpendingPage />} />
+        <Route
+          path="/spending"
+          element={
+            <ProtectedRoute>
+              <SpendingPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* TODO: 404 
         <Route path="*" element={<NotFound />} /> 
         */}
 
-        <Route path="/plancompelete" element={<PlanCompelete />} />
-
         {/* MyPage */}
-        <Route path="/mypage" element={<Myinfo />} />
+        <Route
+          path="/mypage"
+          element={
+            <ProtectedRoute>
+              <Myinfo />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
