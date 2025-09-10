@@ -2,7 +2,17 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TripCard from '@/pages/MainPage/sections/TripCard/TripCard';
 import CompletedTripCard from '@/pages/MainPage/sections/TripCard/CompletedTripCard';
-import { Page, Tabs, Track, ActiveBg, SegTab, CardWrap } from './Plan.style';
+import {
+  Page,
+  Tabs,
+  Track,
+  ActiveBg,
+  SegTab,
+  CardWrap,
+  EmptyArea,
+  EmptyText,
+  EmptyActionButton,
+} from './Plan.style';
 import UsersBadge from '@/pages/MainPage/sections/TripCard/UsersBadge';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import { useTripPlans } from '@/api/trips/queries';
@@ -39,22 +49,12 @@ export default function Plan() {
         )}
 
         {!isLoading && !isError && tab === 'ongoing' && ongoing.length === 0 && (
-          <div style={{ padding: '1rem', opacity: 0.85 }}>
-            진행중인 플랜이 없어요. 새 플랜을 만들어 보세요!
-            <div style={{ marginTop: '0.5rem' }}>
-              <button
-                onClick={() => navigate('/startplan')}
-                style={{
-                  padding: '0.6rem 0.9rem',
-                  borderRadius: 12,
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                여행 계획 만들기
-              </button>
-            </div>
-          </div>
+          <EmptyArea>
+            <EmptyText>진행중인 플랜이 없어요. 새 플랜을 만들어 보세요!</EmptyText>
+            <EmptyActionButton type="button" onClick={() => navigate('/startplan')}>
+              여행 계획 만들기
+            </EmptyActionButton>
+          </EmptyArea>
         )}
 
         {!isLoading && !isError && tab === 'done' && done.length === 0 && (

@@ -72,3 +72,52 @@ export const CardWrap = styled.div`
   > *:first-child > *:first-child {
    margin: 0 !important;+  }
 `;
+
+export const EmptyArea = styled.div`
+  padding: 1rem;
+  opacity: 0.85;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+`;
+
+export const EmptyText = styled.p`
+  margin: 0;
+  line-height: 3;
+`;
+
+export const EmptyActionButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.75rem 1rem;
+  min-height: 2.75rem;
+  width: 80%;
+  max-width: 420px;
+
+  background-color: var(--color-button-primary);
+  color: white;
+
+  border: 0;
+  border-radius: var(--radius-button);
+  cursor: pointer;
+
+  font-weight: 600;
+
+  transition:
+    transform 0.02s ease,
+    filter 0.15s ease;
+  &:hover {
+    filter: brightness(1.05);
+  }
+  &:active {
+    transform: translateY(1px);
+  }
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.7);
+    outline-offset: 2px;
+  }
+`;
