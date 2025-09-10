@@ -2,7 +2,7 @@ import logo from '@/assets/images/moneyJ-Logo.png';
 import kakaologo from '@/assets/images/kakao-Logo.png';
 import styles from './Login.module.css';
 
-import { loginWithKakao } from '@/api/auth';
+import { loginWithKakao } from '@/api/auth/auth';
 
 const goToKakaoLogin = async () => {
   loginWithKakao();
