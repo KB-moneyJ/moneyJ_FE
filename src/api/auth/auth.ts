@@ -3,6 +3,7 @@ import axios from 'axios';
 
 export function loginWithKakao() {
   window.location.href = `${BASE_URL}/oauth2/authorization/kakao`;
+  localStorage.setItem('token', 'dummy-token-1234');
 }
 
 export async function logout() {
