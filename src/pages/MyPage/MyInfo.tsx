@@ -26,6 +26,7 @@ export default function Myinfo() {
       const result = await logout();
       console.log('로그아웃 성공:', result);
       if (result.status === 'success') {
+        localStorage.removeItem('token');
         navigate('/login');
       } else {
         alert('로그아웃에 실패했습니다.');
