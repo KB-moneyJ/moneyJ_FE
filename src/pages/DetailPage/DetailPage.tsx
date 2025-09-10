@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 
 import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem } from './DetailPage.style';
 import ProgressCard from './sections/ProgressCard/ProgressCard';
@@ -10,10 +11,14 @@ import FriendInviteModal from '@/components/modals/FriendInviteModal';
 import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
+import { useTripPlanDetail } from '@/api/trips/queries';
 
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
+
+  const { data, isLoading, isError, error } = useTripPlanDetail(tripId);
+
   const [openMenu, setOpenMenu] = useState(false);
   const [openInvite, setOpenInvite] = useState(false);
   const [openBank, setOpenBank] = useState(false);
@@ -21,42 +26,29 @@ export default function DetailPage() {
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
 
-  const [progress, setProgress] = useState(50);
+  // 진행률은 서버 값 기반으로
+  const progress = data?.progressPercent ?? 0;
 
-  const detail = {
-    destination: 'Tokyo, Japan',
-    countryCode: 'JP',
-    period: '2025.08.24 - 2025.08.29 (2명)',
-    thumbnailUrl:
-      'https://images.unsplash.com/photo-1471623432079-b009d30b6729?q=80&w=1200&auto=format&fit=crop',
-    members: [
-      { id: 'u1', name: 'USERNAME1', percent: 92 },
-      { id: 'u2', name: 'USERNAME2', percent: 72 },
-      { id: 'u3', name: 'USERNAME3', percent: 47 },
-      { id: 'u4', name: 'USERNAME4', percent: 37 },
-    ],
-    tip: '와우, 경비 반은 모았어요! 숙박비도 채워야 노숙투어 안 합니다 😎',
-  };
+  // Overview/BeforeYouGoCard에 들어갈 값 메모
+  const overview = useMemo(() => {
+    if (!data) return null;
+    return {
+      destination: data.destination,
+      countryCode: data.countryCode,
+      period: data.period + (data.members.length ? ` (${data.members.length}명)` : ''),
+      thumbnailUrl: data.thumbnailUrl,
+      progressPercent: data.progressPercent,
+      members: data.members,
+      tip: data.overviewTip,
+    };
+  }, [data]);
 
-  const checklist = [
-    '여권, 항공권',
-    '엔화 현금',
-    '교통카드(Suica/PASMO)',
-    '포켓와이파이/eSIM',
-    '편한 신발, 보조배터리',
-  ];
-
-  const cautions = [
-    '지하철 안 통화 금지',
-    '소규모 가게는 현금만 가능',
-    '흡연은 지정 구역에서만',
-    '쓰레기통 적어 직접 챙겨야 함',
-    '팁 문화 없음',
-  ];
+  const checklist = data?.checklist ?? [];
+  const cautions = data?.cautions ?? [];
 
   useEffect(() => {
-    // TODO: 초기 연동 상태를 API로 불러와서 setIsAccountLinked / setAccountLabel 설정
-    // fetch(`/api/trips/${tripId}`).then(...);
+    // TODO: 초기 연동 상태를 API로 불러와서 setIsAccountLinked / setAccountLabel 설정 (있다면)
+    // e.g., fetch(`/api/bank-link/${tripId}`)
   }, [tripId]);
 
   const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
@@ -67,6 +59,38 @@ export default function DetailPage() {
     setAccountLabel(`${bankName} ${maskAccount(acct)}`);
     setOpenBank(false);
   };
+
+  const planNotFound =
+    axios.isAxiosError(error) &&
+    ((error as any).code === 'PLAN_NOT_FOUND' ||
+      error.response?.status === 404 ||
+      (error.response?.status === 500 &&
+        typeof error.response?.data?.message === 'string' &&
+        error.response?.data?.message.includes('저축 플랜이 존재하지 않습니다')));
+
+  if (isLoading) {
+    return (
+      <div>
+        <Container>
+          <LeftIcon onClick={() => navigate(-1)} />
+        </Container>
+        <div style={{ padding: '1rem', opacity: 0.8 }}>여행 플랜 불러오는 중…</div>
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div>
+        <Container>
+          <LeftIcon onClick={() => navigate(-1)} />
+        </Container>
+        <div style={{ padding: '1rem', color: '#ff8a8a' }}>
+          여행 플랜을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -91,9 +115,11 @@ export default function DetailPage() {
           )}
         </div>
       </Container>
+
+      {/* 진행 상황 + 계좌 연동 */}
       <ProgressCard
         progress={progress}
-        tip="오늘 커피 한 잔을 줄이면, 단 7일 안에 목표를 이룰 수 있습니다."
+        tip={data.overviewTip ?? '오늘도 한 걸음! 목표가 가까워지고 있어요.'}
         linked={isAccountLinked}
         accountLabel={accountLabel}
         onClickSave={() => {
@@ -102,20 +128,27 @@ export default function DetailPage() {
         onClickLink={() => setOpenBank(true)}
       />
 
+      {/* 예상 경비(저축률만 사용 중) */}
       <ExpenseCard savedPercent={progress} />
 
-      <TripOverviewCard
-        destination={detail.destination}
-        countryCode={detail.countryCode}
-        period={detail.period}
-        thumbnailUrl={detail.thumbnailUrl}
-        progressPercent={progress}
-        members={detail.members}
-        podiumImageUrl={podiumUrl}
-        tip={detail.tip}
-      />
+      {/* 개요 카드 */}
+      {overview && (
+        <TripOverviewCard
+          destination={overview.destination}
+          countryCode={overview.countryCode}
+          period={overview.period}
+          thumbnailUrl={overview.thumbnailUrl}
+          progressPercent={overview.progressPercent}
+          members={overview.members}
+          podiumImageUrl={podiumUrl}
+          tip={overview.tip}
+        />
+      )}
 
-      <BeforeYouGoCard destination={detail.destination} checklist={checklist} cautions={cautions} />
+      {/* 체크리스트/주의사항 (백 응답에 없으면 빈 배열) */}
+      <BeforeYouGoCard destination={data.destination} checklist={checklist} cautions={cautions} />
+
+      {/* 모달들 */}
       <FriendInviteModal isOpen={openInvite} onClose={() => setOpenInvite(false)} />
       <BankConnectModal
         isOpen={openBank}
