@@ -36,7 +36,7 @@ export const Period = styled.span`
 export const SectionTitle = styled.h4`
   margin: 0.9rem 0 0.6rem;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
 `;
 
 export const ImageFrame = styled(BaseImageFrame)`
