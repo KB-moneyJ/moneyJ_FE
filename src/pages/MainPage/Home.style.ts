@@ -10,15 +10,26 @@ export const Container = styled.div`
 `;
 
 export const Profile = styled.div`
+  --avatar-size: clamp(2.5rem, 6vw, 3rem);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.9rem;
 `;
 
 export const UserIcon = styled(CircleUserRound)`
-  width: 1.875rem;
-  height: 1.875rem;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
   color: #bdbdbd;
+`;
+
+export const AvatarImg = styled.img`
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  flex: 0 0 var(--avatar-size);
+  background: #2b2b2b;
 `;
 
 export const Nickname = styled.span`
