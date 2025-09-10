@@ -4,29 +4,31 @@ import {
   ProfileWrap,
   AvatarCircle,
   AvatarIcon,
-  EditBadge,
   Username,
   LogoutBtn,
   Item,
   Wrapper,
 } from './MyInfo.style';
 import { FiLogOut } from 'react-icons/fi';
-import { FiEdit2 } from 'react-icons/fi';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import ConfirmModal from '@/components/modals/ConfirmModal';
 import { useState } from 'react';
 import { logout } from '@/api/auth/auth';
 import { useNavigate } from 'react-router-dom';
+import { useMe } from '@/api/users/queries';
 
 export default function Myinfo() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { data: me, isLoading: meLoading, isError: meError } = useMe();
+  const handleImgError: React.ReactEventHandler<HTMLImageElement> = (e) => {
+    (e.currentTarget as HTMLImageElement).style.display = 'none';
+  };
   const goLogout = async () => {
     try {
       const result = await logout();
       console.log('로그아웃 성공:', result);
       if (result.status === 'success') {
-        localStorage.removeItem('token');
         navigate('/login');
       } else {
         alert('로그아웃에 실패했습니다.');
@@ -45,12 +47,13 @@ export default function Myinfo() {
 
         <ProfileWrap>
           <AvatarCircle>
-            <AvatarIcon>👤</AvatarIcon>
-            <EditBadge>
-              <FiEdit2 size={12} />
-            </EditBadge>
+            <AvatarIcon
+              src={me?.profileImage}
+              alt={me?.nickname || 'profile'}
+              onError={handleImgError}
+            />
           </AvatarCircle>
-          <Username>USERNAME</Username>
+          <Username>{me?.nickname ?? (meLoading ? '불러오는 중…' : 'Guest')}</Username>
         </ProfileWrap>
         <LogoutBtn type="button" onClick={() => setOpen(true)}>
           <Item>

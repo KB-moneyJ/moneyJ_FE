@@ -152,7 +152,8 @@ export default function DetailPage() {
         }}
         onClickLink={() => setOpenBank(true)}
       />
-      <ExpenseCard savedPercent={progress} />
+      {/* 예상 경비(저축률만 사용 중) */}
+      <ExpenseCard savedPercent={progress} tripId={Number(tripId)} />
       {overview && (
         <TripOverviewCard
           destination={overview.destination}
