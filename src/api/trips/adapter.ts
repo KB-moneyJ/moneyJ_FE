@@ -1,10 +1,8 @@
-// src/api/trips/adapter.ts
 import type { TripPlanApi, TripCardModel, TripPlanDetailApi, TripDetailModel } from './types';
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const fmtDate = (d?: string | null) => (d ? d.slice(0, 10).replaceAll('-', '.') : '');
 
-// --- 리스트용 기존 어댑터(그대로 유지) ---
 export function toTripCardModel(p: TripPlanApi): TripCardModel {
   const progress =
     p.totalBudget > 0 ? Math.round(clamp01(p.currentSavings / p.totalBudget) * 100) : 0;
@@ -23,7 +21,6 @@ export function toTripCardModel(p: TripPlanApi): TripCardModel {
   };
 }
 
-// --- 상세용 새 어댑터 ---
 export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
   const total = typeof p.totalBudget === 'number' ? p.totalBudget : 0;
   const saved = typeof p.currentSavings === 'number' ? p.currentSavings : 0;

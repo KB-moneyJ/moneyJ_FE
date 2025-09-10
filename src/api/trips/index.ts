@@ -1,4 +1,3 @@
-// src/api/trips/index.ts
 import axios from '@/api/core/axiosInstance';
 import type { TripPlanApi, TripPlanDetailApi } from './types';
 
