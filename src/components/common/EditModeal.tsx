@@ -70,10 +70,6 @@ export default function EditModal({ items, coveredSet, onSave, onClose }: EditMo
     setLocalItems((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const handleTotalChange = (value: string) => {
-    const numericValue = Number(value.replace(/,/g, "")) || 0;
-    setTotal(numericValue);
-  };
 
   const handleSave = () => {
     onSave(localItems);
