@@ -8,18 +8,35 @@ import {
   Username,
   LogoutBtn,
   Item,
+  Wrapper,
 } from './MyInfo.style';
 import { FiLogOut } from 'react-icons/fi';
 import { FiEdit2 } from 'react-icons/fi';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import ConfirmModal from '@/components/modals/ConfirmModal';
 import { useState } from 'react';
+import { logout } from '@/api/auth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Myinfo() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const goLogout = async () => {
+    try {
+      const result = await logout();
+      console.log('로그아웃 성공:', result);
+      if (result.status === 'success') {
+        navigate('/login');
+      } else {
+        alert('로그아웃에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('로그아웃 중 오류 발생:', err);
+    }
+  };
 
   return (
-    <div>
+    <Wrapper>
       <Page>
         <Header>
           <div />
@@ -55,10 +72,10 @@ export default function Myinfo() {
         confirmText="로그아웃"
         onCancel={() => setOpen(false)}
         onConfirm={() => {
-          console.log('로그아웃');
+          goLogout();
           setOpen(false);
         }}
       />
-    </div>
+    </Wrapper>
   );
 }
