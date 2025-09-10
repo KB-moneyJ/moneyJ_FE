@@ -1,8 +1,14 @@
+// src/api/trips/index.ts
 import axios from '@/api/core/axiosInstance';
-import type { TripPlanApi } from './types';
+import type { TripPlanApi, TripPlanDetailApi } from './types';
 
 export async function fetchTripPlans(): Promise<TripPlanApi[]> {
   const { data } = await axios.get<TripPlanApi[]>('/trip-plans');
+  return data;
+}
+
+export async function fetchTripPlanDetail(planId: number | string): Promise<TripPlanDetailApi> {
+  const { data } = await axios.get<TripPlanDetailApi>(`/trip-plans/${planId}`);
   return data;
 }
 
