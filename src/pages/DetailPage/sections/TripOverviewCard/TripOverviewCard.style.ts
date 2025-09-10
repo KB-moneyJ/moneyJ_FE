@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import Card from '@/components/common/Card/Card';
+import { Crown as CrownSvg } from 'lucide-react';
 import {
   Header as BaseHeader,
   DestinationBox,
@@ -96,32 +97,46 @@ export const PodiumWrap = styled.div`
   position: relative;
   display: flex;
   justify-content: center;
-  margin: 4.2rem 0 1.5rem;
+  margin: 5rem 0 1.5rem;
 `;
 
 export const TopAvatar = styled.div<{ $pos: 'first' | 'second' | 'third' }>`
   position: absolute;
   z-index: 2;
 
-  bottom: ${({ $pos }) => ($pos === 'first' ? '90%' : '56%')};
-  left: ${({ $pos }) => ($pos === 'first' ? '50%' : $pos === 'second' ? '26%' : '74%')};
+  bottom: ${({ $pos }) => ($pos === 'first' ? '87%' : $pos === 'second' ? '58%' : '50%')};
+  left: ${({ $pos }) => ($pos === 'first' ? '50%' : $pos === 'second' ? '15%' : '85.5%')};
   transform: translate(-50%, 0%);
 
-  width: ${({ $pos }) => ($pos === 'first' ? '50px' : '42px')};
-  height: ${({ $pos }) => ($pos === 'first' ? '50px' : '42px')};
+  width: ${({ $pos }) => ($pos === 'first' ? '50px' : '40px')};
+  height: ${({ $pos }) => ($pos === 'first' ? '50px' : '40px')};
   border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, 0.9);
+  overflow: visible;
+  border: 2px solid ${({ $pos }) => ($pos === 'first' ? '#edd718ff' : 'rgba(255, 255, 255, 0.9)')};
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(3px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 
-  & > svg {
+  & > svg:not(.crown) {
     width: 100%;
     height: 100%;
     padding: 10px;
     color: #cfcfcf;
   }
+`;
+
+export const CrownIcon = styled(CrownSvg).attrs({ className: 'crown' })`
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 27px;
+  height: 25px;
+
+  stroke: #edd718ff;
+  fill: none;
+  pointer-events: none;
 `;
 
 export const AvatarImg = styled.img`

@@ -31,6 +31,7 @@ import {
   AvatarImg,
   RankAvatarImg,
   PodiumStage,
+  CrownIcon,
 } from './TripOverviewCard.style';
 import { CircleUserRound } from 'lucide-react';
 
@@ -82,6 +83,7 @@ function PodiumAvatar({
 
   return (
     <TopAvatar $pos={pos} aria-label={alt}>
+      {pos === 'first' && <CrownIcon aria-hidden="true" />}
       {url && !failed ? (
         <AvatarImg src={url} alt={alt} onError={() => setFailed(true)} />
       ) : (
