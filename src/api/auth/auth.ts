@@ -3,7 +3,6 @@ import axios from 'axios';
 
 export function loginWithKakao() {
   window.location.href = `${BASE_URL}/oauth2/authorization/kakao`;
-  localStorage.setItem('token', 'dummy-token-1234');
 }
 
 export async function logout() {
@@ -15,9 +14,21 @@ export async function logout() {
         withCredentials: true,
       },
     );
+
     return res.data;
   } catch (err) {
     console.error('로그아웃 실패:', err);
+    throw err;
+  }
+}
+
+export async function isValid() {
+  try {
+    const res = await axios.get(`${BASE_URL}/auth/validate`, {
+      withCredentials: true,
+    });
+    return res;
+  } catch (err) {
     throw err;
   }
 }
