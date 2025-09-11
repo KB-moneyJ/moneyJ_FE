@@ -70,7 +70,8 @@ export const CardWrap = styled.div`
 
   > *:first-child,
   > *:first-child > *:first-child {
-   margin: 0 !important;+  }
+    margin: 0 !important;
+  }
 `;
 
 export const EmptyArea = styled.div`
