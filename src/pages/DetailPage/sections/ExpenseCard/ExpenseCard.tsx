@@ -182,21 +182,17 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
                     <button
                       onClick={() => handlePurchase(i.id)}
                       style={{
-                        padding: '5px 10px',
+                        padding: '4px 8px',
                         borderRadius: '20px',
                         border: '1px solid #ffeaa6',
                         background: '#fffea6',
                         alignItems: 'center',
                         width: '90px',
-                        justifyContent: 'center',
-                        gap: '5px',
+                        justifyContent: 'space-around',
                         cursor: 'pointer',
                         display: 'flex',
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
+                        fontSize: '0.8rem',
                         marginRight: '8px',
-                        color: '#7a5a00',
-                        lineHeight: 1.4,
                       }}
                     >
                       <PiAirplaneTiltFill />
