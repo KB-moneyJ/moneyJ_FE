@@ -119,7 +119,6 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-
         body: JSON.stringify(bodyData),
       });
 
@@ -150,8 +149,7 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(bodyData),
-      });
+
 
       // 요청 후 로컬 업데이트
       setItems(updatedItems);

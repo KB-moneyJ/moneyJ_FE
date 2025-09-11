@@ -4,6 +4,7 @@ import TripCard from './PlanCard/PlanCard';
 import { EndBtn } from '@/pages/StartPlan/PlanStyle';
 
 import { Plane, Home, Utensils } from 'lucide-react';
+const BASE_URL = import.meta.env.VITE_API_URL as string;
 
 const ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
 
