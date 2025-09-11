@@ -12,6 +12,7 @@ import {
   CloseButton,
 } from './BankConnectModal.style';
 import { set } from '@vueuse/core';
+import { connectCard } from '@/api/spending/spending';
 interface CardConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,6 +36,7 @@ export default function CardConnectModal({ isOpen, onClose }: CardConnectModalPr
 
   const handleSubmit = () => {
     console.log({ cardCompany, bankId, password });
+    connectCard(cardCompany, bankId, password);
     setCardCompany('');
     setBankId('');
     setPassword('');
