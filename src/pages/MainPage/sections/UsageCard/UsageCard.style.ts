@@ -7,6 +7,17 @@ export const UsageCardContainer = styled(Card)`
   color: white;
 `;
 
+export const UsageCardContainerNoCard = styled(Card)`
+  margin: 1rem;
+  padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  gap: 1rem;
+`;
+
 export const Header = styled.div`
   display: grid;
   gap: 0.25rem;
