@@ -67,6 +67,7 @@ const Splash = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        fontFamily:'inter'
       }}
     >
       {showMoney && (
