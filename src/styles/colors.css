@@ -12,10 +12,12 @@
   /* 텍스트 강조 색상 */
   --color-text-highlight: #ff82ff;
 
-  --gradient-main: linear-gradient(
-    90deg,
-    var(--color-primary-0) 0%,
-    var(--color-primary-50) 54%,
-    var(--color-primary-100) 100%
-  );
+  /* 포인트 배경색 (로고/저축 버튼) */
+  --color-accent-light: #fce5ff;
+
+  /* 여행 진행도 바 */
+  --progress-gradient: linear-gradient(90deg, #ffe600 0%, #ff7a41 23.72%, #ff24e9 49.83%);
+
+  /* 모든 화면 배경 색상 */
+  --gradient-main: linear-gradient(10.6deg, #2a002c 14.09%, #3a0271 53.43%, #010340 87.16%);
 }

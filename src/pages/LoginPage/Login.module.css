@@ -1,0 +1,54 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  gap: 8%;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 25%;
+}
+
+.logo {
+  width: 100%;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  color: white;
+}
+
+.inlineText {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.colorText {
+  color: #ff82ff;
+}
+.kakaoLogo {
+  width: 1vw;
+  margin-right: 2vw;
+}
+.kakaoButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 250px;
+  height: 45px;
+  background-color: #ecb500;
+  border-radius: var(--radius-card);
+  text-align: center;
+  cursor: pointer;
+}
