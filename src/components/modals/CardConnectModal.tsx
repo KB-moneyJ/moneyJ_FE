@@ -11,8 +11,8 @@ import {
   ConfirmButton,
   CloseButton,
 } from './BankConnectModal.style';
-import { set } from '@vueuse/core';
 import { connectCard } from '@/api/spending/spending';
+
 interface CardConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,11 +35,19 @@ export default function CardConnectModal({ isOpen, onClose }: CardConnectModalPr
   if (!isOpen) return null;
 
   const handleSubmit = () => {
+    if (!cardCompany || !bankId.trim() || !password.trim()) {
+      alert('카드사, 아이디, 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
     console.log({ cardCompany, bankId, password });
     connectCard(cardCompany, bankId, password);
+
+    // 입력 초기화
     setCardCompany('');
     setBankId('');
     setPassword('');
+
     onClose();
   };
 
@@ -48,9 +56,14 @@ export default function CardConnectModal({ isOpen, onClose }: CardConnectModalPr
       <ModalContainer onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose} />
         <Title>어떤 카드와 연결할까요?</Title>
+
         <FieldWrapper>
           <Label htmlFor="card">카드사 선택</Label>
-          <Select id="card" value={cardCompany} onChange={(e) => setCardCompany(e.target.value)}>
+          <Select
+            id="card"
+            value={cardCompany}
+            onChange={(e) => setCardCompany(e.target.value)}
+          >
             <option value="">카드사 선택</option>
             {CARD_COMPANIES.map((c) => (
               <option key={c.code} value={c.code}>
