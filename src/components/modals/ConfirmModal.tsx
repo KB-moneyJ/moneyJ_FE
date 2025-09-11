@@ -7,9 +7,7 @@ type ConfirmModalProps = {
   open: boolean;
   title: string;
   description: React.ReactNode;
-  cancelText?: string;
   confirmText?: string;
-  onCancel: () => void;
   onConfirm: () => void;
 };
 
@@ -17,22 +15,20 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   open,
   title,
   description,
-  cancelText,
-  confirmText,
-  onCancel,
+  confirmText = '닫기',
   onConfirm,
 }) => {
-  const cancelBtnRef = useRef<HTMLButtonElement>(null);
+  const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    cancelBtnRef.current?.focus();
+    confirmBtnRef.current?.focus();
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
+      if (e.key === 'Escape') onConfirm();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onCancel]);
+  }, [open, onConfirm]);
 
   return (
     <AnimatePresence>
@@ -41,7 +37,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onCancel}
+          onClick={onConfirm}
         >
           <S.Dialog
             role="dialog"
@@ -60,10 +56,9 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             </S.TitleContainer>
             <S.Description id="confirm-modal-desc">{description}</S.Description>
             <S.Actions>
-              <S.CancelButton ref={cancelBtnRef} onClick={onCancel}>
-                {cancelText}
-              </S.CancelButton>
-              <S.ConfirmButton onClick={onConfirm}>{confirmText}</S.ConfirmButton>
+              <S.ConfirmButton ref={confirmBtnRef} onClick={onConfirm}>
+                {confirmText}
+              </S.ConfirmButton>
             </S.Actions>
           </S.Dialog>
         </S.Overlay>

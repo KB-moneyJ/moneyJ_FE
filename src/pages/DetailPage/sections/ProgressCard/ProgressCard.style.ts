@@ -26,7 +26,7 @@ export const CardLinkBtn = styled(DetailBtn).attrs({ as: 'button' })`
 export const AccountText = styled.div`
   color: var(--color-text-highlight);
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   letter-spacing: 0.2px;
 `;
 
@@ -76,4 +76,31 @@ export const TipLabel = styled.span`
 export const TipText = styled.p`
   margin: 0;
   line-height: 1.45;
+`;
+
+export const BalancePill = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff3b0;
+  color: #7a5a00;
+  padding: 8px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+
+  svg {
+    margin-right: 4px;
+    vertical-align: middle;
+    position: relative;
+    top: -0.5px;
+  }
+`;
+
+export const AccountRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
 `;
