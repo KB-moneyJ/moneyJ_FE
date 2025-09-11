@@ -81,13 +81,21 @@ export const TipText = styled.p`
 export const BalancePill = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
   background: #fff3b0;
   color: #7a5a00;
-  padding: 7px 8px;
+  padding: 8px 10px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 1;
+
+  svg {
+    margin-right: 4px;
+    vertical-align: middle;
+    position: relative;
+    top: -0.5px;
+  }
 `;
 
 export const AccountRow = styled.div`

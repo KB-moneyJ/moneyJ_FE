@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Plane, Home, Utensils, Check } from 'lucide-react';
-import { PiAirplaneTiltFill } from "react-icons/pi";
+import { PiAirplaneTiltFill } from 'react-icons/pi';
 import EditModal from '../../../../components/common/EditModal';
 
 import {
@@ -28,7 +28,6 @@ type Props = {
   savedPercent: number;
   tripId: number;
 };
-
 
 export default function ExpenseCard({ savedPercent, tripId }: Props) {
   const [items, setItems] = useState<ExpenseItem[]>([]);
@@ -97,9 +96,7 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
 
   // 목표 달성 처리
   const handlePurchase = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, purchased: true } : item))
-    );
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, purchased: true } : item)));
   };
 
   // 모달 저장 처리 (PATCH 요청 후 다시 GET)
@@ -114,24 +111,23 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         })),
       };
 
-      console.log("PATCH 요청 보낼 데이터:", bodyData); // 🔥 여기서 확인
+      console.log('PATCH 요청 보낼 데이터:', bodyData); // 🔥 여기서 확인
 
       await fetch(`http://localhost:8080/trip-plans/${tripId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify(bodyData),
       });
 
       // 요청 후 로컬 업데이트
       setItems(updatedItems);
     } catch (err) {
-      console.error("Failed to update expenses", err);
+      console.error('Failed to update expenses', err);
     }
   };
-
 
   return (
     <Wrapper>
@@ -160,17 +156,21 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
                     <button
                       onClick={() => handlePurchase(i.id)}
                       style={{
-                        padding: '4px 8px',
+                        padding: '5px 10px',
                         borderRadius: '20px',
                         border: '1px solid #ffeaa6',
                         background: '#fffea6',
-                        alignItems:'center',
-                        width:'90px',
-                        justifyContent:'space-around',
+                        alignItems: 'center',
+                        width: '90px',
+                        justifyContent: 'center',
+                        gap: '5px',
                         cursor: 'pointer',
-                        display:'flex',
-                        fontSize: '0.8rem',
-                        marginRight:'8px'
+                        display: 'flex',
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
+                        marginRight: '8px',
+                        color: '#7a5a00',
+                        lineHeight: 1.4,
                       }}
                     >
                       <PiAirplaneTiltFill />
