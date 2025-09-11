@@ -20,9 +20,10 @@ export const BottomNavigationBarWrapper = styled.div`
 `;
 
 export const Page = styled.div`
-  padding-bottom: 5px; // 하단 네비 공간 확보
   overflow-y: auto;
   flex: 1;
+    width: 100%;
+    min-height: 800px;
 `;
 
 export const Container = styled.div`
