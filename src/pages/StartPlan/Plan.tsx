@@ -68,7 +68,8 @@ export default function MakePlan() {
             {
               headers: { Authorization: `Bearer ${token}` },
             },
-          );
+
+
 
           const result = response.data;
 
