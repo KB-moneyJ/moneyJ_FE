@@ -131,11 +131,12 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
   };
 
   // 모달 저장 처리 (PATCH 요청 반영)
+  // 모달 저장 처리 (PATCH 요청 반영)
   const handleSaveItems = async (updatedItems: ExpenseItem[]) => {
     try {
       const bodyData = {
-        planId: tripId,
         categoryDTOList: updatedItems.map((item) => ({
+          tripPlanId: tripId, // ✅ 각 항목에 tripPlanId 포함
           categoryName: item.label,
           amount: item.amount,
         })),
@@ -143,7 +144,7 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
 
       console.log("PATCH 요청 보낼 데이터:", bodyData);
 
-      await fetch(`http://localhost:8080/trip-plans/${tripId}`, {
+      await fetch(`http://localhost:8080/trip-plans/category`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -158,6 +159,7 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
       console.error("Failed to update expenses", err);
     }
   };
+
 
   return (
     <Wrapper>

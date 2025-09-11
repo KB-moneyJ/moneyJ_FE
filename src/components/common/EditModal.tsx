@@ -16,12 +16,13 @@ import {
 } from '../../pages/StartPlan/PlanCard/PlanCardStyle';
 import { Check, X } from "lucide-react";
 
-interface ExpenseItem {
+type ExpenseItem = {
   id: string;
   label: string;
   amount: number;
   icon: React.ReactNode;
-}
+  purchased?: boolean; // <- 옵셔널
+};
 
 interface EditModalProps {
   tripId: number;  // ← 추가
@@ -126,12 +127,13 @@ export default function EditModal({ items, coveredSet, onSave, onClose }: EditMo
                       <select
                         value={i.label}
                         onChange={(e) => handleLabelChange(i.id, e.target.value)}
+                        disabled={i.purchased ?? false} // ✅ 기본값 false
                         style={{
                           padding: "2px",
                           borderRadius: "50px",
                           border: "1px solid #ccc",
-                          backgroundColor: "transparent",
-                          color: "white",
+                          backgroundColor: i.purchased ? "#444" : "transparent", // 수정 불가면 진한 회색
+                          color: i.purchased ? "#aaa" : "white", // 글씨 회색
                         }}
                       >
                         <option value="액티비티">액티비티</option>
@@ -140,15 +142,23 @@ export default function EditModal({ items, coveredSet, onSave, onClose }: EditMo
                         <option value="기타">기타</option>
                       </select>
                     ) : (
-                      <span>{i.label}</span>
+                      <span style={{ color: i.purchased ? "#aaa" : "white" }}>
+        {i.label}
+      </span>
                     )}
                   </Label>
                   <CleanInput
                     type="text"
                     value={i.amount.toLocaleString()}
                     onChange={(e) => handleAmountChange(i.id, e.target.value)}
+                    disabled={i.purchased ?? false} // ✅ 기본값 false
+                    style={{
+                      color: i.purchased ? "#aaa" : "white", // 수정 불가면 글씨 회색
+                      backgroundColor: i.purchased ? "#444" : "transparent",
+                    }}
                   />
                 </Item2>
+
 
                 {isCustom && (
                   <DeleteButton onClick={() => handleDeleteCategory(i.id)}>
