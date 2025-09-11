@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AssetCard from './sections/AssetCard/AssetCard';
 import UsageCard from './sections/UsageCard/UsageCard';
@@ -12,8 +12,12 @@ import { useMe } from '@/api/users/queries';
 export default function Home() {
   const navigate = useNavigate();
   const { data: trips = [], isLoading, isError } = useTripPlans();
-
   const { data: me, isLoading: meLoading, isError: meError } = useMe();
+
+  // ✅ summary 상태
+
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   const handleImgError: React.ReactEventHandler<HTMLImageElement> = (e) => {
     (e.currentTarget as HTMLImageElement).style.display = 'none';
@@ -35,11 +39,16 @@ export default function Home() {
           ) : (
             <UserIcon />
           )}
-
           <Nickname>{me?.nickname ?? (meLoading ? '불러오는 중…' : 'Guest')}</Nickname>
         </Profile>
         <BellIcon />
       </Container>
+
+      {/* 필요하면 summary 상태로 간단 표시 */}
+      {loadingSummary && <div style={{ padding: '0 1rem', opacity: 0.8 }}>요약 불러오는 중…</div>}
+      {summaryError && (
+        <div style={{ padding: '0 1rem', color: '#ff8a8a' }}>요약 로딩 실패: {summaryError}</div>
+      )}
 
       {/* <AssetCard /> */}
       <UsageCard />
