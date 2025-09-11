@@ -8,13 +8,12 @@ import { Container, Profile, UserIcon, Nickname, BellIcon, AvatarImg } from './H
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import { useTripPlans } from '@/api/trips/queries';
 import { useMe } from '@/api/users/queries';
+import { isValid } from '@/api/auth/auth';
 
 export default function Home() {
   const navigate = useNavigate();
   const { data: trips = [], isLoading, isError } = useTripPlans();
   const { data: me, isLoading: meLoading, isError: meError } = useMe();
-
-  // ✅ summary 상태
 
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
@@ -22,6 +21,21 @@ export default function Home() {
   const handleImgError: React.ReactEventHandler<HTMLImageElement> = (e) => {
     (e.currentTarget as HTMLImageElement).style.display = 'none';
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await isValid();
+        if (!res.data.valid) {
+          navigate('/login');
+        }
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   return (
     <div>

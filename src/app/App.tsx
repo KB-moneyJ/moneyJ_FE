@@ -23,14 +23,7 @@ function App() {
         <Route path="/intro" element={<Intro />} />
 
         {/* Home */}
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/home" element={<Home />} />
         <Route
           path="/plan"
           element={
