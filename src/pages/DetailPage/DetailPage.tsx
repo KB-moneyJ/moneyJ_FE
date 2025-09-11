@@ -203,6 +203,7 @@ export default function DetailPage() {
       <BankConnectModal
         isOpen={openBank}
         onClose={() => setOpenBank(false)}
+        tripPlanId={Number(tripId)}
         onConnected={handleBankConnected}
       />
     </div>

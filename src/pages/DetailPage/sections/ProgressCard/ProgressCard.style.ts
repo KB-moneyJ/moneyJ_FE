@@ -26,7 +26,7 @@ export const CardLinkBtn = styled(DetailBtn).attrs({ as: 'button' })`
 export const AccountText = styled.div`
   color: var(--color-text-highlight);
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   letter-spacing: 0.2px;
 `;
 

@@ -37,9 +37,7 @@ export default function ProgressCard({
 
   return (
     <Wrapper>
-      <SaveBtn onClick={isLinked ? onClickSave : onClickLink}>
-        {isLinked ? '저축하기' : '계좌 연동하기'}
-      </SaveBtn>
+      {!isLinked && <SaveBtn onClick={onClickLink}>계좌 연동하기</SaveBtn>}
 
       {isLinked && accountLabel && <AccountText>{accountLabel}</AccountText>}
 
