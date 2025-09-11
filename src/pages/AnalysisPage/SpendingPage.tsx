@@ -272,7 +272,7 @@ export default function SpendingPage() {
                   </div>
                 </div>
                 <ChartContainer>
-                  <ResponsiveContainer width="100%" height={400}>
+                  <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={chartData} barCategoryGap="25%">
                       <XAxis dataKey="month" />
                       <Tooltip
