@@ -10,6 +10,7 @@ import {
   TipLabel,
   TipText,
   AccountText,
+  CardLinkBtn,
 } from './ProgressCard.style';
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
   accountLabel?: string;
   onClickSave?: () => void;
   onClickLink?: () => void;
+  onClickCardLink?: () => void;
 };
 
 export default function ProgressCard({
@@ -28,8 +30,10 @@ export default function ProgressCard({
   accountLabel,
   onClickSave,
   onClickLink,
+  onClickCardLink,
 }: Props) {
   const isLinked = !!linked;
+  const hasTip = typeof tip === 'string' && tip.trim().length > 0;
 
   return (
     <Wrapper>
@@ -51,11 +55,22 @@ export default function ProgressCard({
         </ProgressBar>
         <ProgressRightLabel>{progress}%</ProgressRightLabel>
       </div>
+
       <Divider />
-      <Tip>
-        <TipLabel>TIP</TipLabel>
-        <TipText>{tip ?? '오늘 커피 한 잔을 줄이면, 단 7일 안에 목표를 이룰 수 있습니다.'}</TipText>
-      </Tip>
+
+      {hasTip ? (
+        <Tip>
+          <TipLabel>TIP</TipLabel>
+          <TipText>{tip}</TipText>
+        </Tip>
+      ) : (
+        <>
+          <Tip>
+            <TipLabel>여행지에 대한 TIP이 궁금하다면?</TipLabel>
+          </Tip>
+          <CardLinkBtn onClick={onClickCardLink}>카드 연결하기</CardLinkBtn>
+        </>
+      )}
     </Wrapper>
   );
 }

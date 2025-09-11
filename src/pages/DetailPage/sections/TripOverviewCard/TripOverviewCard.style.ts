@@ -36,7 +36,7 @@ export const Period = styled.span`
 export const SectionTitle = styled.h4`
   margin: 0.9rem 0 0.6rem;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
 `;
 
 export const ImageFrame = styled(BaseImageFrame)`
@@ -100,7 +100,7 @@ export const PodiumWrap = styled.div`
   margin: 5rem 0 1.5rem;
 `;
 
-export const TopAvatar = styled.div<{ $pos: 'first' | 'second' | 'third' }>`
+export const TopAvatar = styled.div<{ $pos: 'first' | 'second' | 'third'; $hasImage?: boolean }>`
   position: absolute;
   z-index: 2;
 
@@ -112,7 +112,10 @@ export const TopAvatar = styled.div<{ $pos: 'first' | 'second' | 'third' }>`
   height: ${({ $pos }) => ($pos === 'first' ? '50px' : '40px')};
   border-radius: 50%;
   overflow: visible;
-  border: 2px solid ${({ $pos }) => ($pos === 'first' ? '#edd718ff' : 'rgba(255, 255, 255, 0.9)')};
+  border: ${({ $pos, $hasImage }) =>
+    $hasImage
+      ? `2px solid ${$pos === 'first' ? '#edd718ff' : 'rgba(255, 255, 255, 0.9)'}`
+      : 'none'};
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(3px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
@@ -120,11 +123,10 @@ export const TopAvatar = styled.div<{ $pos: 'first' | 'second' | 'third' }>`
   & > svg:not(.crown) {
     width: 100%;
     height: 100%;
-    padding: 10px;
+    padding: 0; /* ← 여기 때문에 밀렸음 */
     color: #cfcfcf;
   }
 `;
-
 export const CrownIcon = styled(CrownSvg).attrs({ className: 'crown' })`
   position: absolute;
   bottom: calc(100% + 3px);
@@ -137,6 +139,28 @@ export const CrownIcon = styled(CrownSvg).attrs({ className: 'crown' })`
   stroke: #edd718ff;
   fill: none;
   pointer-events: none;
+`;
+
+export const AvatarBox = styled.div`
+  width: var(--rank-avatar-size, 2rem);
+  height: var(--rank-avatar-size, 2rem);
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  & > img,
+  & > svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  & > img {
+    object-fit: cover;
+  }
 `;
 
 export const AvatarImg = styled.img`
@@ -182,13 +206,6 @@ export const RankUser = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
-  & > svg {
-    width: var(--rank-avatar-size);
-    height: var(--rank-avatar-size);
-    color: #bdbdbd;
-    flex-shrink: 0;
-  }
 `;
 
 export const RankPercent = styled.span`

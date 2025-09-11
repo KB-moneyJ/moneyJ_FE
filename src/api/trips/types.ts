@@ -1,3 +1,5 @@
+export type TipItem = { label: string; text: string };
+
 export type TripPlanApi = {
   planId: number;
   country: string;
@@ -37,6 +39,7 @@ export type TripPlanDetailApi = TripPlanApi & {
   targetDate?: string;
   savingsPhrase?: string[];
   tripTip?: string[];
+  tip?: string;
   categoryDTOList?: CategoryApi[];
   tripMemberDTOList?: TripMemberApi[];
 };
@@ -50,6 +53,7 @@ export type TripDetailModel = {
   progressPercent: number;
   members: { id: string; name: string; percent: number; avatarUrl?: string }[];
   overviewTip?: string;
+  tips?: TipItem[];
   checklist: string[];
   cautions: string[];
   categories?: { name: string; amount: number }[];

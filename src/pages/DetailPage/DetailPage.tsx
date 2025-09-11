@@ -1,6 +1,5 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
 
 import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem } from './DetailPage.style';
 import ProgressCard from './sections/ProgressCard/ProgressCard';
@@ -11,16 +10,21 @@ import FriendInviteModal from '@/components/modals/FriendInviteModal';
 import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
-import { useTripPlanDetail, useTripPlanBalances } from '@/api/trips/queries';
+import { useTripPlanDetail, useTripPlanBalances, useDeleteTripPlan } from '@/api/trips/queries';
 import { useMe } from '@/api/users/queries';
 
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
 
-  const { data, isLoading, isError, error } = useTripPlanDetail(tripId);
+  const location = useLocation() as { state?: { thumbnailUrl?: string } };
+  const thumbFromList = location.state?.thumbnailUrl;
+
+  const { data, isLoading, isError } = useTripPlanDetail(tripId);
   const { data: balances = [] } = useTripPlanBalances(tripId);
   const { data: me } = useMe();
+
+  const { mutate: deletePlan, isPending: deleting } = useDeleteTripPlan();
 
   const [openMenu, setOpenMenu] = useState(false);
   const [openInvite, setOpenInvite] = useState(false);
@@ -63,12 +67,12 @@ export default function DetailPage() {
       destination: data.destination,
       countryCode: data.countryCode,
       period: data.period + (data.members.length ? ` (${data.members.length}명)` : ''),
-      thumbnailUrl: data.thumbnailUrl,
+      thumbnailUrl: thumbFromList ?? data.thumbnailUrl,
       progressPercent: data.progressPercent,
       members: data.members,
       tip: data.overviewTip,
     };
-  }, [data]);
+  }, [data, thumbFromList]);
 
   const checklist = data?.checklist ?? [];
   const cautions = data?.cautions ?? [];
@@ -87,13 +91,25 @@ export default function DetailPage() {
     setOpenBank(false);
   };
 
-  const planNotFound =
-    axios.isAxiosError(error) &&
-    ((error as any).code === 'PLAN_NOT_FOUND' ||
-      error.response?.status === 404 ||
-      (error.response?.status === 500 &&
-        typeof error.response?.data?.message === 'string' &&
-        error.response?.data?.message.includes('저축 플랜이 존재하지 않습니다')));
+  const handleDeletePlan = () => {
+    if (!tripId || deleting) return;
+    const ok = window.confirm(
+      '정말 이 여행 플랜을 삭제할까요?\n삭제하면 모든 멤버의 리스트에서 제거됩니다.',
+    );
+    if (!ok) return;
+
+    setOpenMenu(false);
+    deletePlan(tripId, {
+      onSuccess: (res) => {
+        alert(res?.message ?? '여행 플랜이 삭제되었습니다.');
+        navigate('/', { replace: true });
+      },
+      onError: (e) => {
+        console.error(e);
+        alert('플랜 삭제에 실패했어요. 잠시 후 다시 시도해 주세요.');
+      },
+    });
+  };
 
   if (isLoading) {
     return (
@@ -135,13 +151,15 @@ export default function DetailPage() {
               >
                 친구 초대
               </DropdownItem>
-              <DropdownItem onClick={() => console.log('플랜 삭제하기')}>
-                플랜 삭제하기
+              {/* 삭제 연동 */}
+              <DropdownItem onClick={handleDeletePlan}>
+                {deleting ? '플랜 삭제 중…' : '플랜 삭제하기'}
               </DropdownItem>
             </Dropdown>
           )}
         </div>
       </Container>
+
       <ProgressCard
         progress={progress}
         tip={data.overviewTip ?? '오늘도 한 걸음! 목표가 가까워지고 있어요.'}
@@ -152,8 +170,9 @@ export default function DetailPage() {
         }}
         onClickLink={() => setOpenBank(true)}
       />
-      {/* 예상 경비(저축률만 사용 중) */}
+
       <ExpenseCard savedPercent={progress} tripId={Number(tripId)} />
+
       {overview && (
         <TripOverviewCard
           destination={overview.destination}
@@ -167,13 +186,20 @@ export default function DetailPage() {
           podiumTop3={podiumTop3}
         />
       )}
-      <BeforeYouGoCard destination={data.destination} checklist={checklist} cautions={cautions} />
-      {/* 모달들 */}
+
+      <BeforeYouGoCard
+        destination={data.destination}
+        checklist={checklist}
+        cautions={cautions}
+        tips={data.tips}
+      />
+
       <FriendInviteModal
         isOpen={openInvite}
         onClose={() => setOpenInvite(false)}
         planId={tripId ?? ''}
       />
+
       <BankConnectModal
         isOpen={openBank}
         onClose={() => setOpenBank(false)}
