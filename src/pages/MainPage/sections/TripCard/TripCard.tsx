@@ -48,15 +48,7 @@ export default function TripCard({
   thumbnailUrl: initialThumbnailUrl,
   progressPercent,
   onClickDetail,
-  // 추가적으로 지역, 도시, 나라를 props로 받아야 함
-  selectedCountry,
-  selectedRegions,
-  otherCity,
-}: TripCardProps & {
-  selectedCountry: { country: string; countryCode: string };
-  selectedRegions: string[];
-  otherCity?: string;
-}) {
+}: TripCardProps) {
   const totalTiles = TILE_ROWS * TILE_COLS;
   const orderRef = useRef<number[]>(shuffle([...Array(totalTiles).keys()]));
 
