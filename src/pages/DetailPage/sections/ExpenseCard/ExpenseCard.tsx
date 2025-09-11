@@ -29,7 +29,6 @@ type Props = {
   tripId: number;
 };
 
-
 export default function ExpenseCard({ savedPercent, tripId }: Props) {
   const [items, setItems] = useState<ExpenseItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,6 +43,7 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
 
       const data = await res.json();
 
+      // fetchExpenses 안에서 매핑 부분 수정
       const mappedItems: ExpenseItem[] = data.categoryDTOList.map((c: any) => {
         let icon;
         switch (c.categoryName) {
@@ -65,9 +65,10 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
           label: c.categoryName,
           amount: c.amount,
           icon,
-          purchased: false,
+          purchased: c.consumed ?? false,
         };
       });
+
 
       setItems(mappedItems);
     } catch (err) {
@@ -95,14 +96,40 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
     }
   }
 
-  // 목표 달성 처리
-  const handlePurchase = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, purchased: true } : item))
-    );
+  // 목표 달성 처리 (POST 요청 + 상태 업데이트)
+  const handlePurchase = async (id: string) => {
+    try {
+      const item = items.find((i) => i.id === id);
+      if (!item) return;
+
+      const bodyData = {
+        tripPlanId: tripId,
+        categoryName: item.label,
+        isConsumed: true,
+      };
+
+      console.log("POST 요청 보낼 데이터:", bodyData);
+
+      await fetch(`http://localhost:8080/trip-plans/isconsumed`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(bodyData),
+      });
+
+      // 요청 성공 시 로컬 상태 업데이트
+      setItems((prev) =>
+        prev.map((it) =>
+          it.id === id ? { ...it, purchased: true } : it
+        )
+      );
+    } catch (err) {
+      console.error("Failed to mark as consumed", err);
+    }
   };
 
-  // 모달 저장 처리 (PATCH 요청 후 다시 GET)
   // 모달 저장 처리 (PATCH 요청 반영)
   const handleSaveItems = async (updatedItems: ExpenseItem[]) => {
     try {
@@ -114,7 +141,7 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         })),
       };
 
-      console.log("PATCH 요청 보낼 데이터:", bodyData); // 🔥 여기서 확인
+      console.log("PATCH 요청 보낼 데이터:", bodyData);
 
       await fetch(`http://localhost:8080/trip-plans/${tripId}`, {
         method: "PATCH",
@@ -131,7 +158,6 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
       console.error("Failed to update expenses", err);
     }
   };
-
 
   return (
     <Wrapper>
@@ -180,7 +206,7 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
                 </div>
               </Item>
 
-              <CheckMark $visible={covered}>
+              <CheckMark $visible={covered || i.purchased}>
                 <Check size={24} strokeWidth={6} />
               </CheckMark>
             </ItemContainer>
