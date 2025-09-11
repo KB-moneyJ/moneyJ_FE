@@ -138,7 +138,7 @@ export default function TripOverviewCard({
 
       <Period>{period}</Period>
 
-      <SectionTitle>현재 진행 상황</SectionTitle>
+      <SectionTitle>그룹 진행도</SectionTitle>
 
       <ImageFrame>
         <DimImage src={thumbnailUrl} alt={`${destination} 썸네일`} />
