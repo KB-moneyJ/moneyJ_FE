@@ -1,5 +1,6 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem } from './DetailPage.style';
 import ProgressCard from './sections/ProgressCard/ProgressCard';
@@ -9,12 +10,14 @@ import BeforeYouGoCard from './sections/BeforeYouGoCard/BeforeYouGoCard';
 import FriendInviteModal from '@/components/modals/FriendInviteModal';
 import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
-
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
-
 import { refreshTripPlanBalance } from '@/api/bank/bank';
-
-import { useTripPlanDetail, useTripPlanBalances, useDeleteTripPlan } from '@/api/trips/queries';
+import {
+  useTripPlanDetail,
+  useTripPlanBalances,
+  useDeleteTripPlan,
+  TRIP_KEYS,
+} from '@/api/trips/queries';
 import { useMe } from '@/api/users/queries';
 
 const BANK_ORG_LS_KEY = 'bankOrgByPlanId';
@@ -55,6 +58,7 @@ function getLinkedForPlan(planId: number): boolean {
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
+  const qc = useQueryClient();
 
   const location = useLocation() as { state?: { thumbnailUrl?: string } };
   const thumbFromList = location.state?.thumbnailUrl;
@@ -76,7 +80,7 @@ export default function DetailPage() {
   const progress = useMemo(() => {
     const total = data?.totalBudget ?? 0;
     if (typeof accountBalance === 'number' && total > 0) {
-      const pct = Math.round(Math.min(100, Math.max(0, (accountBalance / total) * 100)));
+      const pct = Math.min(100, Math.max(0, (accountBalance / total) * 100));
       return pct;
     }
     return data?.progressPercent ?? 0;
@@ -108,18 +112,40 @@ export default function DetailPage() {
     return [];
   }, [balances, data?.members, me, progress]);
 
+  const groupMembers = useMemo(() => {
+    if (balances.length) {
+      return balances.map((b) => ({
+        id: b.id,
+        name: b.name,
+        percent: b.percent,
+        avatarUrl: b.avatarUrl,
+      }));
+    }
+    return data?.members ?? [];
+  }, [balances, data?.members]);
+
+  // 2) 그룹 진행도: balances 합계 / totalBudget
+  const groupProgressPercent = useMemo(() => {
+    if (balances.length && (data?.totalBudget ?? 0) > 0) {
+      const sum = balances.reduce((acc, cur) => acc + (cur.balance ?? 0), 0);
+      const pct = (sum / (data!.totalBudget || 1)) * 100;
+      return Math.max(0, Math.min(100, pct));
+    }
+    return data?.progressPercent ?? 0;
+  }, [balances, data?.totalBudget, data?.progressPercent]);
+
   const overview = useMemo(() => {
     if (!data) return null;
     return {
       destination: data.destination,
       countryCode: data.countryCode,
-      period: data.period + (data.members.length ? ` (${data.members.length}명)` : ''),
+      period: data.period + (groupMembers.length ? ` (${groupMembers.length}명)` : ''),
       thumbnailUrl: thumbFromList ?? data.thumbnailUrl,
-      progressPercent: data.progressPercent,
-      members: data.members,
+      progressPercent: groupProgressPercent,
+      members: groupMembers,
       tip: data.overviewTip,
     };
-  }, [data, thumbFromList]);
+  }, [data, thumbFromList, groupMembers, groupProgressPercent]);
 
   const checklist = data?.checklist ?? [];
   const cautions = data?.cautions ?? [];
@@ -142,6 +168,7 @@ export default function DetailPage() {
       try {
         const res = await refreshTripPlanBalance(planId);
         if (!mounted) return;
+        qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
 
         const org = getBankOrgForPlan(planId);
         const bankName = org ? BANK_NAME_BY_CODE[org] : undefined;
@@ -163,7 +190,7 @@ export default function DetailPage() {
     return () => {
       mounted = false;
     };
-  }, [tripId]);
+  }, [tripId, qc]);
 
   const handleBankConnected = async (bankCode: string, acct: string) => {
     const planId = Number(tripId);
@@ -172,6 +199,7 @@ export default function DetailPage() {
 
     try {
       const res = await refreshTripPlanBalance(planId);
+      qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
       const bankName = BANK_NAME_BY_CODE[bankCode] ?? '연동 계좌';
       setIsAccountLinked(true);
       setAccountLabel(`${bankName} ${res.accountNumberDisplay}`);

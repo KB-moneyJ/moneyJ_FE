@@ -172,7 +172,9 @@ export default function TripOverviewCard({
         >
           <ProgressFill $percent={progressPercent} />
         </ProgressBar>
-        <ProgressRightLabel>{progressPercent}%</ProgressRightLabel>
+        <ProgressRightLabel>
+          {(Math.round(progressPercent * 10) / 10).toFixed(1)}%
+        </ProgressRightLabel>
       </ProgressRow>
 
       <Divider />
@@ -213,7 +215,7 @@ export default function TripOverviewCard({
               <RankAvatar url={m.avatarUrl} alt={`${m.name} 프로필`} />
               {m.name}
             </RankUser>
-            <RankPercent>{m.percent}%</RankPercent>
+            <RankPercent>{(Math.round(m.percent * 10) / 10).toFixed(1)}%</RankPercent>
           </RankItem>
         ))}
       </RankList>

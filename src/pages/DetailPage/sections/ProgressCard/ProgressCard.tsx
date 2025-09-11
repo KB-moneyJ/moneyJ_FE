@@ -65,7 +65,7 @@ export default function ProgressCard({
         >
           <ProgressFill $percent={progress} />
         </ProgressBar>
-        <ProgressRightLabel>{progress}%</ProgressRightLabel>
+        <ProgressRightLabel>{(Math.round(progress * 10) / 10).toFixed(1)}%</ProgressRightLabel>
       </div>
 
       <Divider />
