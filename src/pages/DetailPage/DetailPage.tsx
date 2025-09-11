@@ -187,7 +187,12 @@ export default function DetailPage() {
         />
       )}
 
-      <BeforeYouGoCard destination={data.destination} checklist={checklist} cautions={cautions} />
+      <BeforeYouGoCard
+        destination={data.destination}
+        checklist={checklist}
+        cautions={cautions}
+        tips={data.tips}
+      />
 
       <FriendInviteModal
         isOpen={openInvite}

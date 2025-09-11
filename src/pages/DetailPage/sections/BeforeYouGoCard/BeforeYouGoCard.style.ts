@@ -47,8 +47,9 @@ export const SectionTitle = styled.h4`
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fbff0dff;
 
   & > svg {
     width: 1.05rem;
@@ -74,4 +75,9 @@ export const ListItem = styled.li`
   line-height: 1.45;
   opacity: 0.95;
   word-break: keep-all;
+
+  & > strong {
+    font-weight: 700;
+    margin-right: 2px;
+  }
 `;
