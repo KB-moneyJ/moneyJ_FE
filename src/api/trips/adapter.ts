@@ -23,8 +23,11 @@ function absolutize(url?: string): string | undefined {
 }
 
 export function toTripCardModel(p: TripPlanApi): TripCardModel {
-  const progress =
-    p.totalBudget > 0 ? Math.round(clamp01(p.currentSavings / p.totalBudget) * 100) : 0;
+  const total = typeof p.totalBudget === 'number' ? p.totalBudget : 0;
+  const saved = typeof p.currentSavings === 'number' ? p.currentSavings : 0;
+
+  const ratio = total > 0 ? saved / total : 0;
+  const progress = Math.min(100, Math.floor(clamp01(ratio) * 100));
 
   return {
     id: String(p.planId),
@@ -33,7 +36,7 @@ export function toTripCardModel(p: TripPlanApi): TripCardModel {
       '',
     ),
     countryCode: p.countryCode,
-    period: `${fmtDate(p.tripStartDate)} - ${fmtDate(p.tripEndDate)}`,
+    period: `${(p.tripStartDate ?? '').slice(0, 10).replaceAll('-', '.')} - ${(p.tripEndDate ?? '').slice(0, 10).replaceAll('-', '.')}`,
     thumbnailUrl: '/assets/images/trip-placeholder.jpg',
     progressPercent: progress,
     membersCount: 1,
