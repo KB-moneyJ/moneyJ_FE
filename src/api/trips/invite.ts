@@ -34,14 +34,22 @@ export async function inviteTripMembers(planId: string, emails: string[]) {
       console.warn('없는 사용자들:', invalidUsers);
       return;
     }
+
     const res = await axios.post(
       `${BASE_URL}/trip-plans/${planId}/members`,
       { email: emails },
       { withCredentials: true },
     );
     console.log('초대 성공:', res.data);
-  } catch (error) {
+    alert('초대가 완료되었습니다!');
+  } catch (error: any) {
     console.error('Error inviting trip members:', error);
-    throw error;
+
+    // 서버에서 내려준 메시지 확인
+    if (error.response?.data?.message) {
+      alert(error.response.data.message);
+    } else {
+      alert('초대 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
   }
 }

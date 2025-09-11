@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plane, Home, Utensils, Check } from 'lucide-react';
 import { PiAirplaneTiltFill } from "react-icons/pi";
-
+import EditModal from '../../../../components/common/EditModal';
 
 import {
   Wrapper,
@@ -21,59 +21,62 @@ type ExpenseItem = {
   label: string;
   amount: number;
   icon: React.ReactNode;
-  purchased?: boolean; // 사용자가 직접 '목표 달성'한 상태
+  purchased?: boolean;
 };
 
 type Props = {
-  savedPercent: number; // 진행률 (%)
+  savedPercent: number;
   tripId: number;
 };
 
+
 export default function ExpenseCard({ savedPercent, tripId }: Props) {
   const [items, setItems] = useState<ExpenseItem[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 여행 경비 항목 불러오기
+  // 여행 경비 항목 불러오기 함수 (PATCH 후에도 재사용)
+  const fetchExpenses = async () => {
+    try {
+      const res = await fetch(`http://localhost:8080/trip-plans/${tripId}`, {
+        method: 'GET',
+        credentials: 'include', // ✅ 쿠키 포함
+      });
+
+      const data = await res.json();
+
+      const mappedItems: ExpenseItem[] = data.categoryDTOList.map((c: any) => {
+        let icon;
+        switch (c.categoryName) {
+          case '항공비':
+            icon = <Plane size={18} />;
+            break;
+          case '숙박':
+            icon = <Home size={18} />;
+            break;
+          case '식비':
+            icon = <Utensils size={18} />;
+            break;
+          default:
+            icon = <Check size={18} />;
+        }
+
+        return {
+          id: c.categoryName,
+          label: c.categoryName,
+          amount: c.amount,
+          icon,
+          purchased: false,
+        };
+      });
+
+      setItems(mappedItems);
+    } catch (err) {
+      console.error('Failed to fetch expenses', err);
+    }
+  };
+
+  // 첫 렌더링 시 데이터 가져오기
   useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        const res = await fetch(`http://localhost:8080/trip-plans/${tripId}`, {
-          method: 'GET',
-          credentials: 'include',
-        });
-
-        const data = await res.json();
-
-        const mappedItems: ExpenseItem[] = data.categoryDTOList.map((c: any) => {
-          let icon;
-          switch (c.categoryName) {
-            case '항공비':
-              icon = <Plane size={18} />;
-              break;
-            case '숙박':
-              icon = <Home size={18} />;
-              break;
-            case '식비':
-              icon = <Utensils size={18} />;
-              break;
-            default:
-              icon = <Check size={18} />;
-          }
-
-          return {
-            id: c.categoryName,
-            label: c.categoryName,
-            amount: c.amount,
-            icon,
-            purchased: false,
-          };
-        });
-
-        setItems(mappedItems);
-      } catch (err) {
-        console.error('Failed to fetch expenses', err);
-      }
-    };
-
     fetchExpenses();
   }, [tripId]);
 
@@ -92,12 +95,43 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
     }
   }
 
-  // 사용자가 직접 "목표 달성" 처리
+  // 목표 달성 처리
   const handlePurchase = (id: string) => {
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, purchased: true } : item))
     );
   };
+
+  // 모달 저장 처리 (PATCH 요청 후 다시 GET)
+  // 모달 저장 처리 (PATCH 요청 반영)
+  const handleSaveItems = async (updatedItems: ExpenseItem[]) => {
+    try {
+      const bodyData = {
+        planId: tripId,
+        categoryDTOList: updatedItems.map((item) => ({
+          categoryName: item.label,
+          amount: item.amount,
+        })),
+      };
+
+      console.log("PATCH 요청 보낼 데이터:", bodyData); // 🔥 여기서 확인
+
+      await fetch(`http://localhost:8080/trip-plans/${tripId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(bodyData),
+      });
+
+      // 요청 후 로컬 업데이트
+      setItems(updatedItems);
+    } catch (err) {
+      console.error("Failed to update expenses", err);
+    }
+  };
+
 
   return (
     <Wrapper>
@@ -106,12 +140,12 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
           <Title>예상 1인 경비</Title>
           <Amount>₩ {total.toLocaleString()}</Amount>
         </div>
-        <EditBtn>수정하기</EditBtn>
+        <EditBtn onClick={() => setIsModalOpen(true)}>수정하기</EditBtn>
       </Header>
 
       <ItemList>
         {items.map((i) => {
-          const covered = coveredSet.has(i.id); // 진행률 기반 자동 체크만
+          const covered = coveredSet.has(i.id);
 
           return (
             <ItemContainer key={i.id}>
@@ -146,7 +180,6 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
                 </div>
               </Item>
 
-              {/* 체크마크는 자동 진행률 기반만 */}
               <CheckMark $visible={covered}>
                 <Check size={24} strokeWidth={6} />
               </CheckMark>
@@ -154,6 +187,16 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
           );
         })}
       </ItemList>
+
+      {isModalOpen && (
+        <EditModal
+          tripId={tripId}
+          items={items}
+          coveredSet={coveredSet}
+          onSave={handleSaveItems}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </Wrapper>
   );
 }

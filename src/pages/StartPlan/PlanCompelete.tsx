@@ -188,7 +188,9 @@ export default function PlanCompelete() {
         countryCode,
         city: cityString,
         categoryDTOList,
-        duration: Number(days.days),
+        nights: Number(days.nights),   //  테스트용이라 주석 처리
+        days: Number(days.days),       //  테스트용이라 주석 처리
+        //duration: Number(days.days),      //  days → duration으로 임시 변환
         tripStartDate,
         tripEndDate,
         totalBudget,
