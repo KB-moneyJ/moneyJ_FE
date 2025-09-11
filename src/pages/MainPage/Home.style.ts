@@ -6,24 +6,11 @@ export const Wrapper = styled.div`
   flex-direction: column;
 `;
 
-export const BottomNavigationBarWrapper = styled.div`
-    position: sticky; /* 부모 Page 내부에서는 sticky 가능 */
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    backdrop-filter: blur(15px);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 1000;
-`;
-
 export const Page = styled.div`
   overflow-y: auto;
   flex: 1;
-    width: 100%;
-    min-height: 800px;
+  width: 100%;
+  min-height: 800px;
 `;
 
 export const Container = styled.div`

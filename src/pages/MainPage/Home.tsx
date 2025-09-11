@@ -13,7 +13,6 @@ import {
   Nickname,
   BellIcon,
   AvatarImg,
-  BottomNavigationBarWrapper,
 } from './Home.style';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import { useTripPlans } from '@/api/trips/queries';
@@ -105,9 +104,8 @@ export default function Home() {
 
           <AddTripCard onClick={() => navigate('/startplan')} />
         </Page>
-        <BottomNavigationBarWrapper>
-          <BottomNavigationBar />
-        </BottomNavigationBarWrapper>
+
+        <BottomNavigationBar />
       </Wrapper>
     </>
   );

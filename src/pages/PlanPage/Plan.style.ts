@@ -3,7 +3,8 @@ import styled from 'styled-components';
 export const Page = styled.div`
   padding: 1rem;
   color: white;
-  height: 85vh;
+  height: 90vh;
+  overflow-y: auto;
 `;
 
 export const Tabs = styled.div`
