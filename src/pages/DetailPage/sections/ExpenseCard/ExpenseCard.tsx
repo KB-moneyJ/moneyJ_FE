@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Plane, Home, Utensils, Check } from 'lucide-react';
-import { PiAirplaneTiltFill } from "react-icons/pi";
+import { PiAirplaneTiltFill } from 'react-icons/pi';
 import EditModal from '../../../../components/common/EditModal';
 
 import {
@@ -28,17 +28,21 @@ type Props = {
   savedPercent: number;
   tripId: number;
 };
-
+const BASE_URL = import.meta.env.VITE_API_URL as string;
 export default function ExpenseCard({ savedPercent, tripId }: Props) {
   const [items, setItems] = useState<ExpenseItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const token = localStorage.getItem('accessToken');
 
   // 여행 경비 항목 불러오기 함수 (PATCH 후에도 재사용)
   const fetchExpenses = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/trip-plans/${tripId}`, {
+      const res = await fetch(`${BASE_URL}/trip-plans/${tripId}`, {
         method: 'GET',
-        credentials: 'include', // ✅ 쿠키 포함
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
+        },
       });
 
       const data = await res.json();
@@ -68,7 +72,6 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
           purchased: c.consumed ?? false,
         };
       });
-
 
       setItems(mappedItems);
     } catch (err) {
@@ -107,26 +110,23 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         categoryName: item.label,
         isConsumed: true,
       };
+      const token = localStorage.getItem('accessToken');
+      console.log('POST 요청 보낼 데이터:', bodyData);
 
-      console.log("POST 요청 보낼 데이터:", bodyData);
-
-      await fetch(`http://localhost:8080/trip-plans/isconsumed`, {
-        method: "POST",
+      await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        credentials: "include",
+
         body: JSON.stringify(bodyData),
       });
 
       // 요청 성공 시 로컬 상태 업데이트
-      setItems((prev) =>
-        prev.map((it) =>
-          it.id === id ? { ...it, purchased: true } : it
-        )
-      );
+      setItems((prev) => prev.map((it) => (it.id === id ? { ...it, purchased: true } : it)));
     } catch (err) {
-      console.error("Failed to mark as consumed", err);
+      console.error('Failed to mark as consumed', err);
     }
   };
 
@@ -142,24 +142,23 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         })),
       };
 
-      console.log("PATCH 요청 보낼 데이터:", bodyData);
+      console.log('PATCH 요청 보낼 데이터:', bodyData);
 
-      await fetch(`http://localhost:8080/trip-plans/category`, {
-        method: "PATCH",
+      await fetch(`${BASE_URL}/trip-plans/category`, {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        credentials: "include",
         body: JSON.stringify(bodyData),
       });
 
       // 요청 후 로컬 업데이트
       setItems(updatedItems);
     } catch (err) {
-      console.error("Failed to update expenses", err);
+      console.error('Failed to update expenses', err);
     }
   };
-
 
   return (
     <Wrapper>
@@ -192,13 +191,13 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
                         borderRadius: '20px',
                         border: '1px solid #ffeaa6',
                         background: '#fffea6',
-                        alignItems:'center',
-                        width:'90px',
-                        justifyContent:'space-around',
+                        alignItems: 'center',
+                        width: '90px',
+                        justifyContent: 'space-around',
                         cursor: 'pointer',
-                        display:'flex',
+                        display: 'flex',
                         fontSize: '0.8rem',
-                        marginRight:'8px'
+                        marginRight: '8px',
                       }}
                     >
                       <PiAirplaneTiltFill />

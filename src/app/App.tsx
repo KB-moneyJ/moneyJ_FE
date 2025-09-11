@@ -24,65 +24,23 @@ function App() {
 
         {/* Home */}
         <Route path="/home" element={<Home />} />
-        <Route
-          path="/plan"
-          element={
-            <ProtectedRoute>
-              <Plan />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/plan" element={<Plan />} />
 
         {/* Plan (설문/시작 플로우) */}
-        <Route
-          path="/startplan"
-          element={
-            <ProtectedRoute>
-              <About />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/plancompelete"
-          element={
-            <ProtectedRoute>
-              <PlanCompelete />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/startplan" element={<About />} />
+        <Route path="/plancompelete" element={<PlanCompelete />} />
 
         {/* Trip (상세) */}
-        <Route
-          path="/trip/:tripId"
-          element={
-            <ProtectedRoute>
-              <DetailPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/trip/:tripId" element={<DetailPage />} />
 
-        <Route
-          path="/spending"
-          element={
-            <ProtectedRoute>
-              <SpendingPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/spending" element={<SpendingPage />} />
 
         {/* TODO: 404 
         <Route path="*" element={<NotFound />} /> 
         */}
 
         {/* MyPage */}
-        <Route
-          path="/mypage"
-          element={
-            <ProtectedRoute>
-              <Myinfo />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/mypage" element={<Myinfo />} />
       </Routes>
     </Router>
   );

@@ -12,7 +12,8 @@ import {
   UserIcon,
   Nickname,
   BellIcon,
-  AvatarImg, BottomNavigationBarWrapper,
+  AvatarImg,
+  BottomNavigationBarWrapper,
 } from './Home.style';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import { useTripPlans } from '@/api/trips/queries';
@@ -32,19 +33,17 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await isValid();
-        if (!res.data.valid) {
-          navigate('/login');
-        }
-      } catch (error) {
-        navigate('/login');
-      }
-    };
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const isFirstLogin = params.get('isFirstLogin') === 'true';
 
-    checkAuth();
-  }, [navigate]);
+    if (token) {
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('isFirstLogin', String(isFirstLogin));
+    }
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }, []);
 
   return (
     <>
@@ -70,9 +69,13 @@ export default function Home() {
           </Container>
 
           {/* 필요하면 summary 상태로 간단 표시 */}
-          {loadingSummary && <div style={{ padding: '0 1rem', opacity: 0.8, }}>요약 불러오는 중…</div>}
+          {loadingSummary && (
+            <div style={{ padding: '0 1rem', opacity: 0.8 }}>요약 불러오는 중…</div>
+          )}
           {summaryError && (
-            <div style={{ padding: '0 1rem', color: '#ff8a8a' }}>요약 로딩 실패: {summaryError}</div>
+            <div style={{ padding: '0 1rem', color: '#ff8a8a' }}>
+              요약 로딩 실패: {summaryError}
+            </div>
           )}
 
           {/* <AssetCard /> */}
@@ -104,10 +107,8 @@ export default function Home() {
         </Page>
         <BottomNavigationBarWrapper>
           <BottomNavigationBar />
-
         </BottomNavigationBarWrapper>
       </Wrapper>
     </>
-
   );
 }
