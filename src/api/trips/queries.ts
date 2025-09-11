@@ -1,6 +1,11 @@
 import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
-import { fetchTripPlans, fetchTripPlanDetail, fetchTripPlanBalances } from './index';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  fetchTripPlans,
+  fetchTripPlanDetail,
+  fetchTripPlanBalances,
+  deleteTripPlan,
+} from './index';
 import { toTripCardModel, toTripDetailModel } from './adapter';
 import { toBalanceModel } from './adapter';
 import type { TripCardModel, TripDetailModel, TripBalanceModel } from './types';
@@ -64,5 +69,19 @@ export function useTripPlanBalances(id?: number | string) {
     staleTime: 30_000,
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
+  });
+}
+
+export function useDeleteTripPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number | string) => deleteTripPlan(id),
+    onSuccess: (_res, id) => {
+      qc.setQueryData<TripCardModel[] | undefined>(TRIP_KEYS.all, (prev) =>
+        prev ? prev.filter((p) => (p.id === undefined ? true : p.id !== String(id))) : prev,
+      );
+      qc.removeQueries({ queryKey: TRIP_KEYS.detail(id), exact: true });
+      qc.removeQueries({ queryKey: TRIP_KEYS.balances(id), exact: true });
+    },
   });
 }
