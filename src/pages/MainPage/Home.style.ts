@@ -1,11 +1,35 @@
 import styled from 'styled-components';
 import { CircleUserRound, Bell } from 'lucide-react';
 
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const BottomNavigationBarWrapper = styled.div`
+    position: sticky; /* 부모 Page 내부에서는 sticky 가능 */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+`;
+
+export const Page = styled.div`
+  padding-bottom: 5px; // 하단 네비 공간 확보
+  overflow-y: auto;
+  flex: 1;
+`;
+
 export const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem;
+  padding: 0 1.5rem;
   margin-top: 4.0625rem;
 `;
 

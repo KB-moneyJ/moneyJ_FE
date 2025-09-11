@@ -30,16 +30,21 @@ type Props = {
   onProgressDelta?: (deltaPercent: number) => void;
 };
 
+const BASE_URL = import.meta.env.VITE_API_URL as string;
 export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: Props) {
   const [items, setItems] = useState<ExpenseItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const token = localStorage.getItem('accessToken');
 
   // 여행 경비 항목 불러오기 함수 (PATCH 후에도 재사용)
   const fetchExpenses = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/trip-plans/${tripId}`, {
+      const res = await fetch(`${BASE_URL}/trip-plans/${tripId}`, {
         method: 'GET',
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
+        },
       });
 
       const data = await res.json();
@@ -107,6 +112,8 @@ export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: P
         categoryName: item.label,
         isConsumed: true,
       };
+      const token = localStorage.getItem('accessToken');
+      console.log('POST 요청 보낼 데이터:', bodyData);
 
       await fetch(`http://localhost:8080/trip-plans/isconsumed`, {
         method: 'POST',
@@ -142,13 +149,18 @@ export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: P
         })),
       };
 
-      await fetch(`http://localhost:8080/trip-plans/category`, {
+
+      console.log('PATCH 요청 보낼 데이터:', bodyData);
+
+      await fetch(`${BASE_URL}/trip-plans/category`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(bodyData),
       });
-
+      // 요청 후 로컬 업데이트
       setItems(updatedItems);
       // ⚠️ 합계 변경 후 delta 의미가 달라질 수 있으니, 부모에서 balances 무효화로 동기화하는 걸 추천
     } catch (err) {
