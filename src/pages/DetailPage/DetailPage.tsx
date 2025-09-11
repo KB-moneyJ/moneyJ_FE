@@ -71,7 +71,7 @@ export default function DetailPage() {
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
-
+  const tipForProgress = isAccountLinked ? data?.overviewTip : undefined;
   // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
   const myProgressFromBalances = useMemo(() => {
     if (!meId) return undefined;
@@ -341,6 +341,7 @@ export default function DetailPage() {
         balance={accountBalance}
         onClickLink={() => setOpenBank(true)}
         onClickCardLink={() => setOpenBank(true)}
+        tip={tipForProgress}
       />
 
       {/* 예상 경비/목표 달성 */}
