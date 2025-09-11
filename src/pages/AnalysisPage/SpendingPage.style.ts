@@ -22,6 +22,7 @@ export const ChartContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 80%;
   height: 300px;
   margin-top: 40px;
   padding: 0 30px;
@@ -38,14 +39,36 @@ export const ChartContainer = styled.div`
   }
 `;
 
+export const LegendScroll = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+
+  /* WebKit 스크롤바(선택) */
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+`;
+
+// 기존 LegendWrapper 수정(교체)
 export const LegendWrapper = styled.div`
   display: flex;
   gap: 28px;
-  justify-content: center;
   align-items: flex-start;
-  margin-top: 16px;
   color: #fff;
-  margin-bottom: 8px;
+  margin: 16px 0 8px;
+
+  /* 핵심: 한 줄로 펼치기 위해 콘텐츠가 스스로 넓어지도록 */
+  min-width: max-content;
 
   .legend-item {
     display: flex;
@@ -61,7 +84,6 @@ export const LegendWrapper = styled.div`
     &:hover {
       opacity: 1;
     }
-
     &.active {
       opacity: 1;
     }
@@ -73,18 +95,15 @@ export const LegendWrapper = styled.div`
     gap: 8px;
     font-weight: 700;
   }
-
   .dot {
     width: 8px;
     height: 8px;
     border-radius: 999px;
     display: inline-block;
   }
-
   .label {
     font-size: 14px;
   }
-
   .value {
     margin-top: 6px;
     font-size: 18px;
@@ -92,17 +111,15 @@ export const LegendWrapper = styled.div`
     letter-spacing: 0.2px;
     opacity: 0.95;
   }
-
   .pill {
     margin-top: 8px;
     padding: 4px 8px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 700;
-    background: rgba(56, 189, 113, 0.18); /* 연한 초록 */
+    background: rgba(56, 189, 113, 0.18);
     color: #00c566;
   }
-
   .pill.down {
     background: rgba(239, 68, 68, 0.18);
     color: #ff6b6b;

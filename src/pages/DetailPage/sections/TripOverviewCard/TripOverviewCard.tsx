@@ -25,11 +25,9 @@ import {
   RankNo,
   RankUser,
   RankPercent,
-  Tip,
-  TipLabel,
-  TipText,
   AvatarImg,
   RankAvatarImg,
+  AvatarBox,
   PodiumStage,
   CrownIcon,
 } from './TripOverviewCard.style';
@@ -63,10 +61,16 @@ function shuffle<T>(array: T[]): T[] {
 
 function RankAvatar({ url, alt }: { url?: string; alt: string }) {
   const [failed, setFailed] = useState(false);
-  return url && !failed ? (
-    <RankAvatarImg src={url} alt={alt} onError={() => setFailed(true)} />
-  ) : (
-    <CircleUserRound />
+  const showImg = Boolean(url) && !failed;
+
+  return (
+    <AvatarBox>
+      {showImg ? (
+        <img src={url} alt={alt} onError={() => setFailed(true)} />
+      ) : (
+        <CircleUserRound aria-label={alt} />
+      )}
+    </AvatarBox>
   );
 }
 
@@ -80,11 +84,12 @@ function PodiumAvatar({
   pos: 'first' | 'second' | 'third';
 }) {
   const [failed, setFailed] = useState(false);
+  const showImg = Boolean(url) && !failed;
 
   return (
-    <TopAvatar $pos={pos} aria-label={alt}>
+    <TopAvatar $pos={pos} $hasImage={showImg} aria-label={alt}>
       {pos === 'first' && <CrownIcon aria-hidden="true" />}
-      {url && !failed ? (
+      {showImg ? (
         <AvatarImg src={url} alt={alt} onError={() => setFailed(true)} />
       ) : (
         <CircleUserRound />
@@ -196,13 +201,10 @@ export default function TripOverviewCard({
                 alt={`${podiumTop3[2].name} 프로필`}
               />
             )}
-
-            {/* 단상 이미지 */}
             <Podium src={podiumImageUrl} alt="랭킹 단상" />
           </PodiumStage>
         </PodiumWrap>
       )}
-
       <RankList>
         {members.map((m, idx) => (
           <RankItem key={m.id}>
@@ -215,11 +217,6 @@ export default function TripOverviewCard({
           </RankItem>
         ))}
       </RankList>
-      <Divider />
-      <Tip>
-        <TipLabel>TIP</TipLabel>
-        <TipText>{tip}</TipText>
-      </Tip>
     </Wrapper>
   );
 }
