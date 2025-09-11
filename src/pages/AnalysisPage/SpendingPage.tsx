@@ -60,6 +60,24 @@ export default function SpendingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchSummary = async () => {
+    try {
+      setLoading(true);
+      const res = await getSummary();
+      setSummary(res);
+      // ... categories, chartData 세팅하는 부분 그대로 사용
+    } catch (e: any) {
+      setError(e?.message ?? '요약 불러오기 실패');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 최초 진입 시 로드
+  useEffect(() => {
+    fetchSummary();
+  }, []);
+
   // 데이터 불러오기
   useEffect(() => {
     let cancelled = false;
@@ -335,7 +353,11 @@ export default function SpendingPage() {
           </>
         )}
 
-        <CardConnectModal isOpen={isConnectOpen} onClose={() => setIsConnectOpen(false)} />
+        <CardConnectModal
+          isOpen={isConnectOpen}
+          onClose={() => setIsConnectOpen(false)}
+          onSuccess={fetchSummary}
+        />
       </Page>
       <BottomNavigationBar />
     </div>
