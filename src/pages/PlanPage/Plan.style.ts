@@ -3,6 +3,7 @@ import styled from 'styled-components';
 export const Page = styled.div`
   padding: 1rem;
   color: white;
+  height: 85vh;
 `;
 
 export const Tabs = styled.div`

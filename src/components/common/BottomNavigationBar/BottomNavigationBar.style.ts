@@ -15,6 +15,7 @@ export const Wrapper = styled.div`
   justify-content: space-around;
   align-items: center;
   z-index: 1000;
+  padding: 3px;
 `;
 
 export const NavItem = styled.div<{ $active?: boolean }>`
@@ -24,6 +25,7 @@ export const NavItem = styled.div<{ $active?: boolean }>`
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 20px;
 
   svg {
     margin-bottom: 4px;

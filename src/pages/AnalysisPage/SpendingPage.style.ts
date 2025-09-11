@@ -1,11 +1,17 @@
 import styled from 'styled-components';
 
+export const Page = styled.div`
+  padding: 1rem;
+  height: 85vh;
+  gap: 15px;
+`;
+
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-    margin-top: 10px;
+  margin-top: 10px;
 `;
 
 export const TitleContainer = styled.div`
@@ -41,8 +47,8 @@ export const ChartContainer = styled.div`
 export const LegendScroll = styled.div`
   width: 100%;
   overflow-x: auto;
-    height: 110px;
-    overflow-y:hidden;
+  height: 110px;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
@@ -127,8 +133,8 @@ export const LegendWrapper = styled.div`
   }
 `;
 export const CategoryPanel = styled.div`
-    width: 300px;
-    margin-top: 50px;
+  width: 300px;
+  margin-top: 50px;
   color: #fff;
 
   .section-title {
@@ -188,11 +194,11 @@ export const CategoryPanel = styled.div`
 `;
 
 export const SavingsBanner = styled.div`
-    width: 300px;
-    height: 30px;
+  width: 300px;
+  height: 30px;
   border-radius: 16px;
   padding: 14px 16px;
-    margin-top: 10px;
+  margin-top: 10px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -227,6 +233,7 @@ export const CardButton = styled.div`
 
 export const Text = styled.div`
   color: white;
+  margin-top: 30px;
   margin-bottom: 30px;
   text-align: center;
 `;
