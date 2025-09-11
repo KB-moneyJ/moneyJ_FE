@@ -73,7 +73,14 @@ export default function DetailPage() {
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
 
-  const progress = data?.progressPercent ?? 0;
+  const progress = useMemo(() => {
+    const total = data?.totalBudget ?? 0;
+    if (typeof accountBalance === 'number' && total > 0) {
+      const pct = Math.round(Math.min(100, Math.max(0, (accountBalance / total) * 100)));
+      return pct;
+    }
+    return data?.progressPercent ?? 0;
+  }, [accountBalance, data?.totalBudget, data?.progressPercent]);
 
   const podiumTop3 = useMemo(() => {
     if (balances.length) {
