@@ -117,8 +117,8 @@ export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: P
 
       await fetch(`http://localhost:8080/trip-plans/isconsumed`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+
         body: JSON.stringify(bodyData),
       });
 
@@ -148,7 +148,6 @@ export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: P
           amount: item.amount,
         })),
       };
-
 
       console.log('PATCH 요청 보낼 데이터:', bodyData);
 

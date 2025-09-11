@@ -14,6 +14,7 @@ import {
 } from './BankConnectModal.style';
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
+const token = localStorage.getItem('accessToken');
 
 interface BankConnectModalProps {
   isOpen: boolean;
@@ -82,7 +83,9 @@ export default function BankConnectModal({
           },
         ],
       },
-      { withCredentials: true },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
 
   const addCredentialBK = (organization: string, id: string, pw: string) =>
@@ -97,13 +100,16 @@ export default function BankConnectModal({
         id,
         password: pw,
       },
-      { withCredentials: true },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
 
   const fetchBankAccounts = async (organization: string) => {
     const { data } = await axios.get(`${BASE_URL}/api/codef/bank/accounts`, {
       params: { organization },
-      withCredentials: true,
+
+      headers: { Authorization: `Bearer ${token}` },
     });
     const list: DepositTrustAccount[] = (data?.data?.resDepositTrust ?? []).map((a: any) => ({
       resAccount: a.resAccount,
@@ -118,7 +124,9 @@ export default function BankConnectModal({
     await axios.post(
       `${BASE_URL}/api/codef/accounts/bank`,
       { organizationCode, accountNumber: acctNo, tripPlanId: planId },
-      { withCredentials: true },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
   };
 

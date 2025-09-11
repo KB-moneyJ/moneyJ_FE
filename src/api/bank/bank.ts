@@ -2,6 +2,7 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
+const token = localStorage.getItem('accessToken');
 
 /* ====================== Types (필요한 필드만) ====================== */
 
@@ -118,7 +119,9 @@ export async function createBankConnectedId(
         },
       ],
     },
-    { withCredentials: true },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
   );
   return data;
 }
@@ -139,7 +142,9 @@ export async function addBankCredential(
       id,
       password,
     },
-    { withCredentials: true },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
   );
   return data;
 }
@@ -147,7 +152,9 @@ export async function addBankCredential(
 export async function getCredentialsList(): Promise<GetCredentialsListResponse> {
   const { data } = await axios.get<GetCredentialsListResponse>(
     `${BASE_URL}/api/codef/credentials`,
-    { withCredentials: true },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
   );
   return data;
 }
@@ -157,7 +164,8 @@ export async function getCredentialsList(): Promise<GetCredentialsListResponse> 
 async function fetchAccountsOnce(organization: BankOrganizationCode): Promise<BankAccount[]> {
   const { data } = await axios.get<BankAccountsResponseRaw>(`${BASE_URL}/api/codef/bank/accounts`, {
     params: { organization },
-    withCredentials: true,
+
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (data?.result?.code !== CF_SUCCESS) {
@@ -221,7 +229,9 @@ export async function linkTripPlanAccount(params: {
   const { data } = await axios.post<TripPlanAccountSaveResponse>(
     `${BASE_URL}/api/codef/accounts/bank`,
     params,
-    { withCredentials: true },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
   );
   return data;
 }
@@ -232,7 +242,9 @@ export async function refreshTripPlanBalance(
   const { data } = await axios.post<TripPlanAccountSaveResponse>(
     `${BASE_URL}/api/codef/accounts/bank`,
     { tripPlanId },
-    { withCredentials: true },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
   );
   return data;
 }
@@ -256,7 +268,8 @@ export async function deleteBankCredential(params: {
       businessType: params.businessType ?? 'BK',
       loginType: params.loginType ?? '1',
     },
-    withCredentials: true,
+
+    headers: { Authorization: `Bearer ${token}` },
   });
   return data;
 }

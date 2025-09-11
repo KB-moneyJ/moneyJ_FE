@@ -36,6 +36,7 @@ export function useTripPlanDetail(id?: number | string) {
     queryFn: async (): Promise<TripDetailModel> => {
       try {
         const data = await fetchTripPlanDetail(id!);
+
         return toTripDetailModel(data);
       } catch (e) {
         if (axios.isAxiosError(e)) {
@@ -64,6 +65,7 @@ export function useTripPlanBalances(id?: number | string) {
     enabled: !!id,
     queryFn: async (): Promise<TripBalanceModel[]> => {
       const data = await fetchTripPlanBalances(id!);
+      console.log(data);
       return data.map(toBalanceModel).sort((a, b) => b.percent - a.percent);
     },
     staleTime: 30_000,
