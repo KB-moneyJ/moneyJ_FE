@@ -101,11 +101,16 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
 }
 
 export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
+  const raw = (api as any)?.progress;
+  const n = typeof raw === 'string' ? parseFloat(raw) : Number(raw ?? 0);
+  const pct = !isFinite(n) ? 0 : n <= 1 ? n * 100 : n;
+  const percent = Math.round(pct * 10) / 10;
+
   return {
     id: String(api.userId),
     name: api.nickname,
     avatarUrl: absolutize(api.profileImage),
     balance: api.balance,
-    percent: Math.round(api.progress * 10) / 10,
+    percent,
   };
 }

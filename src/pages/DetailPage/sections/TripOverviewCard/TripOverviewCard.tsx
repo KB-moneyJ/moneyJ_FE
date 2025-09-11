@@ -126,6 +126,16 @@ export default function TripOverviewCard({
 
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
 
+  const sortedMembers = useMemo(
+    () =>
+      [...members]
+        .map((m) => ({
+          ...m,
+          percent: Number.isFinite(m.percent as any) ? m.percent : 0,
+        }))
+        .sort((a, b) => b.percent - a.percent),
+    [members],
+  );
   return (
     <Wrapper>
       <Header>
@@ -208,14 +218,14 @@ export default function TripOverviewCard({
         </PodiumWrap>
       )}
       <RankList>
-        {members.map((m, idx) => (
+        {sortedMembers.map((m, idx) => (
           <RankItem key={m.id}>
             <RankNo>{idx + 1}</RankNo>
             <RankUser>
               <RankAvatar url={m.avatarUrl} alt={`${m.name} 프로필`} />
               {m.name}
             </RankUser>
-            <RankPercent>{(Math.round(m.percent * 10) / 10).toFixed(1)}%</RankPercent>
+            <RankPercent>{(Math.round((m.percent ?? 0) * 10) / 10).toFixed(1)}%</RankPercent>
           </RankItem>
         ))}
       </RankList>

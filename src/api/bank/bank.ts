@@ -211,3 +211,104 @@ export async function deleteBankCredential(params: {
   });
   return data;
 }
+
+// --- retry & fallback utils -------------------------------------------------
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function normalizeDigits(s?: string) {
+  return (s ?? '').replace(/\D/g, '').replace(/^0+(?!$)/, '');
+}
+
+/** CODEF 계좌목록: CF-00016(중복요청) 발생 시 지수 백오프 재시도 */
+export async function fetchBankAccountsWithRetry(
+  organization: BankOrganizationCode,
+  tries = 5,
+  initialDelayMs = 250,
+): Promise<BankAccountsResponse> {
+  let delay = initialDelayMs;
+  for (let i = 0; i < tries; i++) {
+    const { data } = await axios.get<BankAccountsResponse>(`${BASE_URL}/api/codef/bank/accounts`, {
+      params: { organization },
+      withCredentials: true,
+    });
+
+    const code = data?.result?.code;
+    if (code === 'CF-00000') return data;
+
+    // CODEF가 "동일한 요청 처리 중" → 잠깐 기다렸다 재시도
+    if (code === 'CF-00016') {
+      await sleep(delay);
+      delay = Math.min(delay * 2, 2000);
+      continue;
+    }
+
+    throw new Error(`은행 계좌 목록 조회 실패 (code: ${code || 'UNKNOWN'})`);
+  }
+  throw new Error('은행 계좌 목록 조회 재시도 초과');
+}
+
+/**
+ * 잔액 조회(새로고침 시) 보호 래퍼
+ * - 429/“중복 요청” 류는 프론트에서 짧게 재시도
+ * - 여전히 실패 & org 전달된 경우: 계좌목록 재조회 → (last4가 있으면) 같은 계좌 추정 → 자동 재연결(linkTripPlanAccount)
+ */
+export async function refreshTripPlanBalanceWithRetry(
+  tripPlanId: number,
+  opts?: {
+    tries?: number;
+    initialDelayMs?: number;
+    organizationCode?: BankOrganizationCode; // 로컬에 저장해둔 org
+    acctLast4?: string; // 로컬에 저장해둔 계좌 뒷4자리(선택)
+  },
+): Promise<TripPlanAccountSaveResponse> {
+  const tries = opts?.tries ?? 3;
+  let delay = opts?.initialDelayMs ?? 400;
+
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await refreshTripPlanBalance(tripPlanId);
+    } catch (e: any) {
+      const status = e?.response?.status;
+      const msg = (e?.response?.data?.message as string | undefined) || '';
+
+      // 서버가 429(혹은 “중복 요청/동일한 요청 처리 중”)이면 잠깐 대기 후 재시도
+      if (status === 429 || /중복 요청|동일한 요청|처리 중/i.test(msg)) {
+        await sleep(delay);
+        delay = Math.min(delay * 2, 1500);
+        continue;
+      }
+
+      const org = opts?.organizationCode;
+      if (org) {
+        try {
+          const list = await fetchBankAccountsWithRetry(org, 5);
+          const accounts = list?.data?.resDepositTrust ?? [];
+          const pick =
+            (opts?.acctLast4 &&
+              accounts.find(
+                (a) =>
+                  normalizeDigits(a.resAccount).endsWith(opts.acctLast4!) ||
+                  normalizeDigits(a.resAccountDisplay).endsWith(opts.acctLast4!),
+              )) ||
+            accounts[0];
+
+          if (!pick?.resAccount) throw new Error('NO_ACCOUNT_CANDIDATE');
+
+          const relink = await linkTripPlanAccount({
+            organizationCode: org,
+            accountNumber: normalizeDigits(pick.resAccount),
+            tripPlanId,
+          });
+
+          return relink;
+        } catch {}
+      }
+
+      throw e;
+    }
+  }
+  return await refreshTripPlanBalance(tripPlanId);
+}

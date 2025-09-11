@@ -11,7 +11,11 @@ import FriendInviteModal from '@/components/modals/FriendInviteModal';
 import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
-import { refreshTripPlanBalance } from '@/api/bank/bank';
+import {
+  refreshTripPlanBalanceWithRetry,
+  BankOrganizationCode,
+  refreshTripPlanBalance,
+} from '@/api/bank/bank';
 import {
   useTripPlanDetail,
   useTripPlanBalances,
@@ -150,12 +154,13 @@ export default function DetailPage() {
   const checklist = data?.checklist ?? [];
   const cautions = data?.cautions ?? [];
 
+  // 새로고침 시 잔액 재조회 (+ CF-00016 대응)
   useEffect(() => {
     let mounted = true;
     if (!tripId) return;
 
-    const planId = Number(tripId);
-    const wasLinked = getLinkedForPlan(planId);
+    const planIdNum = Number(tripId);
+    const wasLinked = getLinkedForPlan(planIdNum);
 
     if (!wasLinked) {
       setIsAccountLinked(false);
@@ -166,21 +171,28 @@ export default function DetailPage() {
 
     (async () => {
       try {
-        const res = await refreshTripPlanBalance(planId);
-        if (!mounted) return;
-        qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
+        const bankOrg = getBankOrgForPlan(planIdNum) as BankOrganizationCode | undefined;
 
-        const org = getBankOrgForPlan(planId);
-        const bankName = org ? BANK_NAME_BY_CODE[org] : undefined;
+        const res = await refreshTripPlanBalanceWithRetry(planIdNum, {
+          organizationCode: bankOrg,
+        });
+
+        if (!mounted) return;
+
+        // 멤버별 잔액/진행도 쿼리 갱신
+        qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planIdNum), exact: true });
+
+        const bankName = bankOrg ? BANK_NAME_BY_CODE[bankOrg] : undefined;
 
         setIsAccountLinked(true);
         setAccountLabel(
           bankName ? `${bankName} ${res.accountNumberDisplay}` : res.accountNumberDisplay,
         );
         setAccountBalance(res.balance);
-      } catch {
+      } catch (err) {
         if (!mounted) return;
-        setLinkedForPlan(planId, false);
+        // 재시도/폴백 실패 시 로컬 링크 해제
+        setLinkedForPlan(planIdNum, false);
         setIsAccountLinked(false);
         setAccountLabel(undefined);
         setAccountBalance(undefined);
