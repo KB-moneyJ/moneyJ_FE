@@ -32,13 +32,17 @@ const BASE_URL = import.meta.env.VITE_API_URL as string;
 export default function ExpenseCard({ savedPercent, tripId }: Props) {
   const [items, setItems] = useState<ExpenseItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const token = localStorage.getItem('accessToken');
 
   // 여행 경비 항목 불러오기 함수 (PATCH 후에도 재사용)
   const fetchExpenses = async () => {
     try {
       const res = await fetch(`${BASE_URL}/trip-plans/${tripId}`, {
         method: 'GET',
-        credentials: 'include', // ✅ 쿠키 포함
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
+        },
       });
 
       const data = await res.json();
@@ -106,15 +110,15 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         categoryName: item.label,
         isConsumed: true,
       };
-
+      const token = localStorage.getItem('accessToken');
       console.log('POST 요청 보낼 데이터:', bodyData);
 
       await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        credentials: 'include',
         body: JSON.stringify(bodyData),
       });
 
@@ -143,11 +147,10 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        credentials: 'include',
         body: JSON.stringify(bodyData),
       });
-
       // 요청 후 로컬 업데이트
       setItems(updatedItems);
     } catch (err) {

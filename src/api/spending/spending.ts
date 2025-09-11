@@ -19,6 +19,8 @@ export async function connectCard(organization: string, id: string, password: st
     start.setDate(1);
     const startDate = formatDate(start);
 
+    const token = localStorage.getItem('accessToken');
+
     const res = await axios.post(
       `${BASE_URL}/api/codef/connected-id`,
       {
@@ -34,7 +36,9 @@ export async function connectCard(organization: string, id: string, password: st
           },
         ],
       },
-      { withCredentials: true },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
     console.log('카드 연결 성공:', res.data);
     console.log(organization, startDate, endDate);
@@ -46,7 +50,9 @@ export async function connectCard(organization: string, id: string, password: st
         startDate,
         endDate,
       },
-      { withCredentials: true },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
     console.log('거래 내역 저장 성공:', result.data);
   } catch (err) {
@@ -56,11 +62,17 @@ export async function connectCard(organization: string, id: string, password: st
 }
 
 export async function getSummary() {
-  const res = await axios.get(`${BASE_URL}/summary`, { withCredentials: true });
+  const token = localStorage.getItem('accessToken');
+  const res = await axios.get(`${BASE_URL}/summary`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return res.data;
 }
 
 export async function getMonthCategory(month: string, category: string) {
-  const res = await axios.get(`${BASE_URL}/summary/category?month=${month}&category=${category}`);
+  const token = localStorage.getItem('accessToken');
+  const res = await axios.get(`${BASE_URL}/summary/category?month=${month}&category=${category}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return res.data;
 }

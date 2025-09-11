@@ -27,6 +27,7 @@ export default function MakePlan() {
   const [people, setPeople] = useState(1);
   const [friendIds, setFriendIds] = useState<string[]>([]);
 
+  const token = localStorage.getItem('accessToken');
   const pageVariants = {
     initial: { x: '100%', opacity: 0 },
     enter: { x: 0, opacity: 1, transition: { duration: 0.5 } },
@@ -64,10 +65,10 @@ export default function MakePlan() {
           const response = await axios.post(
             `${BASE_URL}/users/check`,
             { emails: friendIds },
-            { withCredentials: true },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
           );
-
-
 
           const result = response.data;
 

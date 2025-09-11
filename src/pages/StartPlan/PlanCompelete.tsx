@@ -84,8 +84,8 @@ export default function PlanCompelete() {
           startDate = formatDate(days.year, days.month, '01');
           endDate = formatDate(days.year, days.month, String(lastDayOfMonth));
         }
-
-        const res = await fetch(`${BASE_URL}/trip-plans/budget`, {
+        const BASE_URL = import.meta.env.VITE_API_URL as string;
+        const res = await fetch(`${BASE_URL}trip-plans/budget`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -194,14 +194,13 @@ export default function PlanCompelete() {
         targetDate, // 여행 7일 전
         tripMemberEmail: allEmails, // 내 이메일 + 친구 이메일
       };
-
+      const BASE_URL = import.meta.env.VITE_API_URL as string;
       console.log('최종 POST 데이터:', payload);
-
-      const res = await fetch('${BASE_URL}/trip-plans', {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`${BASE_URL}/trip-plans`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
-        credentials: 'include',
       });
 
       if (!res.ok) throw new Error('여행 저장 실패');
