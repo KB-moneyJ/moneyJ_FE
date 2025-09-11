@@ -77,3 +77,22 @@ export const TipText = styled.p`
   margin: 0;
   line-height: 1.45;
 `;
+
+export const BalancePill = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff3b0;
+  color: #7a5a00;
+  padding: 7px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+`;
+
+export const AccountRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+`;

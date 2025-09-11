@@ -9,9 +9,48 @@ import BeforeYouGoCard from './sections/BeforeYouGoCard/BeforeYouGoCard';
 import FriendInviteModal from '@/components/modals/FriendInviteModal';
 import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
+
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
+
+import { refreshTripPlanBalance } from '@/api/bank/bank';
+
 import { useTripPlanDetail, useTripPlanBalances, useDeleteTripPlan } from '@/api/trips/queries';
 import { useMe } from '@/api/users/queries';
+
+const BANK_ORG_LS_KEY = 'bankOrgByPlanId';
+const BANK_LINKED_LS_KEY = 'bankLinkedByPlanId';
+
+function setBankOrgForPlan(planId: number, org: string) {
+  try {
+    const map = JSON.parse(localStorage.getItem(BANK_ORG_LS_KEY) || '{}');
+    map[String(planId)] = org;
+    localStorage.setItem(BANK_ORG_LS_KEY, JSON.stringify(map));
+  } catch {}
+}
+function getBankOrgForPlan(planId: number): string | undefined {
+  try {
+    const map = JSON.parse(localStorage.getItem(BANK_ORG_LS_KEY) || '{}');
+    return map[String(planId)];
+  } catch {
+    return undefined;
+  }
+}
+function setLinkedForPlan(planId: number, linked: boolean) {
+  try {
+    const map = JSON.parse(localStorage.getItem(BANK_LINKED_LS_KEY) || '{}');
+    if (linked) map[String(planId)] = true;
+    else delete map[String(planId)];
+    localStorage.setItem(BANK_LINKED_LS_KEY, JSON.stringify(map));
+  } catch {}
+}
+function getLinkedForPlan(planId: number): boolean {
+  try {
+    const map = JSON.parse(localStorage.getItem(BANK_LINKED_LS_KEY) || '{}');
+    return !!map[String(planId)];
+  } catch {
+    return false;
+  }
+}
 
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -32,6 +71,7 @@ export default function DetailPage() {
 
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
+  const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
 
   const progress = data?.progressPercent ?? 0;
 
@@ -78,17 +118,66 @@ export default function DetailPage() {
   const cautions = data?.cautions ?? [];
 
   useEffect(() => {
-    // TODO: 초기 연동 상태를 API로 불러와서 setIsAccountLinked / setAccountLabel 설정 (있다면)
-    // e.g., fetch(`/api/bank-link/${tripId}`)
+    let mounted = true;
+    if (!tripId) return;
+
+    const planId = Number(tripId);
+    const wasLinked = getLinkedForPlan(planId);
+
+    if (!wasLinked) {
+      setIsAccountLinked(false);
+      setAccountLabel(undefined);
+      setAccountBalance(undefined);
+      return;
+    }
+
+    (async () => {
+      try {
+        const res = await refreshTripPlanBalance(planId);
+        if (!mounted) return;
+
+        const org = getBankOrgForPlan(planId);
+        const bankName = org ? BANK_NAME_BY_CODE[org] : undefined;
+
+        setIsAccountLinked(true);
+        setAccountLabel(
+          bankName ? `${bankName} ${res.accountNumberDisplay}` : res.accountNumberDisplay,
+        );
+        setAccountBalance(res.balance);
+      } catch {
+        if (!mounted) return;
+        setLinkedForPlan(planId, false);
+        setIsAccountLinked(false);
+        setAccountLabel(undefined);
+        setAccountBalance(undefined);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, [tripId]);
 
-  const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
+  const handleBankConnected = async (bankCode: string, acct: string) => {
+    const planId = Number(tripId);
+    setLinkedForPlan(planId, true);
+    setBankOrgForPlan(planId, bankCode);
 
-  const handleBankConnected = (bankCode: string, acct: string) => {
-    const bankName = BANK_NAME_BY_CODE[bankCode] ?? '연동 계좌';
-    setIsAccountLinked(true);
-    setAccountLabel(`${bankName} ${maskAccount(acct)}`);
-    setOpenBank(false);
+    try {
+      const res = await refreshTripPlanBalance(planId);
+      const bankName = BANK_NAME_BY_CODE[bankCode] ?? '연동 계좌';
+      setIsAccountLinked(true);
+      setAccountLabel(`${bankName} ${res.accountNumberDisplay}`);
+      setAccountBalance(res.balance);
+    } catch {
+      const bankName = BANK_NAME_BY_CODE[bankCode] ?? '연동 계좌';
+      const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
+      setIsAccountLinked(true);
+      setAccountLabel(`${bankName} ${maskAccount(acct)}`);
+      setAccountBalance(undefined);
+    } finally {
+      setOpenBank(false);
+    }
   };
 
   const handleDeletePlan = () => {
@@ -151,7 +240,6 @@ export default function DetailPage() {
               >
                 친구 초대
               </DropdownItem>
-              {/* 삭제 연동 */}
               <DropdownItem onClick={handleDeletePlan}>
                 {deleting ? '플랜 삭제 중…' : '플랜 삭제하기'}
               </DropdownItem>
@@ -165,10 +253,14 @@ export default function DetailPage() {
         tip={data.overviewTip ?? '오늘도 한 걸음! 목표가 가까워지고 있어요.'}
         linked={isAccountLinked}
         accountLabel={accountLabel}
+        balance={accountBalance}
         onClickSave={() => {
           console.log('저축하기 클릭');
         }}
-        onClickLink={() => setOpenBank(true)}
+        onClickLink={() => {
+          if (isAccountLinked) return;
+          setOpenBank(true);
+        }}
       />
 
       <ExpenseCard savedPercent={progress} tripId={Number(tripId)} />
