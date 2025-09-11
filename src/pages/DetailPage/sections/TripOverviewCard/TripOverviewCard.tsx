@@ -27,6 +27,7 @@ import {
   RankPercent,
   AvatarImg,
   RankAvatarImg,
+  AvatarBox,
   PodiumStage,
   CrownIcon,
 } from './TripOverviewCard.style';
@@ -60,10 +61,16 @@ function shuffle<T>(array: T[]): T[] {
 
 function RankAvatar({ url, alt }: { url?: string; alt: string }) {
   const [failed, setFailed] = useState(false);
-  return url && !failed ? (
-    <RankAvatarImg src={url} alt={alt} onError={() => setFailed(true)} />
-  ) : (
-    <CircleUserRound />
+  const showImg = Boolean(url) && !failed;
+
+  return (
+    <AvatarBox>
+      {showImg ? (
+        <img src={url} alt={alt} onError={() => setFailed(true)} />
+      ) : (
+        <CircleUserRound aria-label={alt} />
+      )}
+    </AvatarBox>
   );
 }
 
@@ -77,11 +84,12 @@ function PodiumAvatar({
   pos: 'first' | 'second' | 'third';
 }) {
   const [failed, setFailed] = useState(false);
+  const showImg = Boolean(url) && !failed;
 
   return (
-    <TopAvatar $pos={pos} aria-label={alt}>
+    <TopAvatar $pos={pos} $hasImage={showImg} aria-label={alt}>
       {pos === 'first' && <CrownIcon aria-hidden="true" />}
-      {url && !failed ? (
+      {showImg ? (
         <AvatarImg src={url} alt={alt} onError={() => setFailed(true)} />
       ) : (
         <CircleUserRound />
