@@ -1,50 +1,43 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import axios from "axios";
-import {
-  Wrapper,
-  ContentsWrapper,
-  ProgressBar,
-  Progress,
-  NextBtn,
-  PrevBtn,
-} from "./PlanStyle";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import axios from 'axios';
+import { Wrapper, ContentsWrapper, ProgressBar, Progress, NextBtn, PrevBtn } from './PlanStyle';
 
-import Step1 from "./steps/Step1";
-import Step2 from "./steps/Step2";
-import Step3 from "./steps/Step3";
-import Step4 from "./steps/Step4";
+import Step1 from './steps/Step1';
+import Step2 from './steps/Step2';
+import Step3 from './steps/Step3';
+import Step4 from './steps/Step4';
+const BASE_URL = import.meta.env.VITE_API_URL as string;
 
 export default function MakePlan() {
   const navigate = useNavigate();
   const [step, setStep] = useState<number>(1);
   const [selectedCountry, setSelectedCountry] = useState<any>(null);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-  const [otherCity, setOtherCity] = useState("");
+  const [otherCity, setOtherCity] = useState('');
   const [days, setDays] = useState({
-    year: "",
-    month: "",
-    nights: "",
-    days: "",
-    rangeStart: "",
-    rangeEnd: "",
+    year: '',
+    month: '',
+    nights: '',
+    days: '',
+    rangeStart: '',
+    rangeEnd: '',
   });
   const [people, setPeople] = useState(1);
   const [friendIds, setFriendIds] = useState<string[]>([]);
 
-
   const pageVariants = {
-    initial: { x: "100%", opacity: 0 },
+    initial: { x: '100%', opacity: 0 },
     enter: { x: 0, opacity: 1, transition: { duration: 0.5 } },
-    exit: { x: "-100%", opacity: 0, transition: { duration: 0.5 } },
+    exit: { x: '-100%', opacity: 0, transition: { duration: 0.5 } },
   };
 
   const goNext = async () => {
     // Step2: 여행지 선택 검증
     if (step === 2) {
-      if (selectedRegions.length === 0 && otherCity.trim() === "") {
-        alert("최소 한 개의 여행지를 선택해주세요!");
+      if (selectedRegions.length === 0 && otherCity.trim() === '') {
+        alert('최소 한 개의 여행지를 선택해주세요!');
         return;
       }
     }
@@ -52,7 +45,7 @@ export default function MakePlan() {
     // Step3: 날짜 및 기간 검증
     if (step === 3) {
       if (!days.year || !days.month || !days.nights || !days.days) {
-        alert("년, 월, 몇박 몇일을 모두 입력해주세요!");
+        alert('년, 월, 몇박 몇일을 모두 입력해주세요!');
         return;
       }
     }
@@ -69,9 +62,9 @@ export default function MakePlan() {
         // friendIds가 존재할 때만 서버 검증
         if (friendIds.length > 0) {
           const response = await axios.post(
-            "http://localhost:8080/users/check",
+            `${BASE_URL}/users/check`,
             { emails: friendIds },
-            { withCredentials: true }
+            { withCredentials: true },
           );
 
           const result = response.data;
@@ -81,18 +74,18 @@ export default function MakePlan() {
             .map((user: any) => user.email);
 
           if (invalidUsers.length > 0) {
-            alert(`가입하지 않은 사용자입니다:\n${invalidUsers.join("\n")}`);
+            alert(`가입하지 않은 사용자입니다:\n${invalidUsers.join('\n')}`);
             return; // 검증 실패 시 진행 중단
           }
         }
 
         // 검증 통과 또는 친구 없음 → PlanComplete 페이지로 이동
-        navigate("/plancompelete", {
+        navigate('/plancompelete', {
           state: { selectedCountry, selectedRegions, otherCity, days, people, friendIds },
         });
       } catch (error) {
-        console.error("사용자 검증 실패:", error);
-        alert("사용자 검증 중 오류가 발생했습니다.");
+        console.error('사용자 검증 실패:', error);
+        alert('사용자 검증 중 오류가 발생했습니다.');
       }
     }
   };
@@ -103,11 +96,7 @@ export default function MakePlan() {
     switch (step) {
       case 1:
         return (
-          <Step1
-            onSelectCountry={setSelectedCountry}
-            selected={selectedCountry}
-            goNext={goNext}
-          />
+          <Step1 onSelectCountry={setSelectedCountry} selected={selectedCountry} goNext={goNext} />
         );
       case 2:
         return (
@@ -141,7 +130,6 @@ export default function MakePlan() {
             friendIds={friendIds}
             setFriendIds={setFriendIds}
           />
-
         );
       default:
         return null;
@@ -150,10 +138,10 @@ export default function MakePlan() {
 
   return (
     <Wrapper>
-      <div style={{width:'100%',display:'flex', justifyContent:'flex-start'}}>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
         <div
-          style={{ marginTop: "63px", marginLeft: "42px", cursor: "pointer", width:'24.5px' }}
-          onClick={() => navigate("/home")}
+          style={{ marginTop: '63px', marginLeft: '42px', cursor: 'pointer', width: '24.5px' }}
+          onClick={() => navigate('/home')}
         >
           <svg
             width="22"
@@ -171,12 +159,11 @@ export default function MakePlan() {
           </svg>
         </div>
       </div>
-      <ContentsWrapper style={{ position: "relative", minHeight: "500px" }}>
+      <ContentsWrapper style={{ position: 'relative', minHeight: '500px' }}>
         <ProgressBar>
           <Progress
             style={{
-              marginLeft:
-                step === 1 ? "0" : step === 2 ? "25%" : step === 3 ? "50%" : "75%",
+              marginLeft: step === 1 ? '0' : step === 2 ? '25%' : step === 3 ? '50%' : '75%',
             }}
           />
         </ProgressBar>
@@ -189,13 +176,13 @@ export default function MakePlan() {
             animate="enter"
             exit="exit"
             style={{
-              textAlign: "center",
-              fontSize: "2rem",
-              marginTop: "2rem",
-              position: "absolute",
+              textAlign: 'center',
+              fontSize: '2rem',
+              marginTop: '2rem',
+              position: 'absolute',
               top: 0,
               left: 0,
-              width: "100%",
+              width: '100%',
             }}
           >
             {renderStep()}
@@ -205,11 +192,11 @@ export default function MakePlan() {
 
       <div
         style={{
-          marginTop: "5px",
-          width: "87%",
-          display: "flex",
-          justifyContent: "space-between",
-          zIndex: "999",
+          marginTop: '5px',
+          width: '87%',
+          display: 'flex',
+          justifyContent: 'space-between',
+          zIndex: '999',
         }}
       >
         {step > 1 && <PrevBtn onClick={goPrev}>이전</PrevBtn>}
