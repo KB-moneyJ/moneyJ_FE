@@ -1,3 +1,4 @@
+// src/pages/DetailPage/sections/TripOverviewCard/TripOverviewCard.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Wrapper,
@@ -33,13 +34,14 @@ import {
 } from './TripOverviewCard.style';
 import { CircleUserRound } from 'lucide-react';
 
-type Member = { id: string; name: string; percent: number; avatarUrl?: string };
+type Member = { id: string; name: string; percent: number | string; avatarUrl?: string };
 
 type Props = {
   destination: string;
   countryCode?: string;
   period: string;
   thumbnailUrl: string;
+  /** 멤버가 없을 때 사용할 폴백 진행률(%) */
   progressPercent: number;
   members: Member[];
   tip?: string;
@@ -58,11 +60,15 @@ function shuffle<T>(array: T[]): T[] {
   }
   return copy;
 }
+const clampPct = (n: number) => Math.max(0, Math.min(100, n));
+const toPct = (v: unknown) => {
+  const n = typeof v === 'string' ? parseFloat(v) : (v as number);
+  return Number.isFinite(n) ? n : 0;
+};
 
 function RankAvatar({ url, alt }: { url?: string; alt: string }) {
   const [failed, setFailed] = useState(false);
   const showImg = Boolean(url) && !failed;
-
   return (
     <AvatarBox>
       {showImg ? (
@@ -85,7 +91,6 @@ function PodiumAvatar({
 }) {
   const [failed, setFailed] = useState(false);
   const showImg = Boolean(url) && !failed;
-
   return (
     <TopAvatar $pos={pos} $hasImage={showImg} aria-label={alt}>
       {pos === 'first' && <CrownIcon aria-hidden="true" />}
@@ -109,33 +114,49 @@ export default function TripOverviewCard({
   podiumImageUrl,
   podiumTop3,
 }: Props) {
+  // 1) 멤버 퍼센트 정규화(문자도 숫자로 변환)
+  const normalizedMembers = useMemo(
+    () =>
+      (members ?? []).map((m) => ({
+        ...m,
+        percent: clampPct(toPct(m.percent)),
+      })),
+    [members],
+  );
+
+  // 2) 그룹 평균(멤버 있으면 평균, 없으면 폴백 progressPercent)
+  const groupAvg = useMemo(() => {
+    if (normalizedMembers.length === 0) return clampPct(toPct(progressPercent));
+    const sum = normalizedMembers.reduce((acc, m) => acc + toPct(m.percent), 0);
+    return clampPct(sum / normalizedMembers.length);
+  }, [normalizedMembers, progressPercent]);
+
+  // 3) 타일 퍼즐(그룹 평균에 맞춰 열림)
   const totalTiles = TILE_ROWS * TILE_COLS;
   const orderRef = useRef<number[]>(shuffle([...Array(totalTiles).keys()]));
-  const initialCount = Math.max(0, Math.min(totalTiles, Math.floor(progressPercent / 10)));
+  const initialCount = Math.max(0, Math.min(totalTiles, Math.floor(groupAvg / 10)));
   const [openedCount, setOpenedCount] = useState<number>(initialCount);
 
+  // 평균 변동 시 더 많이 열리도록(되감기는 방지)
   useEffect(() => {
-    const next = Math.max(0, Math.min(totalTiles, Math.floor(progressPercent / 10)));
+    const next = Math.max(0, Math.min(totalTiles, Math.floor(groupAvg / 10)));
     setOpenedCount((prev) => (next > prev ? next : prev));
-  }, [progressPercent]);
+  }, [groupAvg, totalTiles]);
 
+  // 썸네일이 바뀌면 순서/카운트 초기화
   useEffect(() => {
-    setOpenedCount(initialCount);
+    setOpenedCount(Math.max(0, Math.min(totalTiles, Math.floor(groupAvg / 10))));
     orderRef.current = shuffle([...Array(totalTiles).keys()]);
-  }, [thumbnailUrl]);
+  }, [thumbnailUrl, groupAvg, totalTiles]);
 
   const visibleSet = useMemo(() => new Set(orderRef.current.slice(0, openedCount)), [openedCount]);
 
+  // 4) 랭킹 표시용 정렬(개인 퍼센트 숫자 보장)
   const sortedMembers = useMemo(
-    () =>
-      [...members]
-        .map((m) => ({
-          ...m,
-          percent: Number.isFinite(m.percent as any) ? m.percent : 0,
-        }))
-        .sort((a, b) => b.percent - a.percent),
-    [members],
+    () => [...normalizedMembers].sort((a, b) => toPct(b.percent) - toPct(a.percent)),
+    [normalizedMembers],
   );
+
   return (
     <Wrapper>
       <Header>
@@ -176,15 +197,13 @@ export default function TripOverviewCard({
       <ProgressRow>
         <ProgressBar
           role="progressbar"
-          aria-valuenow={progressPercent}
+          aria-valuenow={groupAvg}
           aria-valuemin={0}
           aria-valuemax={100}
         >
-          <ProgressFill $percent={progressPercent} />
+          <ProgressFill $percent={groupAvg} />
         </ProgressBar>
-        <ProgressRightLabel>
-          {(Math.round(progressPercent * 10) / 10).toFixed(1)}%
-        </ProgressRightLabel>
+        <ProgressRightLabel>{(Math.round(groupAvg * 10) / 10).toFixed(1)}%</ProgressRightLabel>
       </ProgressRow>
 
       <Divider />
@@ -217,6 +236,7 @@ export default function TripOverviewCard({
           </PodiumStage>
         </PodiumWrap>
       )}
+
       <RankList>
         {sortedMembers.map((m, idx) => (
           <RankItem key={m.id}>
@@ -225,7 +245,8 @@ export default function TripOverviewCard({
               <RankAvatar url={m.avatarUrl} alt={`${m.name} 프로필`} />
               {m.name}
             </RankUser>
-            <RankPercent>{(Math.round((m.percent ?? 0) * 10) / 10).toFixed(1)}%</RankPercent>
+            {/* ✅ 개인 진행률 숫자 표기 (소수 1자리 고정) */}
+            <RankPercent>{(Math.round(toPct(m.percent) * 10) / 10).toFixed(1)}%</RankPercent>
           </RankItem>
         ))}
       </RankList>

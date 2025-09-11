@@ -131,20 +131,34 @@ export default function BankConnectModal({
     setSelectedAccount('');
 
     try {
-      // connected-id 시도 → 실패 시 credentials 추가
+      // 1) connectedId를 만들되, 이미 있으면 넘어감
       try {
         await createConnectedIdBK(bank, bankId, password);
-      } catch {
-        await addCredentialBK(bank, bankId, password);
+      } catch (e: any) {
+        // CF-04006(이미 존재) 등은 무시하고 진행
+        // 필요 시 e?.response?.data?.result?.code 체크해서 무시 가능한 코드는 통과
       }
 
+      // 2) **항상** credential 추가 시도 (이미 있으면 통과)
+      try {
+        await addCredentialBK(bank, bankId, password);
+      } catch (e: any) {
+        const code = e?.response?.data?.result?.code;
+        // CF-03002: 동일 credential 이미 존재 → 무시하고 진행
+        if (code !== 'CF-03002') throw e;
+      }
+
+      // 3) 계좌 조회
       const list = await fetchBankAccounts(bank);
       if (!list.length) {
-        throw new Error('조회 가능한 예금/신탁 계좌가 없습니다.');
+        throw new Error(
+          '조회 가능한 예금/신탁 계좌가 없습니다. (은행 코드/조직코드 매핑, 인증수단, 계좌유형을 확인해 주세요)',
+        );
       }
       setAccounts(list);
     } catch (err: any) {
       const msg =
+        err?.response?.data?.result?.message ||
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
