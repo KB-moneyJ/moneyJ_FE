@@ -42,6 +42,7 @@ export default function ProgressCard({
 
   return (
     <Wrapper>
+      <Title>나의 진행 상황</Title>
       {!isLinked && <SaveBtn onClick={onClickLink}>계좌 연동하기</SaveBtn>}
       {isLinked && (
         <AccountRow>
@@ -54,8 +55,6 @@ export default function ProgressCard({
           )}
         </AccountRow>
       )}
-
-      <Title>나의 진행 상황</Title>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <ProgressBar
           role="progressbar"
