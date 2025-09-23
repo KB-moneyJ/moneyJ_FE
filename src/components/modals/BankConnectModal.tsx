@@ -130,6 +130,24 @@ export default function BankConnectModal({
     );
   };
 
+  async function checkAccountExists(organization: string): Promise<boolean> {
+    const token = localStorage.getItem('accessToken');
+    try {
+      const res = await axios.get(`${BASE_URL}/api/codef/credentials`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const accountList = res.data?.data?.accountList || [];
+
+      const exists = accountList.some((account: any) => account.organization === organization);
+
+      return exists;
+    } catch (err) {
+      console.error('계정 존재 여부 확인 실패:', err);
+      return false;
+    }
+  }
+
   // 1) 인증/연결 및 계좌 목록 불러오기
   const handleFetchAccounts = async () => {
     if (!canFetchAccounts) return;
@@ -139,21 +157,28 @@ export default function BankConnectModal({
     setSelectedAccount('');
 
     try {
-      // 1) connectedId를 만들되, 이미 있으면 넘어감
-      try {
-        await createConnectedIdBK(bank, bankId, password);
-      } catch (e: any) {
-        // CF-04006(이미 존재) 등은 무시하고 진행
-        // 필요 시 e?.response?.data?.result?.code 체크해서 무시 가능한 코드는 통과
-      }
+      // 이 은행 계정이 우리 DB에 이미 등록되어 있는지 먼저 확인
+      const isAlreadyRegistered = await checkAccountExists(bank);
 
-      // 2) **항상** credential 추가 시도 (이미 있으면 통과)
-      try {
-        await addCredentialBK(bank, bankId, password);
-      } catch (e: any) {
-        const code = e?.response?.data?.result?.code;
-        // CF-03002: 동일 credential 이미 존재 → 무시하고 진행
-        if (code !== 'CF-03002') throw e;
+      // 우리 DB에 등록되어 있지 않은 새로운 계정일 경우에만 등록 절차 실행
+      if (!isAlreadyRegistered) {
+        // 1) connectedId를 만들되, 이미 있으면 넘어감!
+        try {
+          await createConnectedIdBK(bank, bankId, password);
+        } catch (e: any) {
+          const code = e?.response?.data?.result?.code;
+          if (code !== 'CF-04006') throw e; // CF-04006은 예시 코드
+        }
+
+        // credential 추가 시도
+        try {
+          await addCredentialBK(bank, bankId, password);
+        } catch (e: any) {
+          const code = e?.response?.data?.result?.code;
+          if (code !== 'CF-03002') throw e;
+        }
+      } else {
+        console.log('이미 등록된 계정으로 판단되어 CODEF 등록 절차를 건너뜁니다.');
       }
 
       // 3) 계좌 조회
