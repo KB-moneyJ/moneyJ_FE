@@ -115,7 +115,7 @@ export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: P
       const token = localStorage.getItem('accessToken');
       console.log('POST 요청 보낼 데이터:', bodyData);
 
-      await fetch(`http://localhost:8080/trip-plans/isconsumed`, {
+      await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
 
