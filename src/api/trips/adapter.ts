@@ -57,7 +57,7 @@ export function toTripCardModel(p: TripPlanApi): TripCardModel {
     period: `${(p.tripStartDate ?? '').slice(0, 10).replaceAll('-', '.')} - ${(p.tripEndDate ?? '').slice(0, 10).replaceAll('-', '.')}`,
     thumbnailUrl: '/assets/images/trip-placeholder.jpg',
     progressPercent: progress,
-    membersCount: 1,
+    membersCount: p.memberCount ?? 1,
   };
 }
 
