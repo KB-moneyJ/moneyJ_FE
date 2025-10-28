@@ -9,6 +9,7 @@ export type TripPlanApi = {
   tripEndDate: string;
   totalBudget: number;
   currentSavings: number;
+  memberCount: number;
 };
 
 export type TripCardModel = {
