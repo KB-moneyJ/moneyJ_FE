@@ -4,6 +4,10 @@ export const Page = styled.div`
   padding: 1rem;
   height: 85vh;
   gap: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
 `;
 
 export const Wrapper = styled.div`
@@ -11,7 +15,6 @@ export const Wrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 10px;
 `;
 
 export const TitleContainer = styled.div`

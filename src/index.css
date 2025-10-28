@@ -21,7 +21,8 @@ body {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-
+  overflow-y: auto;
+  overflow-x: hidden;
   background: var(--gradient-main);
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);

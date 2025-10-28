@@ -14,6 +14,15 @@ export async function logout() {
         withCredentials: true,
       },
     );
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('isFirstLogin');
+    localStorage.removeItem('me.public');
+
+    document.cookie.split(';').forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, '')
+        .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+    });
 
     return res.data;
   } catch (err) {
