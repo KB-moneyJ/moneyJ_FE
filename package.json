@@ -26,8 +26,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "preinstall": "echo 'nodeLinker: node-modules' > .yarnrc.yml"
+    "preview": "vite preview"
   },
   "packageManager": "yarn@4.9.1"
 }
