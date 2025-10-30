@@ -325,7 +325,7 @@ export default function DetailPage() {
         {openMenu && (
           <Dropdown>
             <DropdownItem onClick={() => setOpenInvite(true)}>멤버 초대</DropdownItem>
-            <DropdownItem onClick={() => setOpenBank(true)}>계좌 연동</DropdownItem>
+            {/* <DropdownItem onClick={() => setOpenBank(true)}>계좌 연동</DropdownItem> */}
             <DropdownItem style={{ color: '#ff7b7b' }} onClick={handleDeletePlan}>
               플랜 삭제
             </DropdownItem>
