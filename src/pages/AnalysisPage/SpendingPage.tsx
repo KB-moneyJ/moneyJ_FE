@@ -3,7 +3,6 @@ import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomN
 import {
   Page,
   Wrapper,
-  TitleContainer,
   CategoryPanel,
   SavingsBanner,
   CardButton,
@@ -43,6 +42,7 @@ export default function SpendingPage() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>('');
 
   /** 🔹 요약 데이터 로드 */
   const fetchSummary = async () => {
@@ -57,12 +57,24 @@ export default function SpendingPage() {
     }
   };
 
-  /** 🔹 첫 마운트 시 데이터 로드 */
+  /** 첫 마운트 시 데이터 로드 */
   useEffect(() => {
     fetchSummary();
+
+    try {
+      const storedData = localStorage.getItem('me.public');
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        setUsername(parsed.nickname || 'User');
+      } else {
+        setUsername('User');
+      }
+    } catch (e) {
+      setUsername('User');
+    }
   }, []);
 
-  /** 🔹 chartData, categories 변환 */
+  /** chartData, categories 변환 */
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -104,7 +116,7 @@ export default function SpendingPage() {
     };
   }, []);
 
-  /** 🔹 기본 선택 카테고리 지정 */
+  /** 기본 선택 카테고리 지정 */
   useEffect(() => {
     if (!selected && categories.length > 0) setSelected(categories[0]);
   }, [categories, selected]);
@@ -116,11 +128,11 @@ export default function SpendingPage() {
     [categories],
   );
 
-  /** 🔹 현재/이전 달 데이터 */
+  /** 현재/이전 달 데이터 */
   const curr = chartData[chartData.length - 1] ?? {};
   const prev = chartData[chartData.length - 2] ?? {};
 
-  /** 🔹 이번 달 총합 */
+  /** 이번 달 총합 */
   const currentTotal = useMemo(() => {
     const monthly = summary?.monthly ?? [];
     if (monthly.length > 0) {
@@ -130,7 +142,7 @@ export default function SpendingPage() {
     return categories.reduce((sum, k) => sum + (Number(curr?.[k]) || 0), 0);
   }, [summary, categories, curr]);
 
-  /** 🔹 평균 / 절약 계산 */
+  /** 평균 / 절약 계산 */
   const metrics = useMemo(() => {
     const currMonthStr = (curr?.month as string) || '';
     const prevMonthStr = (prev?.month as string) || '';
@@ -168,11 +180,11 @@ export default function SpendingPage() {
   return (
     <div>
       <Page>
-        <TitleContainer>
-          <div>CONSUMPTION ANALYSIS</div>
-        </TitleContainer>
-
+        <h2 style={{ marginTop: '4rem', marginBottom: '0.5rem', color: 'white' }}>
+          {username}님의 소비 분석
+        </h2>
         {/* 로딩 상태 */}
+
         {loading && (
           <div style={{ padding: 20, display: 'flex', justifyContent: 'center' }}>
             <RandomSpinner />
@@ -224,7 +236,7 @@ export default function SpendingPage() {
                 <CategoryPanel>
                   <div className="section-title">CATEGORY GOALS</div>
                   <div className="line1">
-                    <span>선택한 카테고리:</span>
+                    <span>{username}님이 선택한 카테고리:</span>
                     <span className="chip" style={{ background: COLORS[selected] || '#8884d8' }}>
                       {selected || '-'}
                     </span>
