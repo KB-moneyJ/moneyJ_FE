@@ -1,9 +1,11 @@
 import styled from 'styled-components';
 
 export const Page = styled.div`
-  padding: 1rem;
-  height: 85vh;
-  gap: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  height: 804px;
 `;
 
 export const Wrapper = styled.div`
@@ -11,43 +13,11 @@ export const Wrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 10px;
-`;
-
-export const TitleContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  margin-top: 78px;
-  font-size: 18px;
-  user-select: none;
-`;
-
-export const ChartContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 80%;
-  height: 300px;
-  padding: 0 30px;
-  border: none;
-  .recharts-wrapper:focus,
-  .recharts-wrapper *:focus,
-  .recharts-surface:focus,
-  .recharts-bar-rectangle path:focus {
-    outline: none !important;
-  }
-
-  .recharts-wrapper svg {
-    -webkit-tap-highlight-color: transparent;
-  }
 `;
 
 export const LegendScroll = styled.div`
   width: 100%;
   overflow-x: auto;
-  height: 110px;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
   scrollbar-width: thin; /* Firefox */
@@ -66,10 +36,8 @@ export const LegendScroll = styled.div`
   }
 `;
 
-// 기존 LegendWrapper 수정(교체)
 export const LegendWrapper = styled.div`
   display: flex;
-  gap: 28px;
   align-items: flex-start;
   color: #fff;
   margin: 16px 0 8px;
@@ -134,7 +102,6 @@ export const LegendWrapper = styled.div`
 `;
 export const CategoryPanel = styled.div`
   width: 300px;
-  margin-top: 50px;
   color: #fff;
 
   .section-title {
@@ -195,7 +162,6 @@ export const CategoryPanel = styled.div`
 
 export const SavingsBanner = styled.div`
   width: 300px;
-  height: 30px;
   border-radius: 16px;
   padding: 14px 16px;
   margin-top: 10px;
@@ -222,7 +188,6 @@ export const CardButton = styled.div`
   display: flex;
   flex-direction: column;
   width: 80%;
-  height: 10%;
   text-align: center;
   align-items: center;
   justify-content: center;
@@ -233,7 +198,5 @@ export const CardButton = styled.div`
 
 export const Text = styled.div`
   color: white;
-  margin-top: 30px;
-  margin-bottom: 30px;
   text-align: center;
 `;
