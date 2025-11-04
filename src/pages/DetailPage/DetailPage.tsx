@@ -26,6 +26,7 @@ import {
 } from '@/api/trips/queries';
 import type { TripDetailModel } from '@/api/trips/types';
 import { useMe } from '@/api/users/queries';
+import ExchangeRateCard from './sections/ExchangeRateCard/ExchangeRateCard';
 
 function clampPercent(v: number) {
   if (!Number.isFinite(v)) return 0;
@@ -370,6 +371,7 @@ export default function DetailPage() {
         tips={data.tips}
       />
 
+      <ExchangeRateCard destination={data.destination} />
       {openInvite && (
         <FriendInviteModal
           isOpen={openInvite}
