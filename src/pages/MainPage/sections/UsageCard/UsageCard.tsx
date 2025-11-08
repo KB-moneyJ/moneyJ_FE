@@ -18,6 +18,7 @@ import {
 } from './UsageCard.style';
 import { getSummary } from '@/api/spending/spending';
 import { CardButton } from '@/pages/AnalysisPage/SpendingPage.style';
+import { useCardStore } from '@/stores/useCardStore';
 
 type CategoryView = {
   name: string;
@@ -53,33 +54,19 @@ export default function UsageCard() {
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { cardConnected, setCardConnected } = useCardStore();
 
   const goToSpending = () => {
     navigate('/spending');
   };
 
   useEffect(() => {
-    let cancelled = false;
     (async () => {
-      try {
-        setLoadingSummary(true);
-        const data = await getSummary();
-        if (!cancelled) {
-          setSummary(data);
-        }
-      } catch (e: any) {
-        if (!cancelled) setSummaryError(e?.message ?? '요약 불러오기 실패');
-      } finally {
-        if (!cancelled) setLoadingSummary(false);
-      }
+      const data = await getSummary();
+      setCardConnected(data.cardConnected ?? false);
+      setSummary(data);
     })();
-    return () => {
-      cancelled = true;
-    };
   }, []);
-
-  // 카드 연결 여부
-  const cardConnected = summary?.cardConnected ?? true;
 
   // monthly의 가장 마지막(가장 최신) 달
   const lastMonth = useMemo(() => {
