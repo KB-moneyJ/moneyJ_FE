@@ -341,7 +341,6 @@ export default function DetailPage() {
         accountLabel={accountLabel}
         balance={accountBalance}
         onClickLink={() => setOpenBank(true)}
-        onClickCardLink={() => setOpenBank(true)}
         tip={tipForProgress}
       />
 
