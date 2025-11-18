@@ -345,7 +345,7 @@ export default function DetailPage() {
       />
 
       {/* 예상 경비/목표 달성 */}
-      <ExpenseCard tripId={id} savedPercent={progress} onProgressDelta={handleProgressDelta} />
+      <ExpenseCard tripId={id} savedPercent={progress} />
 
       {/* 개요 카드 */}
       {overview && (
