@@ -14,7 +14,11 @@ import {
 } from './BankConnectModal.style';
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
-const token = localStorage.getItem('accessToken');
+
+// 토큰을 호출 시점에 가져오는 헬퍼 함수
+const getAuthHeader = () => ({
+  Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+});
 
 interface BankConnectModalProps {
   isOpen: boolean;
@@ -87,7 +91,7 @@ export default function BankConnectModal({
         ],
       },
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
       },
     );
 
@@ -104,15 +108,14 @@ export default function BankConnectModal({
         password: pw,
       },
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
       },
     );
 
   const fetchBankAccounts = async (organization: string) => {
     const { data } = await axios.get(`${BASE_URL}/api/codef/bank/accounts`, {
       params: { organization },
-
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeader(),
     });
     const list: DepositTrustAccount[] = (data?.data?.resDepositTrust ?? []).map((a: any) => ({
       resAccount: a.resAccount,
@@ -128,19 +131,17 @@ export default function BankConnectModal({
       `${BASE_URL}/api/codef/accounts/bank`,
       { organizationCode, accountNumber: acctNo, tripPlanId: planId },
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
       },
     );
   };
 
   // 계좌가 이미 다른 여행 플랜에 등록되어 있는지 확인
   const checkAccountAlreadyLinked = async (accountNumber: string): Promise<boolean | 'error'> => {
-    const token = localStorage.getItem('accessToken');
     try {
       const { data } = await axios.get(`${BASE_URL}/api/codef/accounts/check/${accountNumber}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
       });
-      console.log('계좌 중복 확인 응답:', data, typeof data);
       // true/false 또는 "true"/"false" 문자열 모두 처리
       return data === true || data === 'true';
     } catch (err) {
@@ -151,10 +152,9 @@ export default function BankConnectModal({
   };
 
   async function checkAccountExists(organization: string): Promise<boolean> {
-    const token = localStorage.getItem('accessToken');
     try {
       const res = await axios.get(`${BASE_URL}/api/codef/credentials`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
       });
 
       const accountList = res.data?.data?.accountList || [];
@@ -182,23 +182,26 @@ export default function BankConnectModal({
 
       // 우리 DB에 등록되어 있지 않은 새로운 계정일 경우에만 등록 절차 실행
       if (!isAlreadyRegistered) {
-        // 1) connectedId를 만들되, 이미 있으면 넘어감!
+        let connectedIdCreated = false;
+
+        // 1) connectedId 생성 (은행 자격도 같이 등록됨)
         try {
           await createConnectedIdBK(bank, bankId, password);
+          connectedIdCreated = true;
         } catch (e: any) {
           const code = e?.response?.data?.result?.code;
-          if (code !== 'CF-04006') throw e; // CF-04006은 예시 코드
+          if (code !== 'CF-04006') throw e; // CF-04006: 이미 Connected ID 있음
         }
 
-        // credential 추가 시도
-        try {
-          await addCredentialBK(bank, bankId, password);
-        } catch (e: any) {
-          const code = e?.response?.data?.result?.code;
-          if (code !== 'CF-03002') throw e;
+        // 2) createConnectedIdBK가 실패했을 때만 credential 추가 시도
+        if (!connectedIdCreated) {
+          try {
+            await addCredentialBK(bank, bankId, password);
+          } catch (e: any) {
+            const code = e?.response?.data?.result?.code;
+            if (code !== 'CF-03002' && code !== 'CF-04004') throw e;
+          }
         }
-      } else {
-        console.log('이미 등록된 계정으로 판단되어 CODEF 등록 절차를 건너뜁니다.');
       }
 
       // 3) 계좌 조회
