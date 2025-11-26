@@ -22,6 +22,8 @@ interface BankConnectModalProps {
   /** 연동 성공 시 부모에 알림 (은행코드, resAccount) */
   onConnected?: (bankCode: string, accountNumber: string) => void;
   tripPlanId: number;
+  /** 이미 계좌가 연동되어 있는지 여부 */
+  isAlreadyLinked?: boolean;
 }
 
 type DepositTrustAccount = {
@@ -36,6 +38,7 @@ export default function BankConnectModal({
   onClose,
   onConnected,
   tripPlanId,
+  isAlreadyLinked = false,
 }: BankConnectModalProps) {
   const [bank, setBank] = useState('');
   const [bankId, setBankId] = useState('');
@@ -130,6 +133,23 @@ export default function BankConnectModal({
     );
   };
 
+  // 계좌가 이미 다른 여행 플랜에 등록되어 있는지 확인
+  const checkAccountAlreadyLinked = async (accountNumber: string): Promise<boolean | 'error'> => {
+    const token = localStorage.getItem('accessToken');
+    try {
+      const { data } = await axios.get(`${BASE_URL}/api/codef/accounts/check/${accountNumber}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log('계좌 중복 확인 응답:', data, typeof data);
+      // true/false 또는 "true"/"false" 문자열 모두 처리
+      return data === true || data === 'true';
+    } catch (err) {
+      console.error('계좌 중복 확인 실패:', err);
+      // 에러 시 'error' 반환해서 구분
+      return 'error';
+    }
+  };
+
   async function checkAccountExists(organization: string): Promise<boolean> {
     const token = localStorage.getItem('accessToken');
     try {
@@ -207,7 +227,25 @@ export default function BankConnectModal({
     if (!canSubmit) return;
     setSubmitting(true);
     setErrorMsg(null);
+
     try {
+      // 먼저 계좌가 이미 다른 여행 플랜에 등록되어 있는지 확인
+      const checkResult = await checkAccountAlreadyLinked(selectedAccount);
+
+      // 중복 확인 API 에러 시
+      if (checkResult === 'error') {
+        setErrorMsg('계좌 중복 확인에 실패했습니다. 다시 시도해 주세요.');
+        setSubmitting(false);
+        return;
+      }
+
+      // 이미 등록된 계좌면 에러 메시지 표시하고 연결하지 않음
+      if (checkResult === true) {
+        setErrorMsg('이 계좌는 이미 다른 여행 플랜에 등록되어 있습니다. 다른 계좌를 선택해 주세요.');
+        setSubmitting(false);
+        return;
+      }
+
       await linkTripAccount(bank, selectedAccount, tripPlanId);
       // 성공 시 즉시 부모 알림 & 모달 닫기
       onConnected?.(bank, selectedAccount);
@@ -228,7 +266,14 @@ export default function BankConnectModal({
     <Overlay onClick={onClose}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose} />
-        <Title>어떤 계좌와 연결할까요?</Title>
+        <Title>{isAlreadyLinked ? '계좌 변경하기' : '어떤 계좌와 연결할까요?'}</Title>
+
+        {/* 이미 연동된 계좌가 있는 경우 안내 메시지 */}
+        {isAlreadyLinked && (
+          <p style={{ color: '#ffc107', fontSize: 13, marginBottom: 12, lineHeight: 1.4 }}>
+            ⚠️ 이미 연동된 계좌가 있습니다. 새 계좌를 선택하면 기존 계좌가 변경됩니다.
+          </p>
+        )}
 
         {/* 1. 은행/아이디/비밀번호 입력 */}
         <FieldWrapper>
