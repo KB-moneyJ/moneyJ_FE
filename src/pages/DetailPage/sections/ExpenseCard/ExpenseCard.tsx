@@ -27,11 +27,10 @@ type ExpenseItem = {
 type Props = {
   savedPercent: number;
   tripId: number;
-  onProgressDelta?: (deltaPercent: number) => void;
 };
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
-export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: Props) {
+export default function ExpenseCard({ savedPercent, tripId }: Props) {
   const [items, setItems] = useState<ExpenseItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem('accessToken');
@@ -126,8 +125,8 @@ export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: P
       const rawDelta = (item.amount / total) * 100;
       const delta = Math.round(rawDelta * 10) / 10; // 보기 좋게 소수 1자리
 
-      // 부모(DetailPage) 진행률 즉시 반영
-      onProgressDelta?.(delta);
+      // // 부모(DetailPage) 진행률 즉시 반영
+      // onProgressDelta?.(delta);
 
       // 로컬 purchased 갱신 (버튼 비활성 & 체크마크 표시)
       setItems((prev) => prev.map((it) => (it.id === id ? { ...it, purchased: true } : it)));
