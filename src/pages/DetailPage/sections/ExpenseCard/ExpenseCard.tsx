@@ -30,9 +30,8 @@ type Props = {
   onProgressDelta?: (deltaPercent: number) => void;
 };
 
-
-  const BASE_URL = import.meta.env.VITE_API_URL as string;
-  export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: Props) {
+const BASE_URL = import.meta.env.VITE_API_URL as string;
+export default function ExpenseCard({ savedPercent, tripId, onProgressDelta }: Props) {
   const [items, setItems] = useState<ExpenseItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem('accessToken');
@@ -50,7 +49,6 @@ type Props = {
 
       const data = await res.json();
 
-      // fetchExpenses 안에서 매핑 부분 수정
       const mappedItems: ExpenseItem[] = data.categoryDTOList.map((c: any) => {
         let icon;
         switch (c.categoryName) {
@@ -72,11 +70,9 @@ type Props = {
           label: c.categoryName,
           amount: c.amount,
           icon,
-
           purchased: c.consumed ?? false, // /trip-plans 응답엔 없을 수 있음 → false 처리
         };
       });
-
 
       setItems(mappedItems);
     } catch (err) {
@@ -103,13 +99,11 @@ type Props = {
     }
   }
 
-
   // 목표 달성 처리 (POST 요청 + 상태 업데이트 + 진행률 증분 전달)
   const handlePurchase = async (id: string) => {
     try {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-
       if (item.purchased) return; // ✅ 중복 클릭 방지
       if (total <= 0) return; // ✅ 0 나눗셈 방지
 
@@ -118,7 +112,6 @@ type Props = {
         categoryName: item.label,
         isConsumed: true,
       };
-
       const token = localStorage.getItem('accessToken');
       console.log('POST 요청 보낼 데이터:', bodyData);
 
@@ -150,13 +143,11 @@ type Props = {
     try {
       const bodyData = {
         categoryDTOList: updatedItems.map((item) => ({
-
           tripPlanId: tripId,
           categoryName: item.label,
           amount: item.amount,
         })),
       };
-
 
       console.log('PATCH 요청 보낼 데이터:', bodyData);
 

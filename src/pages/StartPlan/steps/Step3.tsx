@@ -1,108 +1,122 @@
 import React from "react";
-import { DateRange } from "react-date-range";
-import ko from 'date-fns/locale/ko/index.js';
-import dayjs from "dayjs";
-import "react-date-range/dist/styles.css";
-import "react-date-range/dist/theme/default.css";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  Container3,
-  DateDisplay,
+  Container,
   DropdownHeader,
-  GlassCalendar,
   Wrapper,
+  InputRow,
+  DateInput,
+  LabelText,
+  RangeWrapper,
+  InputRow2,
 } from "@/pages/StartPlan/steps/StepsStyle";
+import { motion, AnimatePresence } from "framer-motion";
 import ReactCountryFlag from "react-country-flag";
 
-export default function Step3({
-                                selected,
-                                selectedRegions,
-                                otherCity,
-                                days,
-                                setDays,
-                              }) {
-  const [range, setRange] = React.useState([
-    {
-      startDate: days.startDate ? new Date(days.startDate) : new Date(),
-      endDate: days.endDate ? new Date(days.endDate) : new Date(),
-      key: "selection",
-    },
-  ]);
 
+export default function Step3({ selected, selectedRegions, otherCity, days, setDays }) {
   const displayRegions = selectedRegions.filter((r) => r !== "기타");
-  if (otherCity.trim().length > 0) displayRegions.push(otherCity);
-
-  const handleDateChange = (item) => {
-    const { startDate, endDate } = item.selection;
-    if (!startDate || !endDate) return;
-
-    // ✅ 기존 Step3 구조에 맞춰 변환
-    const nights = dayjs(endDate).diff(dayjs(startDate), "day");
-    const totalDays = nights + 1;
-
-    const year = dayjs(startDate).format("YYYY");
-    const month = dayjs(startDate).format("MM");
-    const rangeStart = dayjs(startDate).format("DD");
-    const rangeEnd = dayjs(endDate).format("DD");
-
-    setDays({
-      ...days,
-      year,
-      month,
-      nights: String(nights),
-      days: String(totalDays),
-      rangeStart,
-      rangeEnd,
-    });
-
-    setRange([item.selection]);
-  };
+  if (otherCity.trim().length > 0) {
+    displayRegions.push(otherCity);
+  }
 
   return (
     <Wrapper>
-      <Container3>
+      <Container>
         <div>여행할 날짜는 언제인가요?</div>
 
-        <DateDisplay>
-          <div>
-            <span className="label">출발일</span>
-            <span className="date">
-              {dayjs(range[0].startDate).format("YYYY.MM.DD")}
-            </span>
-          </div>
-          <span className="arrow">→</span>
-          <div>
-            <span className="label">도착일</span>
-            <span className="date">
-              {dayjs(range[0].endDate).format("YYYY.MM.DD")}
-            </span>
-          </div>
-        </DateDisplay>
+        <InputRow>
+          <DateInput
+            placeholder="YYYY"
+            maxLength={4}
+            value={days.year}
+            onChange={(e) => setDays({ ...days, year: e.target.value })}
+          />
+          <LabelText>년</LabelText>
 
+          <DateInput
+            placeholder="MM"
+            maxLength={2}
+            value={days.month}
+            onChange={(e) => setDays({ ...days, month: e.target.value })}
+          />
+          <LabelText>월</LabelText>
+
+          <DateInput
+            placeholder="N"
+            maxLength={2}
+            value={days.nights}
+            onChange={(e) => setDays({ ...days, nights: e.target.value })}
+          />
+          <LabelText>박</LabelText>
+
+          <DateInput
+            placeholder="D"
+            maxLength={2}
+            value={days.days}
+            onChange={(e) => setDays({ ...days, days: e.target.value })}
+          />
+          <LabelText>일</LabelText>
+        </InputRow>
+
+        {/* 두 번째: 세부 날짜 선택 */}
         <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-          >
-            <GlassCalendar>
-              <DateRange
-                editableDateInputs={true}
-                onChange={handleDateChange}
-                moveRangeOnFirstSelection={false}
-                ranges={range}
-                locale={ko}
-                minDate={new Date()}
-              />
-            </GlassCalendar>
-          </motion.div>
+          {days.month && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            >
+              <RangeWrapper>
+                <div>세부 날짜까지 정하셨나요? (선택)</div>
+                <InputRow2>
+                  <DateInput
+                    placeholder="DD"
+                    maxLength={2}
+                    value={days.rangeStart}
+                    onChange={(e) => {
+                      const start = e.target.value;
+                      let end = "";
+
+                      if (start && days.days) {
+                        const year = parseInt(days.year) || new Date().getFullYear();
+                        const month = parseInt(days.month) || new Date().getMonth() + 1;
+                        const tripDays = parseInt(days.days);
+
+                        const startDay = parseInt(start);
+                        const lastDayOfMonth = new Date(year, month, 0).getDate();
+
+                        let calculatedEnd = startDay + tripDays - 1;
+                        if (calculatedEnd > lastDayOfMonth) {
+                          // 다음 달로 넘어가는 경우
+                          calculatedEnd = calculatedEnd - lastDayOfMonth;
+                        }
+                        end = String(calculatedEnd);
+                      }
+
+                      setDays({ ...days, rangeStart: start, rangeEnd: end });
+                    }}
+                  />
+                  <LabelText>일</LabelText>
+                  <span> ~ </span>
+                  <DateInput
+                    placeholder="DD"
+                    maxLength={2}
+                    value={days.rangeEnd}
+                    readOnly
+                  />
+                  <LabelText>일</LabelText>
+                </InputRow2>
+              </RangeWrapper>
+            </motion.div>
+          )}
         </AnimatePresence>
+
 
         <DropdownHeader
           style={{
             position: "absolute",
-            top: "550px",
+            top: "500px",
             left: "50%",
             transform: "translateX(-50%)",
             width: "300px",
@@ -125,7 +139,8 @@ export default function Step3({
             {days.nights && days.days ? `${days.nights}박 ${days.days}일` : ""}
           </div>
         </DropdownHeader>
-      </Container3>
+
+      </Container>
     </Wrapper>
   );
 }
