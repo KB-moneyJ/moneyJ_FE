@@ -14,11 +14,6 @@ import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
 import {
-  refreshTripPlanBalanceWithRetry,
-  BankOrganizationCode,
-  refreshTripPlanBalance,
-} from '@/api/bank/bank';
-import {
   useTripPlanDetail,
   useTripPlanBalances,
   useDeleteTripPlan,
@@ -73,15 +68,16 @@ export default function DetailPage() {
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
   const tipForProgress = isAccountLinked ? data?.overviewTip : undefined;
+
   // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
   const myProgressFromBalances = useMemo(() => {
     if (!meId) return undefined;
-    const meRow = (balances as any[]).find((b) => b.userId === meId);
-    return typeof meRow?.progress === 'number' ? meRow.progress : undefined;
+    // TripBalanceModel은 id(string), percent 필드를 사용
+    const meRow = (balances as any[]).find((b) => String(b.id) === String(meId));
+    return typeof meRow?.percent === 'number' ? meRow.percent : undefined;
   }, [balances, meId]);
 
   const myProgressFallback = useMemo(() => {
-    // TripDetailModel 에는 totalBudget / currentSavings 가 있음
     const totalBudget = (data as TripDetailModel | undefined)?.totalBudget ?? 0;
     const currentSavings = (data as TripDetailModel | undefined)?.currentSavings ?? 0;
     if (totalBudget > 0) return (currentSavings / totalBudget) * 100;
@@ -99,18 +95,63 @@ export default function DetailPage() {
     setProgress(clampPercent(rounded));
   }, [myProgressFromBalances, myProgressFallback]);
 
+  // ---------- balances에서 "나"의 계좌 정보 ----------
+  const myBalanceRow = useMemo(() => {
+    if (!meId) return undefined;
+    // TripBalanceModel은 id(string) 필드를 사용
+    return (balances as any[]).find((b) => String(b.id) === String(meId));
+  }, [balances, meId]);
+
+// ---------- balances 기반으로 계좌 상태 세팅 ----------
+useEffect(() => {
+  if (!tripId) return;
+
+  const planIdNum = Number(tripId);
+  const rows = (balances ?? []) as any[];
+
+  // balances 자체가 없으면 = 계좌 미연동 처리
+  if (!rows.length) {
+    setIsAccountLinked(false);
+    setAccountLabel(undefined);
+    setAccountBalance(undefined);
+    setLinkedForPlan(planIdNum, false);
+    return;
+  }
+
+  // 내 id 기준으로 행 찾기 (TripBalanceModel은 id 필드 사용, 없으면 첫 번째 행 사용)
+  const target =
+    meId != null
+      ? rows.find((b) => String(b.id) === String(meId))
+      : rows[0];
+
+  // 잔액 정보가 없으면 = 미연동으로 본다
+  if (!target || target.balance == null) {
+    setIsAccountLinked(false);
+    setAccountLabel(undefined);
+    setAccountBalance(undefined);
+    setLinkedForPlan(planIdNum, false);
+    return;
+  }
+
+  // 여기까지 왔으면 계좌 연동된 상태로 간주
+  setIsAccountLinked(true);
+  setAccountBalance(Number(target.balance));
+  setAccountLabel('연동된 계좌');
+  setLinkedForPlan(planIdNum, true);
+}, [tripId, balances, meId]);
+
+
   // ---------- 멤버 리스트 ----------
   const groupMembers = useMemo(() => {
-    // balances가 최우선
     if (balances.length) {
+      // TripBalanceModel 필드: id, name, avatarUrl, balance, percent
       return (balances as any[]).map((b) => ({
-        id: String(b.userId),
-        name: b.nickname,
-        avatarUrl: b.profileImage,
-        percent: clampPercent(typeof b.progress === 'number' ? b.progress : 0),
+        id: String(b.id),
+        name: b.name,
+        avatarUrl: b.avatarUrl,
+        percent: clampPercent(typeof b.percent === 'number' ? b.percent : 0),
       }));
     }
-    // fallback: TripDetailModel 의 members 사용
     if (data?.members?.length) {
       return data.members.map((m) => ({
         id: m.id,
@@ -130,7 +171,6 @@ export default function DetailPage() {
         groupMembers.length;
       return clampPercent(avg);
     }
-    // 멤버가 전혀 없으면 내 진행률로 대체
     return progress;
   }, [groupMembers, progress]);
 
@@ -160,13 +200,12 @@ export default function DetailPage() {
   }, [groupMembers, meId, progress]);
 
   const groupAvgForOverview = useMemo(() => {
-    if (!membersForOverview.length) return progress; // 멤버 없으면 내 진행률로 폴백
+    if (!membersForOverview.length) return progress;
     const sum = membersForOverview.reduce((acc, m) => acc + (m.percent ?? 0), 0);
     return clampPercent(sum / membersForOverview.length);
   }, [membersForOverview, progress]);
 
   // ---------- TripOverviewCard용 개요 ----------
-  // 기존 overview useMemo 수정
   const overview = useMemo(() => {
     if (!data) return null;
 
@@ -179,10 +218,8 @@ export default function DetailPage() {
       countryCode: data.countryCode,
       period: period + (membersForOverview.length ? ` (${membersForOverview.length}명)` : ''),
       thumbnailUrl,
-      // ✅ 여기 2줄 교체
       progressPercent: groupAvgForOverview,
       members: membersForOverview,
-
       tip: data.overviewTip,
       podiumImageUrl: podiumUrl,
       podiumTop3,
@@ -191,86 +228,24 @@ export default function DetailPage() {
 
   const checklist = useMemo(() => data?.checklist ?? [], [data?.checklist]);
   const cautions = useMemo(() => data?.cautions ?? [], [data?.cautions]);
-  // ---------- balances 재조회(새로고침/연동 시) ----------
-  useEffect(() => {
-    let mounted = true;
-    if (!tripId) return;
-
-    const planIdNum = Number(tripId);
-    const wasLinked = getLinkedForPlan(planIdNum);
-
-    if (!wasLinked) {
-      setIsAccountLinked(false);
-      setAccountLabel(undefined);
-      setAccountBalance(undefined);
-      return;
-    }
-
-    (async () => {
-      try {
-        const bankOrg = getBankOrgForPlan(planIdNum) as BankOrganizationCode | undefined;
-
-        const res = await refreshTripPlanBalanceWithRetry(planIdNum, {
-          organizationCode: bankOrg,
-        });
-
-        if (!mounted) return;
-
-        // 멤버별 잔액/진행도 쿼리 갱신
-        qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planIdNum), exact: true });
-
-        const bankName = bankOrg ? BANK_NAME_BY_CODE[bankOrg] : undefined;
-
-        setIsAccountLinked(true);
-        setAccountLabel(
-          bankName ? `${bankName} ${res.accountNumberDisplay}` : res.accountNumberDisplay,
-        );
-        setAccountBalance(res.balance);
-      } catch (err) {
-        if (!mounted) return;
-        // 재시도/폴백 실패 시 로컬 링크 해제
-        setLinkedForPlan(planIdNum, false);
-        setIsAccountLinked(false);
-        setAccountLabel(undefined);
-        setAccountBalance(undefined);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [tripId, qc]);
 
   // ---------- 계좌 연동 완료 핸들러 ----------
+  // 계좌 연동 후에는 CODEF API를 다시 호출하지 않고, balances 쿼리만 새로고침
   const handleBankConnected = async (bankCode: string, acct: string) => {
     const planId = Number(tripId);
     setLinkedForPlan(planId, true);
     setBankOrgForPlan(planId, bankCode);
 
-    try {
-      const res = await refreshTripPlanBalance(planId);
-      qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
-      const bankName = BANK_NAME_BY_CODE[bankCode] ?? '연동 계좌';
-      setIsAccountLinked(true);
-      setAccountLabel(`${bankName} ${res.accountNumberDisplay}`);
-      setAccountBalance(res.balance);
-    } catch {
-      const bankName = BANK_NAME_BY_CODE[bankCode] ?? '연동 계좌';
-      const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
-      setIsAccountLinked(true);
-      setAccountLabel(`${bankName} ${maskAccount(acct)}`);
-      setAccountBalance(undefined);
-    } finally {
-      setOpenBank(false);
-    }
-  };
+    // balances 쿼리를 무효화해서 /trip-plans/{tripPlanId}/balances API로 최신 데이터 가져오기
+    // refreshTripPlanBalance(CODEF API)는 최초 계좌 연결 시에만 BankConnectModal에서 호출됨
+    await qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
 
-  // ---------- 목표 달성(카테고리) 시 진행률 증분 반영 ----------
-  const handleProgressDelta = (deltaPercent: number) => {
-    setProgress((prev) => clampPercent(Math.round((prev + deltaPercent) * 10) / 10));
-    if (id) {
-      qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(id), exact: true });
-    }
+    const bankName = BANK_NAME_BY_CODE[bankCode as keyof typeof BANK_NAME_BY_CODE] ?? '연동 계좌';
+    const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
+    setIsAccountLinked(true);
+    setAccountLabel(`${bankName} ${maskAccount(acct)}`);
+    // 잔액은 balances 쿼리에서 가져온 데이터로 useEffect에서 자동 설정됨
+    setOpenBank(false);
   };
 
   // ---------- 플랜 삭제 ----------
@@ -334,7 +309,6 @@ export default function DetailPage() {
         )}
       </Container>
 
-      {/* 진행 상황 */}
       <ProgressCard
         progress={progress}
         linked={isAccountLinked}
@@ -347,7 +321,6 @@ export default function DetailPage() {
       {/* 예상 경비/목표 달성 */}
       <ExpenseCard tripId={id} savedPercent={progress} />
 
-      {/* 개요 카드 */}
       {overview && (
         <TripOverviewCard
           destination={overview.destination}
@@ -362,7 +335,6 @@ export default function DetailPage() {
         />
       )}
 
-      {/* 준비물/주의/팁 */}
       <BeforeYouGoCard
         destination={data.destination}
         checklist={checklist}
@@ -371,6 +343,7 @@ export default function DetailPage() {
       />
 
       <ExchangeRateCard destination={data.destination} />
+
       {openInvite && (
         <FriendInviteModal
           isOpen={openInvite}
@@ -385,6 +358,7 @@ export default function DetailPage() {
           onClose={() => setOpenBank(false)}
           onConnected={handleBankConnected}
           tripPlanId={id}
+          isAlreadyLinked={isAccountLinked}
         />
       )}
     </div>
