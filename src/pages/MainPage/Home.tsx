@@ -31,19 +31,6 @@ export default function Home() {
     (e.currentTarget as HTMLImageElement).style.display = 'none';
   };
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    const isFirstLogin = params.get('isFirstLogin') === 'true';
-
-    if (token) {
-      localStorage.setItem('accessToken', token);
-      localStorage.setItem('isFirstLogin', String(isFirstLogin));
-    }
-
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }, []);
-
   return (
     <>
       <Wrapper>

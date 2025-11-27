@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from '@/pages/MainPage/Home';
+import KakaoRedirect from '@/pages/KakaoRedirect';
 import About from '@/pages/StartPlan/Plan';
 import DetailPage from '@/pages/DetailPage/DetailPage';
 import Splash from '@/pages/SplashPage/Splash';
@@ -19,6 +20,7 @@ function App() {
         {/* Auth (첫 시작) */}
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/oauth/callback" element={<KakaoRedirect />} />
         <Route path="/agree" element={<Agree />} />
         <Route path="/intro" element={<Intro />} />
 

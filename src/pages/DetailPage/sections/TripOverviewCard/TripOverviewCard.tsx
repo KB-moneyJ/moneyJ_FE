@@ -1,4 +1,3 @@
-// src/pages/DetailPage/sections/TripOverviewCard/TripOverviewCard.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Wrapper,

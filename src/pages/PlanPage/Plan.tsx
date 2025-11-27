@@ -20,7 +20,6 @@ import { useTripPlans } from '@/api/trips/queries';
 export default function Plan() {
   const navigate = useNavigate();
   const { data: trips = [], isLoading, isError } = useTripPlans();
-  console.log('trips', trips);
 
   const [tab, setTab] = useState<'ongoing' | 'done'>('ongoing');
 

@@ -15,6 +15,8 @@ import {
   BalancePill,
   AccountRow,
 } from './ProgressCard.style';
+import { useCardStore } from '@/stores/useCardStore';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   progress: number;
@@ -24,7 +26,6 @@ type Props = {
   balance?: number;
   onClickSave?: () => void;
   onClickLink?: () => void;
-  onClickCardLink?: () => void;
 };
 
 export default function ProgressCard({
@@ -35,10 +36,11 @@ export default function ProgressCard({
   balance,
   onClickSave,
   onClickLink,
-  onClickCardLink,
 }: Props) {
   const isLinked = !!linked;
   const hasTip = typeof tip === 'string' && tip.trim().length > 0;
+  const { cardConnected, setCardConnected } = useCardStore();
+  const navigate = useNavigate();
 
   return (
     <Wrapper>
@@ -77,9 +79,19 @@ export default function ProgressCard({
       ) : (
         <>
           <Tip>
-            <TipLabel>여행지에 대한 TIP이 궁금하다면?</TipLabel>
+            <TipLabel>저축 TIP이 궁금하다면?</TipLabel>
           </Tip>
-          <CardLinkBtn onClick={onClickCardLink}>카드 연결하기</CardLinkBtn>
+          {cardConnected ? (
+            <CardLinkBtn>이제 계좌만 연동하면 돼요!</CardLinkBtn>
+          ) : (
+            <CardLinkBtn
+              onClick={() => {
+                navigate('/spending');
+              }}
+            >
+              카드 연결하기
+            </CardLinkBtn>
+          )}
         </>
       )}
     </Wrapper>

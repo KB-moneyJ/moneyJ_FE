@@ -1,8 +1,13 @@
 const BASE_URL = import.meta.env.VITE_API_URL as string;
 import axios from 'axios';
 
-export function loginWithKakao() {
+export async function loginWithKakao() {
   window.location.href = `${BASE_URL}/oauth2/authorization/kakao`;
+}
+
+export async function exchangeKakaoCodeForToken(code: string) {
+  const res = await axios.post(`${BASE_URL}/auth/exchange`, { code });
+  return res.data;
 }
 
 export async function logout() {
@@ -14,6 +19,15 @@ export async function logout() {
         withCredentials: true,
       },
     );
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('isFirstLogin');
+    localStorage.removeItem('me.public');
+
+    document.cookie.split(';').forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, '')
+        .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+    });
 
     return res.data;
   } catch (err) {
