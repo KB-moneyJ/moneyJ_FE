@@ -1,5 +1,5 @@
 import logo from '@/assets/images/moneyJ-Logo.png';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Wrapper,
@@ -22,6 +22,18 @@ import {
 } from './Agree.style';
 
 export default function Agree() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const isFirstLogin = params.get('isFirstLogin') === 'true';
+
+    if (token) {
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('isFirstLogin', String(isFirstLogin));
+    }
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }, []);
   const [agreements, setAgreements] = useState({
     all: false,
     personalInfo: false,

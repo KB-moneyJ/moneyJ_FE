@@ -57,6 +57,9 @@ export type TripDetailModel = {
   checklist: string[];
   cautions: string[];
   categories?: { name: string; amount: number }[];
+  totalBudget: number;
+  currentSavings: number;
+  savingsPhrases?: string[];
 };
 
 export type TripBalanceApi = {

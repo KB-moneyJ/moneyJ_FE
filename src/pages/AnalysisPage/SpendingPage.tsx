@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
 import {
+  Page,
   Wrapper,
   TitleContainer,
   ChartContainer,
@@ -15,6 +16,7 @@ import { BarChart, Bar, XAxis, Tooltip, Legend, ResponsiveContainer } from 'rech
 import type { LegendProps } from 'recharts';
 import CardConnectModal from '@/components/modals/CardConnectModal';
 import { getSummary } from '@/api/spending/spending';
+import { RandomSpinner } from '../StartPlan/steps/StepsStyle';
 
 // 동적 카테고리
 type CatKey = string;
@@ -57,6 +59,24 @@ export default function SpendingPage() {
   const [chartData, setChartData] = useState<any[]>([]); // recharts용 [{month:'9월', '식비': 10000, ...}, ...]
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const fetchSummary = async () => {
+    try {
+      setLoading(true);
+      const res = await getSummary();
+      setSummary(res);
+      // ... categories, chartData 세팅하는 부분 그대로 사용
+    } catch (e: any) {
+      setError(e?.message ?? '요약 불러오기 실패');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 최초 진입 시 로드
+  useEffect(() => {
+    fetchSummary();
+  }, []);
 
   // 데이터 불러오기
   useEffect(() => {
@@ -211,100 +231,134 @@ export default function SpendingPage() {
 
   return (
     <div>
-      <TitleContainer>
-        <div>CONSUMPTION ANALYSIS</div>
-      </TitleContainer>
+      <Page>
+        <TitleContainer>
+          <div>CONSUMPTION ANALYSIS</div>
+        </TitleContainer>
 
-      {loading && <div style={{ padding: 12 }}>불러오는 중…</div>}
-      {error && <div style={{ padding: 12, color: 'red' }}>{error}</div>}
-
-      {isCard ? (
-        <Wrapper>
-          <Text>
-            연결된 카드가 없습니다
-            <br />
-            소비 분석을 위해 카드를 연동해주세요
-          </Text>
-          <CardButton onClick={() => setIsConnectOpen(true)}>카드 연동하기</CardButton>
-        </Wrapper>
-      ) : (
-        <Wrapper>
-          <div
-            style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              color: '#fff',
-              padding: '0 30px',
-              marginBottom: '8px',
-            }}
-          >
-            <div style={{ fontWeight: 800, fontSize: 18 }}>
-              이번달 총합: {toCurrency(currentTotal)} 원
-            </div>
+        {/* ✅ 로딩 중이면 RandomSpinner 표시 */}
+        {loading && (
+          <div style={{ padding: 20, display: 'flex', justifyContent: 'center' }}>
+            <RandomSpinner />
           </div>
-          <ChartContainer>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData} barCategoryGap="25%">
-                <XAxis dataKey="month" />
-                <Tooltip />
-                <Legend verticalAlign="bottom" align="center" content={<CustomLegend />} />
-                {/* 동적 Bar */}
-                {categories.map((k) => (
-                  <Bar key={k} dataKey={k} stackId="a" fill={COLORS[k] || '#8884d8'} />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+        )}
+        {error && <div style={{ padding: 12, color: 'red' }}>{error}</div>}
 
-          <CategoryPanel>
-            <div className="section-title">CATEGORY GOALS</div>
-            <div className="line1">
-              <span>경서님이 선택한 카테고리:</span>
-              <span className="chip" style={{ background: COLORS[selected] || '#8884d8' }}>
-                {selected || '-'}
-              </span>
-            </div>
-            <div className="helper">한 달 동안 하루 평균 이렇게 썼어요!</div>
+        {!loading && ( // ✅ 로딩 아닐 때만 내용 렌더링
+          <>
+            {isCard ? (
+              <Wrapper>
+                <Text>
+                  연결된 카드가 없습니다
+                  <br />
+                  소비 분석을 위해 카드를 연동해주세요
+                </Text>
+                <CardButton onClick={() => setIsConnectOpen(true)}>카드 연동하기</CardButton>
+              </Wrapper>
+            ) : (
+              <Wrapper>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: '#fff',
+                    marginBottom: '2px',
+                  }}
+                >
+                  <div style={{ fontWeight: 800, fontSize: 20 }}>
+                    이번달 총합: {toCurrency(currentTotal)} 원
+                  </div>
+                </div>
+                <ChartContainer>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={chartData} barCategoryGap="25%">
+                      <XAxis dataKey="month" />
+                      <Tooltip
+                        formatter={(v) => `${toCurrency(v as number)} 원`}
+                        contentStyle={{
+                          background: 'rgba(30, 30, 30, 0.7)',
+                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                          backdropFilter: 'blur(15px)',
+                          WebkitBackdropFilter: 'blur(15px)',
+                          boxShadow: `
+                          0 8px 32px rgba(0, 0, 0, 0.2),
+                          inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                          inset 0 -1px 0 rgba(255, 255, 255, 0.1)
+                        `,
+                          borderRadius: '12px',
+                          padding: '10px 14px',
+                        }}
+                        labelStyle={{
+                          fontWeight: 700,
+                          color: '#fff',
+                        }}
+                      />
+                      <Legend verticalAlign="bottom" align="center" content={<CustomLegend />} />
+                      {categories.map((k) => (
+                        <Bar key={k} dataKey={k} stackId="a" fill={COLORS[k] || '#8884d8'} />
+                      ))}
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
 
-            <div className="row">
-              <span className="month">{metrics.prevMonth}</span>
-              <span
-                className="color-chip"
-                style={{
-                  background: COLORS[selected] || '#8884d8',
-                  width: `${prevWidth}px`,
-                }}
-              />
-              <span className="amount">{toCurrency(Math.round(metrics.prevAvg))} 원</span>
-            </div>
+                <CategoryPanel>
+                  <div className="section-title">CATEGORY GOALS</div>
+                  <div className="line1">
+                    <span>경서님이 선택한 카테고리:</span>
+                    <span className="chip" style={{ background: COLORS[selected] || '#8884d8' }}>
+                      {selected || '-'}
+                    </span>
+                  </div>
+                  <div className="helper">한 달 동안 하루 평균 이렇게 썼어요!</div>
 
-            <div className="row current">
-              <span className="month">{metrics.currMonth}</span>
-              <span
-                className="color-chip"
-                style={{
-                  background: COLORS[selected] || '#8884d8',
-                  width: `${currWidth}px`,
-                }}
-              />
-              <span className="amount current">{toCurrency(Math.round(metrics.currAvg))} 원</span>
-            </div>
-          </CategoryPanel>
+                  <div className="row">
+                    <span className="month">{metrics.prevMonth}</span>
+                    <span
+                      className="color-chip"
+                      style={{
+                        background: COLORS[selected] || '#8884d8',
+                        width: `${prevWidth}px`,
+                      }}
+                    />
+                    <span className="amount">{toCurrency(Math.round(metrics.prevAvg))} 원</span>
+                  </div>
 
-          <SavingsBanner className={metrics.isSaving ? 'saving' : 'increase'}>
-            <span className="emoji">🎉</span>
-            <span>
-              {metrics.isSaving
-                ? `${metrics.prevMonth}보다 ${toCurrency(Math.round(metrics.savingAbs))}원 절약중`
-                : `${metrics.prevMonth}보다 ${toCurrency(Math.round(metrics.savingAbs))}원 증가`}
-            </span>
-          </SavingsBanner>
-        </Wrapper>
-      )}
+                  <div className="row current">
+                    <span className="month">{metrics.currMonth}</span>
+                    <span
+                      className="color-chip"
+                      style={{
+                        background: COLORS[selected] || '#8884d8',
+                        width: `${currWidth}px`,
+                      }}
+                    />
+                    <span className="amount current">
+                      {toCurrency(Math.round(metrics.currAvg))} 원
+                    </span>
+                  </div>
+                </CategoryPanel>
 
-      <CardConnectModal isOpen={isConnectOpen} onClose={() => setIsConnectOpen(false)} />
+                <SavingsBanner className={metrics.isSaving ? 'saving' : 'increase'}>
+                  <span className="emoji">🎉</span>
+                  <span>
+                    {metrics.isSaving
+                      ? `${metrics.prevMonth}보다 ${toCurrency(Math.round(metrics.savingAbs))}원 절약중`
+                      : `${metrics.prevMonth}보다 ${toCurrency(Math.round(metrics.savingAbs))}원 증가`}
+                  </span>
+                </SavingsBanner>
+              </Wrapper>
+            )}
+          </>
+        )}
+
+        <CardConnectModal
+          isOpen={isConnectOpen}
+          onClose={() => setIsConnectOpen(false)}
+          onSuccess={fetchSummary}
+        />
+      </Page>
       <BottomNavigationBar />
     </div>
   );

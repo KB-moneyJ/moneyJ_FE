@@ -1,11 +1,23 @@
 import styled from 'styled-components';
 import { CircleUserRound, Bell } from 'lucide-react';
 
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const Page = styled.div`
+  overflow-y: auto;
+  flex: 1;
+  width: 100%;
+  min-height: 800px;
+`;
+
 export const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem;
+  padding: 0 1.5rem;
   margin-top: 4.0625rem;
 `;
 

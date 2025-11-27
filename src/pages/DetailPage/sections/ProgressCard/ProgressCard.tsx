@@ -1,3 +1,4 @@
+import { CircleDollarSign } from 'lucide-react';
 import {
   Wrapper,
   SaveBtn,
@@ -11,6 +12,8 @@ import {
   TipText,
   AccountText,
   CardLinkBtn,
+  BalancePill,
+  AccountRow,
 } from './ProgressCard.style';
 
 type Props = {
@@ -18,6 +21,7 @@ type Props = {
   tip?: string;
   linked?: boolean;
   accountLabel?: string;
+  balance?: number;
   onClickSave?: () => void;
   onClickLink?: () => void;
   onClickCardLink?: () => void;
@@ -28,6 +32,7 @@ export default function ProgressCard({
   tip,
   linked,
   accountLabel,
+  balance,
   onClickSave,
   onClickLink,
   onClickCardLink,
@@ -37,13 +42,19 @@ export default function ProgressCard({
 
   return (
     <Wrapper>
-      <SaveBtn onClick={isLinked ? onClickSave : onClickLink}>
-        {isLinked ? '저축하기' : '계좌 연동하기'}
-      </SaveBtn>
-
-      {isLinked && accountLabel && <AccountText>{accountLabel}</AccountText>}
-
       <Title>나의 진행 상황</Title>
+      {!isLinked && <SaveBtn onClick={onClickLink}>계좌 연동하기</SaveBtn>}
+      {isLinked && (
+        <AccountRow>
+          {accountLabel && <AccountText>{accountLabel}</AccountText>}
+          {typeof balance === 'number' && (
+            <BalancePill aria-label="모은 잔액">
+              <CircleDollarSign size={14} style={{ marginRight: 4 }} />
+              모은 잔액 {balance.toLocaleString()}원
+            </BalancePill>
+          )}
+        </AccountRow>
+      )}
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <ProgressBar
           role="progressbar"
@@ -53,7 +64,7 @@ export default function ProgressCard({
         >
           <ProgressFill $percent={progress} />
         </ProgressBar>
-        <ProgressRightLabel>{progress}%</ProgressRightLabel>
+        <ProgressRightLabel>{(Math.round(progress * 10) / 10).toFixed(1)}%</ProgressRightLabel>
       </div>
 
       <Divider />

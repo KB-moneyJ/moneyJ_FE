@@ -7,11 +7,14 @@ export async function inviteTripMembers(planId: string, emails: string[]) {
       alert('이메일을 입력하세요.');
       return;
     }
+    const token = localStorage.getItem('accessToken');
 
     const response = await axios.post(
       `${BASE_URL}/users/check`,
       { emails },
-      { withCredentials: true },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
 
     console.log(planId);
@@ -38,7 +41,9 @@ export async function inviteTripMembers(planId: string, emails: string[]) {
     const res = await axios.post(
       `${BASE_URL}/trip-plans/${planId}/members`,
       { email: emails },
-      { withCredentials: true },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
     console.log('초대 성공:', res.data);
     alert('초대가 완료되었습니다!');

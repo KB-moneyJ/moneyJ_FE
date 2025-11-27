@@ -133,7 +133,7 @@ export default function TripCard({
 
       <Period>{period}</Period>
 
-      <div>
+      {/* <div>
         <ProgressBar
           role="progressbar"
           aria-valuenow={progressPercent}
@@ -143,7 +143,7 @@ export default function TripCard({
           <ProgressFill $percent={progressPercent} />
         </ProgressBar>
         <ProgressLabel>{progressPercent}%</ProgressLabel>
-      </div>
+      </div> */}
 
       <DetailBtn as={Link} to={`/trip/${tripId}`} state={{ thumbnailUrl }} onClick={onClickDetail}>
         상세보기

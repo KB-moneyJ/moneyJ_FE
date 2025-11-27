@@ -3,12 +3,14 @@ import styled, { css } from 'styled-components';
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 30px;
 `;
 export const Page = styled.div`
   overflow-y: hidden;
   overflow-x: hidden;
   padding: 16px 22px 0;
   color: white;
+  height: 85vh;
 `;
 
 export const Header = styled.header`
@@ -155,7 +157,6 @@ export const VerifyBtn = styled.button`
 `;
 
 export const BtnGroup = styled.div`
-  margin-top: 28px;
   display: grid;
   gap: 12px;
 `;
@@ -197,6 +198,5 @@ export const LogoutBtn = styled.button`
   background: #ff4d6d;
   color: white;
   width: 100%;
-  margin-top: 40%;
-  margin-bottom: 400px;
+  margin-top: 50px;
 `;
