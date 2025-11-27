@@ -248,14 +248,6 @@ useEffect(() => {
     setOpenBank(false);
   };
 
-  // ---------- 목표 달성(카테고리) 시 진행률 증분 반영 ----------
-  const handleProgressDelta = (deltaPercent: number) => {
-    setProgress((prev) => clampPercent(Math.round((prev + deltaPercent) * 10) / 10));
-    if (id) {
-      qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(id), exact: true });
-    }
-  };
-
   // ---------- 플랜 삭제 ----------
   const handleDeletePlan = () => {
     if (!tripId || deleting) return;
@@ -326,7 +318,8 @@ useEffect(() => {
         tip={tipForProgress}
       />
 
-      <ExpenseCard tripId={id} savedPercent={progress} onProgressDelta={handleProgressDelta} />
+      {/* 예상 경비/목표 달성 */}
+      <ExpenseCard tripId={id} savedPercent={progress} />
 
       {overview && (
         <TripOverviewCard
