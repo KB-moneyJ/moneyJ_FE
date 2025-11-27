@@ -55,6 +55,21 @@ export const Container2 = styled.div`
 
 `;
 
+
+export const Container3 = styled.div`
+  font-family: Inter;
+  font-size: 24px;
+  color: white;
+  font-weight: bold;
+    width: 90%;
+  border-radius: 8px;
+  display: flex;
+    margin-top: 20px;
+  flex-direction: column;
+  align-items: center;
+    
+`;
+
 export const DropdownWrapper = styled.div`
   width: 300px;
     margin-top: 48px;
@@ -386,4 +401,166 @@ export const AddButton = styled.button`
 
     flex-shrink: 0;    
     align-self: center;
+`;
+export const DateDisplay = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    color: white;
+    font-weight: 600;
+
+    .label {
+        display: block;
+        font-size: 0.85rem;
+        opacity: 0.8;
+        text-align: center;
+    }
+
+    .date {
+        display: block;
+        margin-top: 2px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .arrow {
+        font-size: 1.2rem;
+        opacity: 0.7;
+    }
+`;
+
+export const GlassCalendar = styled.div`
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+    /* ✅ react-date-range 기본 상단 네모(날짜입력) 제거 */
+    .rdrDateDisplayWrapper {
+        display: none !important;
+    }
+
+    /* ✅ 달력 전체 래퍼 */
+    .rdrCalendarWrapper {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 0 4px 2px rgba(255, 255, 255, 0.2);
+        color: #fff;
+        font-family: "Pretendard", "Noto Sans KR", sans-serif;
+    }
+
+    /* ✅ 달 여러 개 들어가는 부분 */
+    .rdrMonths {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+
+    /* ✅ 개별 달력 */
+    .rdrMonth {
+        width: 100% !important;
+    }
+
+    /* ▶️ 화살표 버튼 */
+    .rdrNextButton,
+    .rdrPprevButton {
+        background: rgba(255, 255, 255, 0.25) !important;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        transition: background 0.2s;
+    }
+
+    .rdrNextButton:hover,
+    .rdrPprevButton:hover {
+        background: rgba(255, 255, 255, 0.35) !important;
+    }
+
+    /* 🔽 월·년도 선택 드롭다운 */
+    .rdrMonthAndYearPickers select {
+        font-weight: 600;
+        color: white;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* 📅 요일 */
+    .rdrWeekDays {
+        color: #ffccaa;
+        font-weight: 600;
+    }
+
+    /* 📅 날짜 색상 */
+    .rdrDayNumber span {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .rdrDayPassive span {
+        color: rgba(255, 255, 255, 0.35) !important;
+    }
+
+    /* ✅ 선택 스타일 */
+    .rdrStartEdge.rdrEndEdge,
+    .rdrSelected.rdrStartEdge.rdrEndEdge {
+        background: rgba(236, 181, 0, 0.52) !important;
+        border-radius: 20px !important;
+    }
+
+    .rdrStartEdge:not(.rdrEndEdge) {
+        background: rgba(236, 181, 0, 0.52) !important;
+        border-radius: 20px 0 0 20px !important;
+    }
+
+    .rdrEndEdge:not(.rdrStartEdge) {
+        background: rgba(236, 181, 0, 0.52) !important;
+        border-radius: 0 20px 20px 0 !important;
+    }
+
+    .rdrInRange {
+        background: rgba(236, 181, 0, 0.27) !important;
+    }
+
+    /* ✅ 오늘 표시 */
+    .rdrDayToday .rdrDayNumber span:after {
+        background: #ff7bfa !important;
+    }
+
+    .rdrDayDisabled {
+        background: transparent !important;
+    }
+
+    .rdrDayDisabled .rdrDayNumber span {
+        color: rgba(255, 255, 255, 0.25) !important; /* 흐린 텍스트만 */
+    }
+
+    .rdrDayPassive {
+        background: transparent !important;
+    }
+
+
+    @media (max-width: 480px) {
+        .rdrCalendarWrapper {
+            font-size: 0.9rem;
+            padding: 12px;
+        }
+    }
 `;
