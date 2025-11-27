@@ -1,6 +1,6 @@
 import React from "react";
 import { DateRange } from "react-date-range";
-import { ko } from "date-fns/locale";
+import ko from 'date-fns/locale/ko/index.js';
 import dayjs from "dayjs";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";

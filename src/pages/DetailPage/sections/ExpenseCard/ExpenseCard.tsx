@@ -118,7 +118,7 @@ type Props = {
         categoryName: item.label,
         isConsumed: true,
       };
-]
+
       const token = localStorage.getItem('accessToken');
       console.log('POST 요청 보낼 데이터:', bodyData);
 
