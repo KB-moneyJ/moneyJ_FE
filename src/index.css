@@ -1,55 +1,49 @@
 @import './styles/colors.css';
 @import './styles/variables.css';
 
-/* ✅ 뷰포트 높이 JS 변수로 관리 (JS에서 var(--vh) 설정해줌) */
 :root {
   font-size: 16px;
 }
 
-/* ✅ 전체 배경이 화면을 꽉 채우게 */
 html,
 body {
   margin: 0;
   padding: 0;
   background: #e6e6e6;
-  height: 100%;
-  width: 100%;
+  min-height: 100vh;
   display: grid;
   place-items: center;
-  overflow: hidden; /* 전체 스크롤은 막고, 내부 #root에서만 스크롤 */
 }
 
-/* ✅ 실제 앱 컨테이너 */
 #root {
-  width: min(100vw, 420px); /* 기본: 모바일 기준 */
-  height: calc(var(--vh, 1vh) * 100);
-  background: var(--gradient-main);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  width: 402px;
+  height: 874px;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+
+  background: var(--gradient-main);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
   scrollbar-width: none;
 }
-
 #root::-webkit-scrollbar {
-  display: none;
+  width: 0;
+  height: 0;
 }
 
-/* ✅ 작은 화면(모바일 등)에서는 꽉 차게 */
-@media (max-width: 430px) {
+@media (max-width: 402px) {
   #root {
     width: 100vw;
-    height: calc(var(--vh, 1vh) * 100);
+    height: 100dvh;
     border-radius: 0;
     box-shadow: none;
   }
 }
 
-
-/* ✅ 화면이 짧은 경우에도 꽉 차게 */
-@media (max-height: 874px) {
+@media (max-height: 874px) and (min-width: 403px) {
   #root {
-    height: calc(var(--vh, 1vh) * 100);
+    height: min(874px, 100dvh);
   }
 }
