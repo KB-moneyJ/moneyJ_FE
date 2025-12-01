@@ -94,7 +94,11 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
     tips,
     checklist,
     cautions,
-    categories: p.categoryDTOList?.map((c) => ({ name: c.categoryName, amount: c.amount })),
+    categories: p.categoryDTOList?.map((c) => ({ 
+      name: c.categoryName, 
+      amount: c.amount,
+      consumed: c.consumed ?? false,
+    })),
     totalBudget: total,
     currentSavings: saved,
   };

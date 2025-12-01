@@ -319,7 +319,16 @@ useEffect(() => {
       />
 
       {/* 예상 경비/목표 달성 */}
-      <ExpenseCard tripId={id} savedPercent={progress} />
+      <ExpenseCard
+        tripId={id}
+        savedPercent={progress}
+        categories={data?.categories}
+        onDataChange={async () => {
+          // ExpenseCard에서 데이터 변경 시 쿼리 무효화하여 재조회
+          await qc.invalidateQueries({ queryKey: TRIP_KEYS.detail(id), exact: true });
+          await qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(id), exact: true });
+        }}
+      />
 
       {overview && (
         <TripOverviewCard

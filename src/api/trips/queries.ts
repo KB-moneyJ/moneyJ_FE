@@ -54,8 +54,8 @@ export function useTripPlanDetail(id?: number | string) {
     },
     retry: false,
     staleTime: 60_000,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 }
 
