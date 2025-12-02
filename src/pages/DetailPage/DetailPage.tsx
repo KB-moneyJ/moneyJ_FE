@@ -102,44 +102,56 @@ export default function DetailPage() {
     return (balances as any[]).find((b) => String(b.id) === String(meId));
   }, [balances, meId]);
 
-// ---------- balances 기반으로 계좌 상태 세팅 ----------
-useEffect(() => {
-  if (!tripId) return;
+  // ---------- balances 기반으로 계좌 상태 세팅 ----------
+  // balances API 응답(UserBalanceResponseDTO[])을 기반으로 계좌 연동 상태 자동 업데이트
+  useEffect(() => {
+    if (!tripId) return;
 
-  const planIdNum = Number(tripId);
-  const rows = (balances ?? []) as any[];
+    const planIdNum = Number(tripId);
+    const rows = (balances ?? []) as any[];
 
-  // balances 자체가 없으면 = 계좌 미연동 처리
-  if (!rows.length) {
-    setIsAccountLinked(false);
-    setAccountLabel(undefined);
-    setAccountBalance(undefined);
-    setLinkedForPlan(planIdNum, false);
-    return;
-  }
+    // balances 자체가 없으면 = 계좌 미연동 처리
+    if (!rows.length) {
+      setIsAccountLinked(false);
+      setAccountLabel(undefined);
+      setAccountBalance(undefined);
+      setLinkedForPlan(planIdNum, false);
+      return;
+    }
 
-  // 내 id 기준으로 행 찾기 (TripBalanceModel은 id 필드 사용, 없으면 첫 번째 행 사용)
-  const target =
-    meId != null
-      ? rows.find((b) => String(b.id) === String(meId))
-      : rows[0];
+    // 내 id 기준으로 행 찾기
+    // adapter를 거친 후: TripBalanceModel { id: string, name, avatarUrl, balance, percent }
+    // adapter 변환: id = String(userId)
+    // meId가 유효한 값(양수)이고 매칭되는 항목이 있으면 사용, 없으면 첫 번째 항목 사용
+    let target = undefined;
+    if (meId != null && meId > 0) {
+      target = rows.find((b) => String(b.id) === String(meId));
+    }
+    // meId로 찾지 못했거나 meId가 유효하지 않으면 첫 번째 항목 사용
+    if (!target && rows.length > 0) {
+      target = rows[0];
+    }
 
-  // 잔액 정보가 없으면 = 미연동으로 본다
-  if (!target || target.balance == null) {
-    setIsAccountLinked(false);
-    setAccountLabel(undefined);
-    setAccountBalance(undefined);
-    setLinkedForPlan(planIdNum, false);
-    return;
-  }
+    // 잔액 정보가 null이거나 undefined이면 = 미연동으로 본다
+    // balance가 0인 경우는 유효한 값이므로 체크하지 않음
+    if (!target || target.balance === null || target.balance === undefined) {
+      setIsAccountLinked(false);
+      setAccountLabel(undefined);
+      setAccountBalance(undefined);
+      setLinkedForPlan(planIdNum, false);
+      return;
+    }
 
-  // 여기까지 왔으면 계좌 연동된 상태로 간주
-  setIsAccountLinked(true);
-  setAccountBalance(Number(target.balance));
-  setAccountLabel('연동된 계좌');
-  setLinkedForPlan(planIdNum, true);
-}, [tripId, balances, meId]);
-
+    // 여기까지 왔으면 계좌 연동된 상태로 간주
+    setIsAccountLinked(true);
+    setAccountBalance(Number(target.balance));
+    // accountLabel은 handleBankConnected에서 설정하거나, 없으면 기본값
+    // useEffect에서는 balances 기반으로 isAccountLinked와 balance만 업데이트
+    if (!accountLabel) {
+      setAccountLabel('연동된 계좌');
+    }
+    setLinkedForPlan(planIdNum, true);
+  }, [tripId, balances, meId]);
 
   // ---------- 멤버 리스트 ----------
   const groupMembers = useMemo(() => {
@@ -230,21 +242,33 @@ useEffect(() => {
   const cautions = useMemo(() => data?.cautions ?? [], [data?.cautions]);
 
   // ---------- 계좌 연동 완료 핸들러 ----------
-  // 계좌 연동 후에는 CODEF API를 다시 호출하지 않고, balances 쿼리만 새로고침
+  // 계좌 연동 후 /trip-plans/{tripPlanId}/balances API를 refetch하여 최신 데이터 가져오기
+  // 이 API는 모든 멤버의 계좌와 달성율(UserBalanceResponseDTO)을 반환하므로 바로 활용
   const handleBankConnected = async (bankCode: string, acct: string) => {
     const planId = Number(tripId);
     setLinkedForPlan(planId, true);
     setBankOrgForPlan(planId, bankCode);
 
-    // balances 쿼리를 무효화해서 /trip-plans/{tripPlanId}/balances API로 최신 데이터 가져오기
-    // refreshTripPlanBalance(CODEF API)는 최초 계좌 연결 시에만 BankConnectModal에서 호출됨
-    await qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
-
     const bankName = BANK_NAME_BY_CODE[bankCode as keyof typeof BANK_NAME_BY_CODE] ?? '연동 계좌';
     const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
+
+    // 계좌 연동 상태 즉시 설정 (버튼 숨기기)
     setIsAccountLinked(true);
     setAccountLabel(`${bankName} ${maskAccount(acct)}`);
-    // 잔액은 balances 쿼리에서 가져온 데이터로 useEffect에서 자동 설정됨
+
+    // balances API를 invalidate하여 최신 데이터 가져오기
+    // useEffect가 balances 변경을 감지하여 balance와 progress 자동 업데이트
+    await qc.invalidateQueries({
+      queryKey: TRIP_KEYS.balances(planId),
+      exact: true,
+    });
+
+    // detail 쿼리도 함께 invalidate
+    await qc.invalidateQueries({
+      queryKey: TRIP_KEYS.detail(planId),
+      exact: true,
+    });
+
     setOpenBank(false);
   };
 
