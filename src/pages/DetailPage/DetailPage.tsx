@@ -9,10 +9,14 @@ import ProgressCard from './sections/ProgressCard/ProgressCard';
 import ExpenseCard from './sections/ExpenseCard/ExpenseCard';
 import TripOverviewCard from './sections/TripOverviewCard/TripOverviewCard';
 import BeforeYouGoCard from './sections/BeforeYouGoCard/BeforeYouGoCard';
+import ExchangeRateCard from './sections/ExchangeRateCard/ExchangeRateCard';
 import FriendInviteModal from '@/components/modals/FriendInviteModal';
 import BankConnectModal from '@/components/modals/BankConnectModal';
 import podiumUrl from '@/assets/images/podium.svg';
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
+
+import { getDestinationAirportCode } from "@/pages/StartPlan/airport/destinationAirportCode";
+
 import {
   useTripPlanDetail,
   useTripPlanBalances,
@@ -21,7 +25,10 @@ import {
 } from '@/api/trips/queries';
 import type { TripDetailModel } from '@/api/trips/types';
 import { useMe } from '@/api/users/queries';
-import ExchangeRateCard from './sections/ExchangeRateCard/ExchangeRateCard';
+
+import Airport from '@/pages/StartPlan/airport/Airport';
+
+import styled from "styled-components";
 
 function clampPercent(v: number) {
   if (!Number.isFinite(v)) return 0;
@@ -43,6 +50,25 @@ function setBankOrgForPlan(planId: number, org: string) {
   localStorage.setItem(`plan:${planId}:bankOrg`, org);
 }
 
+const TabWrapper = styled.div`
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid #eee;
+    margin-top: 6px;
+`;
+
+const TabItem = styled.div<{ $active: boolean }>`
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    color: ${({ $active }) => ($active ? "#ae65e1" : "#bababa")};
+    border-bottom: ${({ $active }) => ($active ? "2px solid #333" : "2px solid transparent")};
+    transition: 0.2s ease;
+`;
+
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const id = Number(tripId);
@@ -52,8 +78,9 @@ export default function DetailPage() {
   const location = useLocation() as { state?: { thumbnailUrl?: string } };
   const thumbFromList = location.state?.thumbnailUrl;
 
-  // 상세 / 밸런스 / 유저
-  const { data, isLoading, isError } = useTripPlanDetail(tripId); // TripDetailModel
+  const [tab, setTab] = useState<"saving" | "info">("saving");
+
+  const { data, isLoading, isError } = useTripPlanDetail(tripId);
   const { data: balances = [] } = useTripPlanBalances(tripId);
   const { data: me } = useMe();
   const meId = me?.id;
@@ -67,12 +94,19 @@ export default function DetailPage() {
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
+
   const tipForProgress = isAccountLinked ? data?.overviewTip : undefined;
 
-  // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
+  // ⭐ 여기에 destination → IATA 코드 변환 넣기
+  const destinationAirportCode = useMemo(() => {
+    return data?.destination
+      ? getDestinationAirportCode(data.destination)
+      : "ICN";
+  }, [data?.destination]);
+
+  // ---------------- 진행률 ----------------
   const myProgressFromBalances = useMemo(() => {
     if (!meId) return undefined;
-    // TripBalanceModel은 id(string), percent 필드를 사용
     const meRow = (balances as any[]).find((b) => String(b.id) === String(meId));
     return typeof meRow?.percent === 'number' ? meRow.percent : undefined;
   }, [balances, meId]);
@@ -84,10 +118,8 @@ export default function DetailPage() {
     return 0;
   }, [data]);
 
-  // 화면 표시용 진행률(단일 소스)
   const [progress, setProgress] = useState<number>(0);
 
-  // 서버 데이터 변화 시 동기화
   useEffect(() => {
     const next =
       typeof myProgressFromBalances === 'number' ? myProgressFromBalances : myProgressFallback;
@@ -95,56 +127,42 @@ export default function DetailPage() {
     setProgress(clampPercent(rounded));
   }, [myProgressFromBalances, myProgressFallback]);
 
-  // ---------- balances에서 "나"의 계좌 정보 ----------
-  const myBalanceRow = useMemo(() => {
-    if (!meId) return undefined;
-    // TripBalanceModel은 id(string) 필드를 사용
-    return (balances as any[]).find((b) => String(b.id) === String(meId));
-  }, [balances, meId]);
+  // ---------- 내 계좌 ----------
+  useEffect(() => {
+    if (!tripId) return;
+    const planIdNum = Number(tripId);
 
-// ---------- balances 기반으로 계좌 상태 세팅 ----------
-useEffect(() => {
-  if (!tripId) return;
+    const rows = (balances ?? []) as any[];
 
-  const planIdNum = Number(tripId);
-  const rows = (balances ?? []) as any[];
+    if (!rows.length) {
+      setIsAccountLinked(false);
+      setAccountLabel(undefined);
+      setAccountBalance(undefined);
+      setLinkedForPlan(planIdNum, false);
+      return;
+    }
 
-  // balances 자체가 없으면 = 계좌 미연동 처리
-  if (!rows.length) {
-    setIsAccountLinked(false);
-    setAccountLabel(undefined);
-    setAccountBalance(undefined);
-    setLinkedForPlan(planIdNum, false);
-    return;
-  }
-
-  // 내 id 기준으로 행 찾기 (TripBalanceModel은 id 필드 사용, 없으면 첫 번째 행 사용)
-  const target =
-    meId != null
+    const target = meId != null
       ? rows.find((b) => String(b.id) === String(meId))
       : rows[0];
 
-  // 잔액 정보가 없으면 = 미연동으로 본다
-  if (!target || target.balance == null) {
-    setIsAccountLinked(false);
-    setAccountLabel(undefined);
-    setAccountBalance(undefined);
-    setLinkedForPlan(planIdNum, false);
-    return;
-  }
+    if (!target || target.balance == null) {
+      setIsAccountLinked(false);
+      setAccountLabel(undefined);
+      setAccountBalance(undefined);
+      setLinkedForPlan(planIdNum, false);
+      return;
+    }
 
-  // 여기까지 왔으면 계좌 연동된 상태로 간주
-  setIsAccountLinked(true);
-  setAccountBalance(Number(target.balance));
-  setAccountLabel('연동된 계좌');
-  setLinkedForPlan(planIdNum, true);
-}, [tripId, balances, meId]);
+    setIsAccountLinked(true);
+    setAccountBalance(Number(target.balance));
+    setAccountLabel("연동된 계좌");
+    setLinkedForPlan(planIdNum, true);
+  }, [tripId, balances, meId]);
 
-
-  // ---------- 멤버 리스트 ----------
+  // ---------- 멤버 ----------
   const groupMembers = useMemo(() => {
     if (balances.length) {
-      // TripBalanceModel 필드: id, name, avatarUrl, balance, percent
       return (balances as any[]).map((b) => ({
         id: String(b.id),
         name: b.name,
@@ -163,7 +181,6 @@ useEffect(() => {
     return [];
   }, [balances, data?.members]);
 
-  // ---------- 그룹 전체 진행도(멤버 평균) ----------
   const groupProgressPercent = useMemo(() => {
     if (groupMembers.length) {
       const avg =
@@ -174,7 +191,6 @@ useEffect(() => {
     return progress;
   }, [groupMembers, progress]);
 
-  // ---------- 포디움(상위 3명) ----------
   const podiumTop3 = useMemo(() => {
     if (groupMembers.length) {
       const sorted = [...groupMembers].sort((a, b) => b.percent - a.percent);
@@ -205,7 +221,6 @@ useEffect(() => {
     return clampPercent(sum / membersForOverview.length);
   }, [membersForOverview, progress]);
 
-  // ---------- TripOverviewCard용 개요 ----------
   const overview = useMemo(() => {
     if (!data) return null;
 
@@ -229,26 +244,22 @@ useEffect(() => {
   const checklist = useMemo(() => data?.checklist ?? [], [data?.checklist]);
   const cautions = useMemo(() => data?.cautions ?? [], [data?.cautions]);
 
-  // ---------- 계좌 연동 완료 핸들러 ----------
-  // 계좌 연동 후에는 CODEF API를 다시 호출하지 않고, balances 쿼리만 새로고침
+  // ---------- 계좌 연동 완료 ----------
   const handleBankConnected = async (bankCode: string, acct: string) => {
     const planId = Number(tripId);
     setLinkedForPlan(planId, true);
     setBankOrgForPlan(planId, bankCode);
 
-    // balances 쿼리를 무효화해서 /trip-plans/{tripPlanId}/balances API로 최신 데이터 가져오기
-    // refreshTripPlanBalance(CODEF API)는 최초 계좌 연결 시에만 BankConnectModal에서 호출됨
     await qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
 
     const bankName = BANK_NAME_BY_CODE[bankCode as keyof typeof BANK_NAME_BY_CODE] ?? '연동 계좌';
     const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
     setIsAccountLinked(true);
     setAccountLabel(`${bankName} ${maskAccount(acct)}`);
-    // 잔액은 balances 쿼리에서 가져온 데이터로 useEffect에서 자동 설정됨
+
     setOpenBank(false);
   };
 
-  // ---------- 플랜 삭제 ----------
   const handleDeletePlan = () => {
     if (!tripId || deleting) return;
     const ok = window.confirm(
@@ -264,11 +275,14 @@ useEffect(() => {
       },
       onError: (e) => {
         console.error(e);
-        alert('플랜 삭제에 실패했어요. 잠시 후 다시 시도해 주세요.');
+        alert('플랜 삭제에 실패했어요.');
       },
     });
   };
 
+  // ==============================
+  // 로딩 화면
+  // ==============================
   if (isLoading) {
     return (
       <div>
@@ -280,6 +294,9 @@ useEffect(() => {
     );
   }
 
+  // ==============================
+  // 에러 화면
+  // ==============================
   if (isError || !data) {
     return (
       <div>
@@ -293,6 +310,9 @@ useEffect(() => {
     );
   }
 
+  // ==============================
+  // 실제 화면
+  // ==============================
   return (
     <div>
       <Container>
@@ -301,7 +321,6 @@ useEffect(() => {
         {openMenu && (
           <Dropdown>
             <DropdownItem onClick={() => setOpenInvite(true)}>멤버 초대</DropdownItem>
-            {/* <DropdownItem onClick={() => setOpenBank(true)}>계좌 연동</DropdownItem> */}
             <DropdownItem style={{ color: '#ff7b7b' }} onClick={handleDeletePlan}>
               플랜 삭제
             </DropdownItem>
@@ -309,41 +328,62 @@ useEffect(() => {
         )}
       </Container>
 
-      <ProgressCard
-        progress={progress}
-        linked={isAccountLinked}
-        accountLabel={accountLabel}
-        balance={accountBalance}
-        onClickLink={() => setOpenBank(true)}
-        tip={tipForProgress}
-      />
+      <TabWrapper>
+        <TabItem $active={tab === "saving"} onClick={() => setTab("saving")}>
+          저축 상세
+        </TabItem>
+        <TabItem $active={tab === "info"} onClick={() => setTab("info")}>
+          부가적 정보
+        </TabItem>
+      </TabWrapper>
 
-      {/* 예상 경비/목표 달성 */}
-      <ExpenseCard tripId={id} savedPercent={progress} />
+      {/* ⭐ 탭 1 : 저축 상세 */}
+      {tab === "saving" && (
+        <>
+          <ProgressCard
+            progress={progress}
+            linked={isAccountLinked}
+            accountLabel={accountLabel}
+            balance={accountBalance}
+            onClickLink={() => setOpenBank(true)}
+            tip={tipForProgress}
+          />
 
-      {overview && (
-        <TripOverviewCard
-          destination={overview.destination}
-          countryCode={overview.countryCode}
-          period={overview.period}
-          thumbnailUrl={overview.thumbnailUrl}
-          progressPercent={overview.progressPercent}
-          members={overview.members}
-          tip={overview.tip}
-          podiumImageUrl={overview.podiumImageUrl}
-          podiumTop3={overview.podiumTop3}
-        />
+          <ExpenseCard tripId={id} savedPercent={progress} />
+
+          {overview && (
+            <TripOverviewCard
+              destination={overview.destination}
+              countryCode={overview.countryCode}
+              period={overview.period}
+              thumbnailUrl={overview.thumbnailUrl}
+              progressPercent={overview.progressPercent}
+              members={overview.members}
+              tip={overview.tip}
+              podiumImageUrl={overview.podiumImageUrl}
+              podiumTop3={overview.podiumTop3}
+            />
+          )}
+
+          <BeforeYouGoCard
+            destination={data.destination}
+            checklist={checklist}
+            cautions={cautions}
+            tips={data.tips}
+          />
+
+          <ExchangeRateCard destination={data.destination} />
+        </>
       )}
 
-      <BeforeYouGoCard
-        destination={data.destination}
-        checklist={checklist}
-        cautions={cautions}
-        tips={data.tips}
-      />
+      {/* ⭐ 탭 2 : Airport 페이지 */}
+      {tab === "info" && (
+        <div style={{ padding: "10px" }}>
+          <Airport destination={destinationAirportCode} />
+        </div>
+      )}
 
-      <ExchangeRateCard destination={data.destination} />
-
+      {/* 모달 */}
       {openInvite && (
         <FriendInviteModal
           isOpen={openInvite}
