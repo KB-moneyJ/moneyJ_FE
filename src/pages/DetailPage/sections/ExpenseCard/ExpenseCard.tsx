@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plane, Home, Utensils, Check } from 'lucide-react';
 import { PiAirplaneTiltFill } from 'react-icons/pi';
 import EditModal from '../../../../components/common/EditModal';
@@ -27,61 +27,42 @@ type ExpenseItem = {
 type Props = {
   savedPercent: number;
   tripId: number;
+  categories?: { name: string; amount: number; consumed?: boolean }[];
+  onDataChange?: () => void;
 };
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
-export default function ExpenseCard({ savedPercent, tripId }: Props) {
-  const [items, setItems] = useState<ExpenseItem[]>([]);
+export default function ExpenseCard({ savedPercent, tripId, categories = [], onDataChange }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem('accessToken');
 
-  // 여행 경비 항목 불러오기 함수 (PATCH 후에도 재사용)
-  const fetchExpenses = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/trip-plans/${tripId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      });
+  // categories를 ExpenseItem 형식으로 변환
+  const items = useMemo<ExpenseItem[]>(() => {
+    return categories.map((c) => {
+      let icon;
+      switch (c.name) {
+        case '항공비':
+          icon = <Plane size={18} />;
+          break;
+        case '숙박':
+          icon = <Home size={18} />;
+          break;
+        case '식비':
+          icon = <Utensils size={18} />;
+          break;
+        default:
+          icon = <Check size={18} />;
+      }
 
-      const data = await res.json();
-
-      const mappedItems: ExpenseItem[] = data.categoryDTOList.map((c: any) => {
-        let icon;
-        switch (c.categoryName) {
-          case '항공비':
-            icon = <Plane size={18} />;
-            break;
-          case '숙박':
-            icon = <Home size={18} />;
-            break;
-          case '식비':
-            icon = <Utensils size={18} />;
-            break;
-          default:
-            icon = <Check size={18} />;
-        }
-
-        return {
-          id: c.categoryName,
-          label: c.categoryName,
-          amount: c.amount,
-          icon,
-          purchased: c.consumed ?? false, // /trip-plans 응답엔 없을 수 있음 → false 처리
-        };
-      });
-
-      setItems(mappedItems);
-    } catch (err) {
-      console.error('Failed to fetch expenses', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchExpenses();
-  }, [tripId]);
+      return {
+        id: c.name,
+        label: c.name,
+        amount: c.amount,
+        icon,
+        purchased: c.consumed ?? false,
+      };
+    });
+  }, [categories]);
 
   // 총합 & 진행률 기반 커버 계산 (부모 progress 사용)
   const total = items.reduce((sum, i) => sum + i.amount, 0);
@@ -121,18 +102,8 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         body: JSON.stringify(bodyData),
       });
 
-      // ✅ 증가량 = (해당 항목 금액 / 총합) * 100
-      const rawDelta = (item.amount / total) * 100;
-      const delta = Math.round(rawDelta * 10) / 10; // 보기 좋게 소수 1자리
-
-      // // 부모(DetailPage) 진행률 즉시 반영
-      // onProgressDelta?.(delta);
-
-      // 로컬 purchased 갱신 (버튼 비활성 & 체크마크 표시)
-      setItems((prev) => prev.map((it) => (it.id === id ? { ...it, purchased: true } : it)));
-
-      // (선택) /isconsumed/{tripId} 로 재조회해서 확정 상태 싱크하고 싶다면:
-      // await fetchExpenses();
+      // 부모 컴포넌트에 데이터 새로고침 요청
+      onDataChange?.();
     } catch (err) {
       console.error('Failed to mark as consumed', err);
     }
@@ -158,9 +129,9 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         },
         body: JSON.stringify(bodyData),
       });
-      // 요청 후 로컬 업데이트
-      setItems(updatedItems);
-      // ⚠️ 합계 변경 후 delta 의미가 달라질 수 있으니, 부모에서 balances 무효화로 동기화하는 걸 추천
+      
+      // 부모 컴포넌트에 데이터 새로고침 요청
+      onDataChange?.();
     } catch (err) {
       console.error('Failed to update expenses', err);
     }

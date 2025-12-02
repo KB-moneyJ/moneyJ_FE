@@ -32,6 +32,7 @@ export type TripMemberApi = {
 export type CategoryApi = {
   categoryName: string;
   amount: number;
+  consumed?: boolean;
 };
 
 export type TripPlanDetailApi = TripPlanApi & {
@@ -57,7 +58,7 @@ export type TripDetailModel = {
   tips?: TipItem[];
   checklist: string[];
   cautions: string[];
-  categories?: { name: string; amount: number }[];
+  categories?: { name: string; amount: number; consumed?: boolean }[];
   totalBudget: number;
   currentSavings: number;
   savingsPhrases?: string[];
