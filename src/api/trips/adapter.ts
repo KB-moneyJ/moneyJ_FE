@@ -105,9 +105,10 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
 }
 
 export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
-  const raw = (api as any)?.progress;
-  const n = typeof raw === 'string' ? parseFloat(raw) : Number(raw ?? 0);
-  const pct = !isFinite(n) ? 0 : n <= 1 ? n * 100 : n;
+  // api.progress가 이미 number 타입이므로 직접 사용
+  const n = api.progress ?? 0;
+  // 0~1 범위이면 100을 곱하고, 아니면 그대로 사용 (퍼센트 값 호환)
+  const pct = n <= 1 ? n * 100 : n;
   const percent = Math.round(pct * 10) / 10;
 
   return {
