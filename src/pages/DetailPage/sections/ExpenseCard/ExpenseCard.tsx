@@ -32,7 +32,12 @@ type Props = {
 };
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
-export default function ExpenseCard({ savedPercent, tripId, categories = [], onDataChange }: Props) {
+export default function ExpenseCard({
+  savedPercent,
+  tripId,
+  categories = [],
+  onDataChange,
+}: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem('accessToken');
 
@@ -95,7 +100,7 @@ export default function ExpenseCard({ savedPercent, tripId, categories = [], onD
       const token = localStorage.getItem('accessToken');
       console.log('POST 요청 보낼 데이터:', bodyData);
 
-      await fetch(`http://localhost:8080/trip-plans/isconsumed`, {
+      await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
 
@@ -129,7 +134,7 @@ export default function ExpenseCard({ savedPercent, tripId, categories = [], onD
         },
         body: JSON.stringify(bodyData),
       });
-      
+
       // 부모 컴포넌트에 데이터 새로고침 요청
       onDataChange?.();
     } catch (err) {
