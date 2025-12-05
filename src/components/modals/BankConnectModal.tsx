@@ -153,17 +153,31 @@ export default function BankConnectModal({
 
   async function checkAccountExists(organization: string): Promise<boolean> {
     try {
-      const res = await axios.get(`${BASE_URL}/api/codef/credentials`, {
-        headers: getAuthHeader(),
-      });
-
-      const accountList = res.data?.data?.accountList || [];
-
-      const exists = accountList.some((account: any) => account.organization === organization);
-
-      return exists;
-    } catch (err) {
-      console.error('계정 존재 여부 확인 실패:', err);
+      await axios.post(
+        `${BASE_URL}/api/codef/credentials`,
+        {
+          countryCode: 'KR',
+          businessType: 'BK',
+          clientType: 'P',
+          organization,
+          loginType: '1',
+          id: bankId,
+          password,
+        },
+        {
+          headers: getAuthHeader(),
+        },
+      );
+      // POST 성공 = 계정 추가 성공 = 이미 등록된 상태로 간주하여 이후 중복 추가 로직 스킵
+      return true;
+    } catch (err: any) {
+      const code = err?.response?.data?.result?.code;
+      // 이미 존재하거나 중복된 경우도 등록된 상태로 간주
+      if (code === 'CF-03002' || code === 'CF-04004') {
+        return true;
+      }
+      // 그 외 에러(비밀번호 틀림 등)는 false 반환 -> 이후 로직에서 다시 시도하거나 에러 발생시킴
+      console.error('계정 존재 여부 확인(POST) 실패:', err);
       return false;
     }
   }
@@ -244,7 +258,9 @@ export default function BankConnectModal({
 
       // 이미 등록된 계좌면 에러 메시지 표시하고 연결하지 않음
       if (checkResult === true) {
-        setErrorMsg('이 계좌는 이미 다른 여행 플랜에 등록되어 있습니다. 다른 계좌를 선택해 주세요.');
+        setErrorMsg(
+          '이 계좌는 이미 다른 여행 플랜에 등록되어 있습니다. 다른 계좌를 선택해 주세요.',
+        );
         setSubmitting(false);
         return;
       }
