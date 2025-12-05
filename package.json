@@ -31,7 +31,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "preinstall": "echo 'nodeLinker: node-modules' > .yarnrc.yml && corepack prepare yarn@4.9.1 --activate"
+    "preinstall": "echo 'nodeLinker: node-modules' > .yarnrc.yml && corepack prepare yarn@4.9.11 --activate"
   },
   "packageManager": "yarn@4.9.11"
 }
