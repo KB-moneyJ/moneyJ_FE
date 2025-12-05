@@ -33,5 +33,5 @@
     "preview": "vite preview",
     "preinstall": "echo 'nodeLinker: node-modules' > .yarnrc.yml && corepack prepare yarn@4.9.1 --activate"
   },
-  "packageManager": "yarn@4.9.1"
+  "packageManager": "yarn@4.9.11"
 }
