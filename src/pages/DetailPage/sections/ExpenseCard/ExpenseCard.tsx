@@ -13,6 +13,7 @@ import {
   Item,
   CheckMark,
   ItemContainer,
+  GoalButton,
 } from './ExpenseCard.style';
 import { Label, Price } from '@/pages/StartPlan/PlanCard/PlanCardStyle';
 
@@ -165,31 +166,16 @@ export default function ExpenseCard({
                 </Label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Price>₩{i.amount.toLocaleString()}</Price>
-                  {!covered && !i.purchased && (
-                    <button
-                      onClick={() => handlePurchase(i.id)}
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: '20px',
-                        border: '1px solid #ffeaa6',
-                        background: '#fffea6',
-                        alignItems: 'center',
-                        width: '90px',
-                        justifyContent: 'space-around',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        fontSize: '0.8rem',
-                        marginRight: '8px',
-                      }}
-                    >
+                  {!i.purchased && (
+                    <GoalButton onClick={() => handlePurchase(i.id)} $blink={covered}>
                       <PiAirplaneTiltFill />
                       목표 달성
-                    </button>
+                    </GoalButton>
                   )}
                 </div>
               </Item>
 
-              <CheckMark $visible={covered || i.purchased}>
+              <CheckMark $visible={i.purchased}>
                 <Check size={24} strokeWidth={6} />
               </CheckMark>
             </ItemContainer>
