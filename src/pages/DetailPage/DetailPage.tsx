@@ -54,7 +54,10 @@ export default function DetailPage() {
 
   // 상세 / 밸런스 / 유저
   const { data, isLoading, isError } = useTripPlanDetail(tripId); // TripDetailModel
-  const { data: balances = [] } = useTripPlanBalances(tripId);
+  const { data: balancesData } = useTripPlanBalances(tripId);
+  const balances = balancesData?.members ?? [];
+  const serverGroupProgress = balancesData?.groupProgress;
+
   const { data: me } = useMe();
   const meId = me?.id;
 
@@ -71,10 +74,24 @@ export default function DetailPage() {
 
   // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
   const myProgressFromBalances = useMemo(() => {
-    if (!meId) return undefined;
-    // TripBalanceModel은 id(string), percent 필드를 사용
-    const meRow = (balances as any[]).find((b) => String(b.id) === String(meId));
-    return typeof meRow?.percent === 'number' ? meRow.percent : undefined;
+    const rows = balances as any[];
+    if (!rows.length) return undefined;
+
+    // 1순위: 내 ID로 매칭되는 멤버
+    if (meId) {
+      const meRow = rows.find((b) => String(b.id) === String(meId));
+      if (meRow && typeof meRow.percent === 'number') {
+        return meRow.percent;
+      }
+    }
+
+    // 2순위: 매칭 실패 시 첫 번째 멤버 (잔액 표시 로직과 일치시킴)
+    // 이렇게 해야 잔액은 나오는데 진행도는 0%인 불일치를 방지할 수 있음
+    if (rows[0] && typeof rows[0].percent === 'number') {
+      return rows[0].percent;
+    }
+
+    return undefined;
   }, [balances, meId]);
 
   const myProgressFallback = useMemo(() => {
@@ -177,6 +194,11 @@ export default function DetailPage() {
 
   // ---------- 그룹 전체 진행도(멤버 평균) ----------
   const groupProgressPercent = useMemo(() => {
+    // 서버에서 받은 그룹 진행도가 있으면 우선 사용
+    if (typeof serverGroupProgress === 'number') {
+      return clampPercent(serverGroupProgress);
+    }
+
     if (groupMembers.length) {
       const avg =
         groupMembers.reduce((acc: number, cur: any) => acc + (cur.percent ?? 0), 0) /
@@ -184,7 +206,7 @@ export default function DetailPage() {
       return clampPercent(avg);
     }
     return progress;
-  }, [groupMembers, progress]);
+  }, [groupMembers, progress, serverGroupProgress]);
 
   // ---------- 포디움(상위 3명) ----------
   const podiumTop3 = useMemo(() => {
@@ -245,9 +267,9 @@ export default function DetailPage() {
   // 계좌 연동 후 /trip-plans/{tripPlanId}/balances API를 refetch하여 최신 데이터 가져오기
   // 이 API는 모든 멤버의 계좌와 달성율(UserBalanceResponseDTO)을 반환하므로 바로 활용
   const handleBankConnected = async (bankCode: string, acct: string) => {
-    const planId = Number(tripId);
-    setLinkedForPlan(planId, true);
-    setBankOrgForPlan(planId, bankCode);
+    const planId = String(tripId); // 문자열로 정규화 (queryKey 일관성)
+    setLinkedForPlan(Number(tripId), true);
+    setBankOrgForPlan(Number(tripId), bankCode);
 
     const bankName = BANK_NAME_BY_CODE[bankCode as keyof typeof BANK_NAME_BY_CODE] ?? '연동 계좌';
     const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
@@ -256,15 +278,17 @@ export default function DetailPage() {
     setIsAccountLinked(true);
     setAccountLabel(`${bankName} ${maskAccount(acct)}`);
 
-    // balances API를 invalidate하여 최신 데이터 가져오기
-    // useEffect가 balances 변경을 감지하여 balance와 progress 자동 업데이트
-    await qc.invalidateQueries({
+    // 서버에서 잔액 업데이트 시간 확보를 위해 약간의 딜레이
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // refetchQueries로 강제 refetch (invalidate보다 확실하게 데이터 갱신)
+    await qc.refetchQueries({
       queryKey: TRIP_KEYS.balances(planId),
       exact: true,
     });
 
-    // detail 쿼리도 함께 invalidate
-    await qc.invalidateQueries({
+    // detail 쿼리도 함께 refetch
+    await qc.refetchQueries({
       queryKey: TRIP_KEYS.detail(planId),
       exact: true,
     });
@@ -349,8 +373,10 @@ export default function DetailPage() {
         categories={data?.categories}
         onDataChange={async () => {
           // ExpenseCard에서 데이터 변경 시 쿼리 무효화하여 재조회
-          await qc.invalidateQueries({ queryKey: TRIP_KEYS.detail(id), exact: true });
-          await qc.invalidateQueries({ queryKey: TRIP_KEYS.balances(id), exact: true });
+          // 문자열로 정규화하여 queryKey 일관성 유지
+          const planId = String(id);
+          await qc.refetchQueries({ queryKey: TRIP_KEYS.detail(planId), exact: true });
+          await qc.refetchQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
         }}
       />
 
