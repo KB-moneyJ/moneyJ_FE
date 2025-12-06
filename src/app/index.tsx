@@ -6,9 +6,8 @@ import '../index.css';
 import '../styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <RQProvider>
-      <App />
-    </RQProvider>
-  </React.StrictMode>,
+  <RQProvider>
+    <App />
+  </RQProvider>
 );
+
