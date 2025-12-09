@@ -13,6 +13,7 @@ import {
   Item,
   CheckMark,
   ItemContainer,
+  GoalButton,
 } from './ExpenseCard.style';
 import { Label, Price } from '@/pages/StartPlan/PlanCard/PlanCardStyle';
 
@@ -32,7 +33,12 @@ type Props = {
 };
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
-export default function ExpenseCard({ savedPercent, tripId, categories = [], onDataChange }: Props) {
+export default function ExpenseCard({
+  savedPercent,
+  tripId,
+  categories = [],
+  onDataChange,
+}: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem('accessToken');
 
@@ -95,7 +101,7 @@ export default function ExpenseCard({ savedPercent, tripId, categories = [], onD
       const token = localStorage.getItem('accessToken');
       console.log('POST 요청 보낼 데이터:', bodyData);
 
-      await fetch(`http://localhost:8080/trip-plans/isconsumed`, {
+      await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
 
@@ -129,7 +135,7 @@ export default function ExpenseCard({ savedPercent, tripId, categories = [], onD
         },
         body: JSON.stringify(bodyData),
       });
-      
+
       // 부모 컴포넌트에 데이터 새로고침 요청
       onDataChange?.();
     } catch (err) {
@@ -160,31 +166,16 @@ export default function ExpenseCard({ savedPercent, tripId, categories = [], onD
                 </Label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Price>₩{i.amount.toLocaleString()}</Price>
-                  {!covered && !i.purchased && (
-                    <button
-                      onClick={() => handlePurchase(i.id)}
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: '20px',
-                        border: '1px solid #ffeaa6',
-                        background: '#fffea6',
-                        alignItems: 'center',
-                        width: '90px',
-                        justifyContent: 'space-around',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        fontSize: '0.8rem',
-                        marginRight: '8px',
-                      }}
-                    >
+                  {!i.purchased && (
+                    <GoalButton onClick={() => handlePurchase(i.id)} $blink={covered}>
                       <PiAirplaneTiltFill />
                       목표 달성
-                    </button>
+                    </GoalButton>
                   )}
                 </div>
               </Item>
 
-              <CheckMark $visible={covered || i.purchased}>
+              <CheckMark $visible={i.purchased}>
                 <Check size={24} strokeWidth={6} />
               </CheckMark>
             </ItemContainer>

@@ -65,11 +65,17 @@ export type TripDetailModel = {
 };
 
 export type TripBalanceApi = {
+  accountId: number;
   userId: number;
   nickname: string;
   profileImage?: string;
   balance: number;
   progress: number;
+};
+
+export type TripBalanceResponse = {
+  tripPlanProgress: number;
+  userBalanceInfoList: TripBalanceApi[];
 };
 
 export type TripBalanceModel = {
@@ -78,4 +84,9 @@ export type TripBalanceModel = {
   avatarUrl?: string;
   balance: number;
   percent: number;
+};
+
+export type TripBalancesModel = {
+  groupProgress: number;
+  members: TripBalanceModel[];
 };

@@ -1,5 +1,5 @@
 import axios from '@/api/core/axiosInstance';
-import type { TripPlanApi, TripPlanDetailApi, TripBalanceApi } from './types';
+import type { TripPlanApi, TripPlanDetailApi, TripBalanceApi, TripBalanceResponse } from './types';
 
 /* 여행 플랜 목록 */
 export async function fetchTripPlans(): Promise<TripPlanApi[]> {
@@ -20,8 +20,8 @@ export async function addTripMembers(planId: number, emails: string[]) {
 }
 
 /* 여행 플랜 참여 멤버별 계좌 잔액 및 달성률 조회 (잔액 내림차순) */
-export async function fetchTripPlanBalances(planId: number | string): Promise<TripBalanceApi[]> {
-  const { data } = await axios.get<TripBalanceApi[]>(`/trip-plans/${planId}/balances`);
+export async function fetchTripPlanBalances(planId: number | string): Promise<TripBalanceResponse> {
+  const { data } = await axios.get<TripBalanceResponse>(`/trip-plans/${planId}/balances`);
   return data;
 }
 
