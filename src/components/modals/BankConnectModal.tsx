@@ -128,7 +128,7 @@ export default function BankConnectModal({
 
   const linkTripAccount = async (organizationCode: string, acctNo: string, planId: number) => {
     await axios.post(
-      `${BASE_URL}/api/codef/accounts/bank`,
+      `${BASE_URL}/accounts/link`,
       { organizationCode, accountNumber: acctNo, tripPlanId: planId },
       {
         headers: getAuthHeader(),
@@ -139,7 +139,7 @@ export default function BankConnectModal({
   // 계좌가 이미 다른 여행 플랜에 등록되어 있는지 확인
   const checkAccountAlreadyLinked = async (accountNumber: string): Promise<boolean | 'error'> => {
     try {
-      const { data } = await axios.get(`${BASE_URL}/api/codef/accounts/check/${accountNumber}`, {
+      const { data } = await axios.get(`${BASE_URL}/accounts/check/${accountNumber}`, {
         headers: getAuthHeader(),
       });
       // true/false 또는 "true"/"false" 문자열 모두 처리

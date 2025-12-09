@@ -227,7 +227,7 @@ export async function linkTripPlanAccount(params: {
   tripPlanId: number;
 }): Promise<TripPlanAccountSaveResponse> {
   const { data } = await axios.post<TripPlanAccountSaveResponse>(
-    `${BASE_URL}/api/codef/accounts/bank`,
+    `${BASE_URL}/accounts/link`,
     params,
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -240,7 +240,7 @@ export async function refreshTripPlanBalance(
   tripPlanId: number,
 ): Promise<TripPlanAccountSaveResponse> {
   const { data } = await axios.post<TripPlanAccountSaveResponse>(
-    `${BASE_URL}/api/codef/accounts/bank`,
+    `${BASE_URL}/accounts/link`,
     { tripPlanId },
     {
       headers: { Authorization: `Bearer ${token}` },
