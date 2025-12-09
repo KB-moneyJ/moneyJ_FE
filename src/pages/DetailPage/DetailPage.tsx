@@ -320,7 +320,7 @@ export default function DetailPage() {
   return (
     <div>
       <Container>
-        <LeftIcon onClick={() => navigate(-1)} />
+        <LeftIcon onClick={() => navigate(-2)} />
         <RightIcon onClick={() => setOpenMenu((s) => !s)} />
         {openMenu && (
           <Dropdown>

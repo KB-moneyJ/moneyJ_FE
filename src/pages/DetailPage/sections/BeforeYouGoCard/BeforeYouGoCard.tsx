@@ -68,20 +68,25 @@ export default function BeforeYouGoCard({ destination, checklist, cautions, tips
         </Section>
       )} */}
 
-      {showTips && (
-        <Section>
-          <SectionTitle>
-            <Sparkles aria-hidden /> 현지 꿀팁
-          </SectionTitle>
-          <BulletList role="list">
-            {tips!.map((tip, i) => (
+      <Section>
+        <SectionTitle>
+          <Sparkles aria-hidden /> 현지 꿀팁
+        </SectionTitle>
+
+        <BulletList role="list">
+          {showTips ? (
+            tips!.map((tip, i) => (
               <ListItem role="listitem" key={`tip-${i}`}>
                 {tip.label ? <strong>{tip.label}:</strong> : null} {tip.text}
               </ListItem>
-            ))}
-          </BulletList>
-        </Section>
-      )}
+            ))
+          ) : (
+            <ListItem role="listitem" style={{ opacity: 0.8 }}>
+               여행 팁이 아직 준비 중이에요!
+            </ListItem>
+          )}
+        </BulletList>
+      </Section>
     </Wrapper>
   );
 }
