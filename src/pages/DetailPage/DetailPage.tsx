@@ -81,6 +81,7 @@ export default function DetailPage() {
     if (meId) {
       const meRow = rows.find((b) => String(b.id) === String(meId));
       if (meRow && typeof meRow.percent === 'number') {
+        // 서버에서 0.0%로 왔을 때도 유효한 값으로 처리
         return meRow.percent;
       }
     }
@@ -106,8 +107,14 @@ export default function DetailPage() {
 
   // 서버 데이터 변화 시 동기화
   useEffect(() => {
-    const next =
-      typeof myProgressFromBalances === 'number' ? myProgressFromBalances : myProgressFallback;
+    // myProgressFromBalances가 undefined가 아니면 사용 (0.0%도 유효한 값)
+    // 단, NaN이나 Infinity 같은 잘못된 값은 폴백 사용
+    let next: number;
+    if (typeof myProgressFromBalances === 'number' && Number.isFinite(myProgressFromBalances)) {
+      next = myProgressFromBalances;
+    } else {
+      next = myProgressFallback;
+    }
     const rounded = Math.round(next * 10) / 10;
     setProgress(clampPercent(rounded));
   }, [myProgressFromBalances, myProgressFallback]);
@@ -370,6 +377,8 @@ export default function DetailPage() {
       <ExpenseCard
         tripId={id}
         savedPercent={progress}
+        accountBalance={accountBalance}
+        totalBudget={data?.totalBudget}
         categories={data?.categories}
         onDataChange={async () => {
           // ExpenseCard에서 데이터 변경 시 쿼리 무효화하여 재조회
