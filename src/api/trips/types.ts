@@ -84,6 +84,7 @@ export type TripBalanceModel = {
   avatarUrl?: string;
   balance: number;
   percent: number;
+  accountId?: number;
 };
 
 export type TripBalancesModel = {

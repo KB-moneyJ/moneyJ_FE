@@ -104,3 +104,39 @@ export const AccountRow = styled.div`
   align-items: center;
   margin-top: 6px;
 `;
+
+export const RefreshButton = styled.button<{ $isRotating: boolean }>`
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s ease;
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+
+  &:hover:not(:disabled) {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    animation: ${(props) => (props.$isRotating ? 'rotate 1s linear infinite' : 'none')};
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;

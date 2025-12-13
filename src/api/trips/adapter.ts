@@ -117,5 +117,6 @@ export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
     avatarUrl: absolutize(api.profileImage),
     balance: api.balance,
     percent,
+    accountId: api.accountId,
   };
 }

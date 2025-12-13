@@ -1,4 +1,5 @@
 import { CircleDollarSign } from 'lucide-react';
+import { useState } from 'react';
 import {
   Wrapper,
   SaveBtn,
@@ -14,9 +15,13 @@ import {
   CardLinkBtn,
   BalancePill,
   AccountRow,
+  RefreshButton,
 } from './ProgressCard.style';
 import { useCardStore } from '@/stores/useCardStore';
 import { useNavigate } from 'react-router-dom';
+import { manualAccountUpdate } from '@/api/accounts';
+import { useQueryClient } from '@tanstack/react-query';
+import { TRIP_KEYS } from '@/api/trips/queries';
 
 type Props = {
   progress: number;
@@ -24,6 +29,8 @@ type Props = {
   linked?: boolean;
   accountLabel?: string;
   balance?: number;
+  accountId?: number;
+  tripId?: string;
   onClickSave?: () => void;
   onClickLink?: () => void;
 };
@@ -34,6 +41,8 @@ export default function ProgressCard({
   linked,
   accountLabel,
   balance,
+  accountId,
+  tripId,
   onClickSave,
   onClickLink,
 }: Props) {
@@ -41,6 +50,32 @@ export default function ProgressCard({
   const hasTip = typeof tip === 'string' && tip.trim().length > 0;
   const { cardConnected, setCardConnected } = useCardStore();
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    if (!accountId || isRefreshing) return;
+    
+    setIsRefreshing(true);
+    try {
+      await manualAccountUpdate(accountId);
+      // 잔액 업데이트 후 쿼리 refetch
+      if (tripId) {
+        await qc.refetchQueries({
+          queryKey: TRIP_KEYS.balances(tripId),
+          exact: true,
+        });
+        await qc.refetchQueries({
+          queryKey: TRIP_KEYS.detail(tripId),
+          exact: true,
+        });
+      }
+    } catch (error) {
+      console.error('계좌 업데이트 실패:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <Wrapper>
@@ -50,10 +85,32 @@ export default function ProgressCard({
         <AccountRow>
           {accountLabel && <AccountText>{accountLabel}</AccountText>}
           {typeof balance === 'number' && (
-            <BalancePill aria-label="모은 잔액">
-              <CircleDollarSign size={14} style={{ marginRight: 4 }} />
-              모은 잔액 {balance.toLocaleString()}원
-            </BalancePill>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BalancePill aria-label="모은 잔액">
+                <CircleDollarSign size={14} style={{ marginRight: 4 }} />
+                모은 잔액 {balance.toLocaleString()}원
+              </BalancePill>
+              <RefreshButton
+                onClick={handleRefresh}
+                disabled={isRefreshing || !accountId}
+                $isRotating={isRefreshing}
+                aria-label="계좌 잔액 새로고침"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  <path d="M17 8h4v4" />
+                </svg>
+              </RefreshButton>
+            </div>
           )}
         </AccountRow>
       )}

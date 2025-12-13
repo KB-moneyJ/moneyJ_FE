@@ -70,6 +70,7 @@ export default function DetailPage() {
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
+  const [accountId, setAccountId] = useState<number | undefined>(undefined);
   const tipForProgress = isAccountLinked ? data?.overviewTip : undefined;
 
   // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
@@ -139,6 +140,7 @@ export default function DetailPage() {
       setIsAccountLinked(false);
       setAccountLabel(undefined);
       setAccountBalance(undefined);
+      setAccountId(undefined);
       setLinkedForPlan(planIdNum, false);
       return;
     }
@@ -162,6 +164,7 @@ export default function DetailPage() {
       setIsAccountLinked(false);
       setAccountLabel(undefined);
       setAccountBalance(undefined);
+      setAccountId(undefined);
       setLinkedForPlan(planIdNum, false);
       return;
     }
@@ -169,13 +172,17 @@ export default function DetailPage() {
     // 여기까지 왔으면 계좌 연동된 상태로 간주
     setIsAccountLinked(true);
     setAccountBalance(Number(target.balance));
+    // accountId는 balances에서 가져옴
+    if (target.accountId) {
+      setAccountId(target.accountId);
+    }
     // accountLabel은 handleBankConnected에서 설정하거나, 없으면 기본값
     // useEffect에서는 balances 기반으로 isAccountLinked와 balance만 업데이트
     if (!accountLabel) {
       setAccountLabel('연동된 계좌');
     }
     setLinkedForPlan(planIdNum, true);
-  }, [tripId, balances, meId]);
+  }, [tripId, balances, meId, accountLabel]);
 
   // ---------- 멤버 리스트 ----------
   const groupMembers = useMemo(() => {
@@ -281,7 +288,7 @@ export default function DetailPage() {
     const bankName = BANK_NAME_BY_CODE[bankCode as keyof typeof BANK_NAME_BY_CODE] ?? '연동 계좌';
     const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
 
-    // 계좌 연동 상태 즉시 설정 (버튼 숨기기)
+    // 계좌 연동 상태 즉시 설정
     setIsAccountLinked(true);
     setAccountLabel(`${bankName} ${maskAccount(acct)}`);
 
@@ -369,6 +376,8 @@ export default function DetailPage() {
         linked={isAccountLinked}
         accountLabel={accountLabel}
         balance={accountBalance}
+        accountId={accountId}
+        tripId={tripId}
         onClickLink={() => setOpenBank(true)}
         tip={tipForProgress}
       />
