@@ -284,7 +284,7 @@ export default function DetailPage() {
     deletePlan(tripId, {
       onSuccess: (res) => {
         alert(res?.message ?? '여행 플랜이 삭제되었습니다.');
-        navigate('/', { replace: true });
+        navigate('/home', { replace: true });
       },
       onError: (e) => {
         console.error(e);
