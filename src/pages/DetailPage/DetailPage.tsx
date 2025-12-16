@@ -70,6 +70,7 @@ export default function DetailPage() {
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
+  const [accountId, setAccountId] = useState<number | undefined>(undefined);
   const tipForProgress = isAccountLinked ? data?.overviewTip : undefined;
 
   // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
@@ -81,6 +82,7 @@ export default function DetailPage() {
     if (meId) {
       const meRow = rows.find((b) => String(b.id) === String(meId));
       if (meRow && typeof meRow.percent === 'number') {
+        // 서버에서 0.0%로 왔을 때도 유효한 값으로 처리
         return meRow.percent;
       }
     }
@@ -106,8 +108,14 @@ export default function DetailPage() {
 
   // 서버 데이터 변화 시 동기화
   useEffect(() => {
-    const next =
-      typeof myProgressFromBalances === 'number' ? myProgressFromBalances : myProgressFallback;
+    // myProgressFromBalances가 undefined가 아니면 사용 (0.0%도 유효한 값)
+    // 단, NaN이나 Infinity 같은 잘못된 값은 폴백 사용
+    let next: number;
+    if (typeof myProgressFromBalances === 'number' && Number.isFinite(myProgressFromBalances)) {
+      next = myProgressFromBalances;
+    } else {
+      next = myProgressFallback;
+    }
     const rounded = Math.round(next * 10) / 10;
     setProgress(clampPercent(rounded));
   }, [myProgressFromBalances, myProgressFallback]);
@@ -132,6 +140,7 @@ export default function DetailPage() {
       setIsAccountLinked(false);
       setAccountLabel(undefined);
       setAccountBalance(undefined);
+      setAccountId(undefined);
       setLinkedForPlan(planIdNum, false);
       return;
     }
@@ -155,6 +164,7 @@ export default function DetailPage() {
       setIsAccountLinked(false);
       setAccountLabel(undefined);
       setAccountBalance(undefined);
+      setAccountId(undefined);
       setLinkedForPlan(planIdNum, false);
       return;
     }
@@ -162,13 +172,17 @@ export default function DetailPage() {
     // 여기까지 왔으면 계좌 연동된 상태로 간주
     setIsAccountLinked(true);
     setAccountBalance(Number(target.balance));
+    // accountId는 balances에서 가져옴
+    if (target.accountId) {
+      setAccountId(target.accountId);
+    }
     // accountLabel은 handleBankConnected에서 설정하거나, 없으면 기본값
     // useEffect에서는 balances 기반으로 isAccountLinked와 balance만 업데이트
     if (!accountLabel) {
       setAccountLabel('연동된 계좌');
     }
     setLinkedForPlan(planIdNum, true);
-  }, [tripId, balances, meId]);
+  }, [tripId, balances, meId, accountLabel]);
 
   // ---------- 멤버 리스트 ----------
   const groupMembers = useMemo(() => {
@@ -274,7 +288,7 @@ export default function DetailPage() {
     const bankName = BANK_NAME_BY_CODE[bankCode as keyof typeof BANK_NAME_BY_CODE] ?? '연동 계좌';
     const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*');
 
-    // 계좌 연동 상태 즉시 설정 (버튼 숨기기)
+    // 계좌 연동 상태 즉시 설정
     setIsAccountLinked(true);
     setAccountLabel(`${bankName} ${maskAccount(acct)}`);
 
@@ -362,6 +376,8 @@ export default function DetailPage() {
         linked={isAccountLinked}
         accountLabel={accountLabel}
         balance={accountBalance}
+        accountId={accountId}
+        tripId={tripId}
         onClickLink={() => setOpenBank(true)}
         tip={tipForProgress}
       />
@@ -370,6 +386,8 @@ export default function DetailPage() {
       <ExpenseCard
         tripId={id}
         savedPercent={progress}
+        accountBalance={accountBalance}
+        totalBudget={data?.totalBudget}
         categories={data?.categories}
         onDataChange={async () => {
           // ExpenseCard에서 데이터 변경 시 쿼리 무효화하여 재조회

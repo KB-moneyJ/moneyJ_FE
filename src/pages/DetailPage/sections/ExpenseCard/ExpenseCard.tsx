@@ -28,6 +28,8 @@ type ExpenseItem = {
 type Props = {
   savedPercent: number;
   tripId: number;
+  accountBalance?: number;
+  totalBudget?: number;
   categories?: { name: string; amount: number; consumed?: boolean }[];
   onDataChange?: () => void;
 };
@@ -36,6 +38,8 @@ const BASE_URL = import.meta.env.VITE_API_URL as string;
 export default function ExpenseCard({
   savedPercent,
   tripId,
+  accountBalance,
+  totalBudget,
   categories = [],
   onDataChange,
 }: Props) {
@@ -70,28 +74,48 @@ export default function ExpenseCard({
     });
   }, [categories]);
 
-  // 총합 & 진행률 기반 커버 계산 (부모 progress 사용)
+  // 총합 & 실제 계좌 잔액 기반 커버 계산
   const total = items.reduce((sum, i) => sum + i.amount, 0);
-  const clamped = Math.max(0, Math.min(100, savedPercent));
-  let remaining = Math.round((total * clamped) / 100);
+  
+  // 실제 계좌 잔액이 있으면 그것을 사용, 없으면 진행률 기반으로 계산
+  const actualBalance = typeof accountBalance === 'number' && accountBalance >= 0 
+    ? accountBalance 
+    : (typeof totalBudget === 'number' && totalBudget > 0 
+      ? Math.round((totalBudget * savedPercent) / 100) 
+      : 0);
 
-  const coveredSet = new Set<string>();
-  for (const i of items) {
-    if (remaining >= i.amount) {
-      coveredSet.add(i.id);
-      remaining -= i.amount;
-    } else {
-      break;
+  const coveredSet = useMemo(() => {
+    const set = new Set<string>();
+    let remaining = actualBalance;
+    
+    // 이미 구매한 항목은 제외하고 계산
+    const unpurchasedItems = items.filter(i => !i.purchased);
+    
+    for (const i of unpurchasedItems) {
+      if (remaining >= i.amount) {
+        set.add(i.id);
+        remaining -= i.amount;
+      } else {
+        break;
+      }
     }
-  }
+    
+    return set;
+  }, [items, actualBalance]);
 
-  // 목표 달성 처리 (POST 요청 + 상태 업데이트 + 진행률 증분 전달)
+  // 목표 달성 처리 (POST 요청 + 상태 업데이트)
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  
   const handlePurchase = async (id: string) => {
+    // 이미 처리 중이면 중복 요청 방지
+    if (processingId) return;
+    
     try {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-      if (item.purchased) return; // ✅ 중복 클릭 방지
-      if (total <= 0) return; // ✅ 0 나눗셈 방지
+      if (item.purchased) return; // 중복 클릭 방지
+
+      setProcessingId(id);
 
       const bodyData = {
         tripPlanId: tripId,
@@ -99,19 +123,39 @@ export default function ExpenseCard({
         isConsumed: true,
       };
       const token = localStorage.getItem('accessToken');
-      console.log('POST 요청 보낼 데이터:', bodyData);
 
-      await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
+      const response = await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` 
+        },
         body: JSON.stringify(bodyData),
       });
 
-      // 부모 컴포넌트에 데이터 새로고침 요청
-      onDataChange?.();
+      if (!response.ok) {
+        throw new Error(`서버 오류: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // 서버가 consumed 값을 반환하는지 확인
+      if (responseData.consumed === true) {
+        // 성공적으로 처리되었으므로 데이터 새로고침
+        if (onDataChange) {
+          await onDataChange();
+        }
+      } else {
+        // consumed가 false이거나 undefined인 경우 실패로 간주
+        const errorMsg = responseData.message || '알 수 없는 오류';
+        alert(`목표 달성 처리에 실패했습니다.\n\n${errorMsg}`);
+        setProcessingId(null);
+        return;
+      }
     } catch (err) {
-      console.error('Failed to mark as consumed', err);
+      alert('목표 달성 처리에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -125,8 +169,6 @@ export default function ExpenseCard({
         })),
       };
 
-      console.log('PATCH 요청 보낼 데이터:', bodyData);
-
       await fetch(`${BASE_URL}/trip-plans/category`, {
         method: 'PATCH',
         headers: {
@@ -139,7 +181,7 @@ export default function ExpenseCard({
       // 부모 컴포넌트에 데이터 새로고침 요청
       onDataChange?.();
     } catch (err) {
-      console.error('Failed to update expenses', err);
+      // 에러 처리
     }
   };
 
@@ -167,9 +209,14 @@ export default function ExpenseCard({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Price>₩{i.amount.toLocaleString()}</Price>
                   {!i.purchased && (
-                    <GoalButton onClick={() => handlePurchase(i.id)} $blink={covered}>
+                    <GoalButton 
+                      onClick={() => handlePurchase(i.id)} 
+                      $blink={covered}
+                      disabled={processingId === i.id}
+                      style={{ opacity: processingId === i.id ? 0.6 : 1, cursor: processingId === i.id ? 'wait' : 'pointer' }}
+                    >
                       <PiAirplaneTiltFill />
-                      목표 달성
+                      {processingId === i.id ? '처리 중...' : '목표 달성'}
                     </GoalButton>
                   )}
                 </div>

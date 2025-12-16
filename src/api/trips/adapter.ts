@@ -105,11 +105,11 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
 }
 
 export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
-  // api.progress가 이미 number 타입이므로 직접 사용
+  // api.progress는 서버에서 이미 퍼센트 값으로 전달됨 (예: 0.8 = 0.8%)
+  // 따라서 그대로 사용 (소수 값이 아닌 퍼센트 값)
   const n = api.progress ?? 0;
-  // 0~1 범위이면 100을 곱하고, 아니면 그대로 사용 (퍼센트 값 호환)
-  const pct = n <= 1 ? n * 100 : n;
-  const percent = Math.round(pct * 10) / 10;
+  // NaN이나 Infinity 같은 잘못된 값은 0으로 처리
+  const percent = Number.isFinite(n) ? Math.round(n * 10) / 10 : 0;
 
   return {
     id: String(api.userId),
@@ -117,5 +117,6 @@ export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
     avatarUrl: absolutize(api.profileImage),
     balance: api.balance,
     percent,
+    accountId: api.accountId,
   };
 }
