@@ -16,6 +16,7 @@ import {
   BalancePill,
   AccountRow,
   RefreshButton,
+  UnlinkButton,
 } from './ProgressCard.style';
 import { useCardStore } from '@/stores/useCardStore';
 import { useNavigate } from 'react-router-dom';
@@ -33,6 +34,7 @@ type Props = {
   tripId?: string;
   onClickSave?: () => void;
   onClickLink?: () => void;
+  onClickUnlink?: () => void;
 };
 
 export default function ProgressCard({
@@ -45,6 +47,7 @@ export default function ProgressCard({
   tripId,
   onClickSave,
   onClickLink,
+  onClickUnlink,
 }: Props) {
   const isLinked = !!linked;
   const hasTip = typeof tip === 'string' && tip.trim().length > 0;
@@ -82,37 +85,44 @@ export default function ProgressCard({
       <Title>나의 진행 상황</Title>
       {!isLinked && <SaveBtn onClick={onClickLink}>계좌 연동하기</SaveBtn>}
       {isLinked && (
-        <AccountRow>
-          {accountLabel && <AccountText>{accountLabel}</AccountText>}
-          {typeof balance === 'number' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <BalancePill aria-label="모은 잔액">
-                <CircleDollarSign size={14} style={{ marginRight: 4 }} />
-                모은 잔액 {balance.toLocaleString()}원
-              </BalancePill>
-              <RefreshButton
-                onClick={handleRefresh}
-                disabled={isRefreshing || !accountId}
-                $isRotating={isRefreshing}
-                aria-label="계좌 잔액 새로고침"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+        <>
+          <AccountRow>
+            {accountLabel && <AccountText>{accountLabel}</AccountText>}
+            {typeof balance === 'number' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <BalancePill aria-label="모은 잔액">
+                  <CircleDollarSign size={14} style={{ marginRight: 4 }} />
+                  모은 잔액 {balance.toLocaleString()}원
+                </BalancePill>
+                <RefreshButton
+                  onClick={handleRefresh}
+                  disabled={isRefreshing || !accountId}
+                  $isRotating={isRefreshing}
+                  aria-label="계좌 잔액 새로고침"
                 >
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                  <path d="M17 8h4v4" />
-                </svg>
-              </RefreshButton>
-            </div>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    <path d="M17 8h4v4" />
+                  </svg>
+                </RefreshButton>
+              </div>
+            )}
+          </AccountRow>
+          {onClickUnlink && (
+            <UnlinkButton onClick={onClickUnlink} disabled={!accountId}>
+              계좌 연동 해제
+            </UnlinkButton>
           )}
-        </AccountRow>
+        </>
       )}
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <ProgressBar

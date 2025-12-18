@@ -140,3 +140,34 @@ export const RefreshButton = styled.button<{ $isRotating: boolean }>`
     }
   }
 `;
+
+export const UnlinkButton = styled.button`
+  border: 0;
+  border-radius: var(--radius-button);
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 123, 123, 0.2);
+  color: #ff7b7b;
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    background 0.2s ease,
+    filter 0.2s ease;
+  margin-top: 0.5rem;
+  width: 100%;
+
+  &:hover {
+    background: rgba(255, 123, 123, 0.3);
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
