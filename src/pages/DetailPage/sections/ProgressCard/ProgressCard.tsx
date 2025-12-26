@@ -17,6 +17,8 @@ import {
   AccountRow,
   RefreshButton,
   UnlinkButton,
+  ChangeButton,
+  ActionButtonsRow,
 } from './ProgressCard.style';
 import { useCardStore } from '@/stores/useCardStore';
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +37,7 @@ type Props = {
   onClickSave?: () => void;
   onClickLink?: () => void;
   onClickUnlink?: () => void;
+  onClickChangeAccount?: () => void;
 };
 
 export default function ProgressCard({
@@ -48,6 +51,7 @@ export default function ProgressCard({
   onClickSave,
   onClickLink,
   onClickUnlink,
+  onClickChangeAccount,
 }: Props) {
   const isLinked = !!linked;
   const hasTip = typeof tip === 'string' && tip.trim().length > 0;
@@ -117,11 +121,18 @@ export default function ProgressCard({
               </div>
             )}
           </AccountRow>
-          {onClickUnlink && (
-            <UnlinkButton onClick={onClickUnlink} disabled={!accountId}>
-              계좌 연동 해제
-            </UnlinkButton>
-          )}
+          <ActionButtonsRow>
+            {onClickChangeAccount && (
+              <ChangeButton onClick={onClickChangeAccount} disabled={!accountId}>
+                계좌 변경
+              </ChangeButton>
+            )}
+            {onClickUnlink && (
+              <UnlinkButton onClick={onClickUnlink} disabled={!accountId}>
+                계좌 연동 해제
+              </UnlinkButton>
+            )}
+          </ActionButtonsRow>
         </>
       )}
       <div style={{ display: 'flex', alignItems: 'center' }}>

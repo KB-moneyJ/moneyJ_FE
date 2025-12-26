@@ -283,6 +283,8 @@ export default function DetailPage() {
   // 계좌 연동 후 /trip-plans/{tripPlanId}/balances API를 refetch하여 최신 데이터 가져오기
   // 이 API는 모든 멤버의 계좌와 달성율(UserBalanceResponseDTO)을 반환하므로 바로 활용
   const handleBankConnected = async (bankCode: string, acct: string) => {
+    const wasLinked = isAccountLinked; // 변경 여부 판단
+
     const planId = String(tripId); // 문자열로 정규화 (queryKey 일관성)
     setLinkedForPlan(Number(tripId), true);
     setBankOrgForPlan(Number(tripId), bankCode);
@@ -310,6 +312,10 @@ export default function DetailPage() {
     });
 
     setOpenBank(false);
+
+    if (wasLinked) {
+      alert('계좌가 변경되었습니다.');
+    }
   };
 
   // ---------- 계좌 연동 해제 ----------
@@ -420,6 +426,7 @@ export default function DetailPage() {
         tripId={tripId}
         onClickLink={() => setOpenBank(true)}
         onClickUnlink={handleUnlinkAccount}
+        onClickChangeAccount={() => setOpenBank(true)}
         tip={tipForProgress}
       />
 
