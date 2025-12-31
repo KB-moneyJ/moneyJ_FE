@@ -16,9 +16,9 @@ import {
   TipLabel,
   TipText,
 } from './UsageCard.style';
-import { getSummary } from '@/api/spending/spending';
 import { CardButton } from '@/pages/AnalysisPage/SpendingPage.style';
 import { useCardStore } from '@/stores/useCardStore';
+import { useSummaryQuery } from '@/api/spending/queries';
 
 type CategoryView = {
   name: string;
@@ -50,23 +50,20 @@ const ymToLabel = (ym?: string) => {
 
 export default function UsageCard() {
   const [hovered, setHovered] = useState<CategoryView | null>(null);
-  const [summary, setSummary] = useState<any>(null);
-  const [loadingSummary, setLoadingSummary] = useState(false);
-  const [summaryError, setSummaryError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { cardConnected, setCardConnected } = useCardStore();
-
   const goToSpending = () => {
     navigate('/spending');
   };
 
+  const { data: summary, isLoading: loadingSummary, isError, error } = useSummaryQuery();
+
+  // summary가 바뀔 때 카드 연결 상태 반영
   useEffect(() => {
-    (async () => {
-      const data = await getSummary();
-      setCardConnected(data.cardConnected ?? false);
-      setSummary(data);
-    })();
-  }, []);
+    if (summary) {
+      setCardConnected(summary.cardConnected ?? false);
+    }
+  }, [summary, setCardConnected]);
 
   // monthly의 가장 마지막(가장 최신) 달
   const lastMonth = useMemo(() => {

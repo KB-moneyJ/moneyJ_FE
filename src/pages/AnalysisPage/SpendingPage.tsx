@@ -9,7 +9,7 @@ import {
   Text,
 } from './SpendingPage.style';
 import CardConnectModal from '@/components/modals/CardConnectModal';
-import { getSummary } from '@/api/spending/spending';
+import { useSummaryQuery } from '@/api/spending/queries';
 import { RandomSpinner } from '../StartPlan/steps/StepsStyle';
 import SpendingChart from './components/SpendingChart';
 
@@ -43,12 +43,12 @@ export default function SpendingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('');
+  const { data: res } = useSummaryQuery();
 
   /** 🔹 요약 데이터 로드 */
   const fetchSummary = async () => {
     try {
       setLoading(true);
-      const res = await getSummary();
       setSummary(res);
     } catch (e: any) {
       setError(e?.message ?? '요약 불러오기 실패');
@@ -80,7 +80,7 @@ export default function SpendingPage() {
     (async () => {
       try {
         setLoading(true);
-        const res = await getSummary();
+
         if (cancelled) return;
 
         setSummary(res);
