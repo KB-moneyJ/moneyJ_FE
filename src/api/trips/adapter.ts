@@ -45,7 +45,9 @@ export function toTripCardModel(p: TripPlanApi): TripCardModel {
   const saved = typeof p.currentSavings === 'number' ? p.currentSavings : 0;
 
   const ratio = total > 0 ? saved / total : 0;
-  const progress = total > 0 ? Math.round(clamp01(saved / total) * 100) : 0;
+  // const progress = total > 0 ? Math.round(clamp01(saved / total) * 100) : 0;
+  const progress = p.groupProgress;
+  console.log('toTripCardModel', { total, saved, ratio, progress });
 
   return {
     id: String(p.planId),
@@ -94,8 +96,8 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
     tips,
     checklist,
     cautions,
-    categories: p.categoryDTOList?.map((c) => ({ 
-      name: c.categoryName, 
+    categories: p.categoryDTOList?.map((c) => ({
+      name: c.categoryName,
       amount: c.amount,
       consumed: c.consumed ?? false,
     })),
