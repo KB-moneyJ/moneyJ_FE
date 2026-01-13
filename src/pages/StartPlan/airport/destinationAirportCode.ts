@@ -173,6 +173,17 @@ export const CITY_TO_IATA: Record<string, string> = {
 };
 
 
-export const getDestinationAirportCode = (city: string): string => {
-  return CITY_TO_IATA[city] ?? "ICN"; // 기본값 인천
+export const getDestinationAirportCode = (destination: string): string => {
+  // "Tokyo, Japan" → "Tokyo"
+  const city = destination.split(",")[0].trim();
+
+  return CITY_TO_IATA[city] ?? "ICN";
 };
+
+
+export const IATA_TO_CITY: Record<string, string> = Object.entries(CITY_TO_IATA)
+  .reduce((acc, [city, code]) => {
+    // 이미 있으면 덮어쓰지 않음 (Tokyo / Osaka 같은 대표 도시 유지)
+    if (!acc[code]) acc[code] = city;
+    return acc;
+  }, {} as Record<string, string>);

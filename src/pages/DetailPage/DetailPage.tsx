@@ -1,10 +1,10 @@
 // src/pages/DetailPage/DetailPage.tsx
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem } from './DetailPage.style';
+import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem, AirportWrapper } from './DetailPage.style';
 import ProgressCard from './sections/ProgressCard/ProgressCard';
 import ExpenseCard from './sections/ExpenseCard/ExpenseCard';
 import TripOverviewCard from './sections/TripOverviewCard/TripOverviewCard';
@@ -16,6 +16,7 @@ import podiumUrl from '@/assets/images/podium.svg';
 import { BANK_NAME_BY_CODE } from '@/constants/banks';
 
 import { getDestinationAirportCode } from "@/pages/StartPlan/airport/destinationAirportCode";
+
 
 import {
   useTripPlanDetail,
@@ -49,6 +50,19 @@ function getBankOrgForPlan(planId: number): string | undefined {
 function setBankOrgForPlan(planId: number, org: string) {
   localStorage.setItem(`plan:${planId}:bankOrg`, org);
 }
+
+function parsePeriod(period: string): { depart: string; returnDate: string } {
+  const [start, end] = period.split(" - ");
+
+  const toISO = (s: string) =>
+    s.replace(/\./g, "-"); // 2026.01.21 → 2026-01-21
+
+  return {
+    depart: toISO(start),
+    returnDate: toISO(end),
+  };
+}
+
 
 const TabWrapper = styled.div`
     display: flex;
@@ -119,6 +133,12 @@ export default function DetailPage() {
   }, [data]);
 
   const [progress, setProgress] = useState<number>(0);
+
+  const travelDates = useMemo(() => {
+    if (!data?.period) return null;
+    return parsePeriod(data.period);
+  }, [data?.period]);
+
 
   useEffect(() => {
     const next =
@@ -223,7 +243,6 @@ export default function DetailPage() {
 
   const overview = useMemo(() => {
     if (!data) return null;
-
     const destination = data.destination;
     const period = data.period;
     const thumbnailUrl = thumbFromList ?? data.thumbnailUrl;
@@ -378,10 +397,20 @@ export default function DetailPage() {
 
       {/* ⭐ 탭 2 : Airport 페이지 */}
       {tab === "info" && (
-        <div style={{ padding: "10px" }}>
-          <Airport destination={destinationAirportCode} />
-        </div>
-      )}
+        <>
+          <ExchangeRateCard destination="Japan" />
+          <AirportWrapper>
+            {travelDates && (
+              <Airport
+                destinationCode={destinationAirportCode}
+                depart={travelDates.depart}
+                returnDate={travelDates.returnDate}
+              />
+            )}
+          </AirportWrapper>
+        </>
+
+        )}
 
       {/* 모달 */}
       {openInvite && (

@@ -5,7 +5,6 @@ import styled from "styled-components";
 
 export const PageWrapper = styled.div`
     padding: 10px;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;

@@ -5,11 +5,14 @@ import {PageWrapper, DurationText, LoadingWrapper, LoadingText, HeaderText, Pric
 RouteSub,RouteRow, GlassRow, AirlineInfo, AirportBtn, CardTop, FlightCard, Divider, Analysis, LogoCircle }
   from '@/pages/StartPlan/airport/airportstyle'
 import ExchangeRateCard from '@/pages/DetailPage/sections/ExchangeRateCard/ExchangeRateCard';
+import { IATA_TO_CITY } from "@/pages/StartPlan/airport/destinationAirportCode";
+
+
 // =======================
 // 🔑 Amadeus API 정보
 // =======================
-const CLIENT_ID = "6j6PRJFX1dH0hGzvGOt2reeYrYuTOyX4";
-const CLIENT_SECRET = "YbRNvADtljVymAPG";
+const CLIENT_ID = import.meta.env.VITE_AMADEUS_CLIENT_ID;
+const CLIENT_SECRET = import.meta.env.VITE_AMADEUS_CLIENT_SECRET;
 
 // =======================
 // 타입 정의
@@ -25,12 +28,25 @@ interface Flight {
   };
 }
 
-export const Airport: React.FC<{ destinationCode: string }> = ({ destinationCode }) => {
+interface AirportProps {
+  destinationCode: string;
+  depart: string;
+  returnDate: string;
+}
+
+export const Airport: React.FC<AirportProps> = ({
+                                                  destinationCode,
+                                                  depart,
+                                                  returnDate,
+                                                }) => {
+
+
   const [origin, setOrigin] = useState("ICN");
 
-  const [destination] = useState(destinationCode);
-  const [depart] = useState("2025-12-10");
-  const [returnDate] = useState("2025-12-15");
+
+  const [destination, setDestination] = useState<string>(
+    destinationCode || "KIX" // ⭐ 임시 기본값: 오사카
+  );
 
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
@@ -199,18 +215,13 @@ export const Airport: React.FC<{ destinationCode: string }> = ({ destinationCode
     { code: "CJU", name: "제주공항" },
   ];
 
-  const airportNameMap: Record<string, string> = {
-    ICN: "인천",
-    PUS: "부산",
-    TAE: "대구",
-    CJU: "제주",
-    KIX: "오사카",
-  };
-
   useEffect(() => {
+    if (!depart || !returnDate) return;
+
     fetchLowestPriceForAllAirports();
     getFlights(origin);
-  }, []);
+  }, [depart, returnDate]);
+
 
   // ======================
   // UI
@@ -218,9 +229,10 @@ export const Airport: React.FC<{ destinationCode: string }> = ({ destinationCode
   return (
     <PageWrapper>
       <HeaderText>
+        ✈ {IATA_TO_CITY[destination] ?? destination} 왕복 항공권 <br/>
         ✈ {formatDate(depart)} ~ {formatDate(returnDate)}{" "}
-        {airportNameMap[destination]} 왕복 항공권
       </HeaderText>
+
 
       {/* 공항 선택 */}
       <GlassRow>
@@ -330,7 +342,6 @@ export const Airport: React.FC<{ destinationCode: string }> = ({ destinationCode
           </FlightCard>
         );
       })}
-      <ExchangeRateCard destination="Japan" />
     </PageWrapper>
   );
 };
