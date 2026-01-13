@@ -4,6 +4,7 @@ import type { TripPlanApi, TripPlanDetailApi, TripBalanceApi, TripBalanceRespons
 /* 여행 플랜 목록 */
 export async function fetchTripPlans(): Promise<TripPlanApi[]> {
   const { data } = await axios.get<TripPlanApi[]>('/trip-plans');
+  console.log(data);
   return data;
 }
 

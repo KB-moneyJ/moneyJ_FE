@@ -10,6 +10,7 @@ export type TripPlanApi = {
   totalBudget: number;
   currentSavings: number;
   memberCount: number;
+  groupProgress: number;
 };
 
 export type TripCardModel = {
