@@ -22,3 +22,11 @@ export async function manualAccountUpdate(
   return data;
 }
 
+/**
+ * 계좌 삭제 (연동 해제)
+ * @param accountId 계좌 ID
+ */
+export async function deleteAccount(accountId: number): Promise<void> {
+  await axios.delete(`${BASE_URL}/accounts/${accountId}`);
+}
+

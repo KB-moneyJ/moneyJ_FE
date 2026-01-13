@@ -22,6 +22,7 @@ import {
 import type { TripDetailModel } from '@/api/trips/types';
 import { useMe } from '@/api/users/queries';
 import ExchangeRateCard from './sections/ExchangeRateCard/ExchangeRateCard';
+import { deleteAccount } from '@/api/accounts';
 
 function clampPercent(v: number) {
   if (!Number.isFinite(v)) return 0;
@@ -71,6 +72,7 @@ export default function DetailPage() {
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
   const [accountId, setAccountId] = useState<number | undefined>(undefined);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const tipForProgress = isAccountLinked ? data?.overviewTip : undefined;
 
   // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
@@ -281,6 +283,8 @@ export default function DetailPage() {
   // 계좌 연동 후 /trip-plans/{tripPlanId}/balances API를 refetch하여 최신 데이터 가져오기
   // 이 API는 모든 멤버의 계좌와 달성율(UserBalanceResponseDTO)을 반환하므로 바로 활용
   const handleBankConnected = async (bankCode: string, acct: string) => {
+    const wasLinked = isAccountLinked; // 변경 여부 판단
+
     const planId = String(tripId); // 문자열로 정규화 (queryKey 일관성)
     setLinkedForPlan(Number(tripId), true);
     setBankOrgForPlan(Number(tripId), bankCode);
@@ -308,6 +312,48 @@ export default function DetailPage() {
     });
 
     setOpenBank(false);
+
+    if (wasLinked) {
+      alert('계좌가 변경되었습니다.');
+    }
+  };
+
+  // ---------- 계좌 연동 해제 ----------
+  const handleUnlinkAccount = async () => {
+    if (!accountId || isDeletingAccount) return;
+    
+    const ok = window.confirm('정말 계좌 연동을 해제할까요?');
+    if (!ok) return;
+
+    setIsDeletingAccount(true);
+    try {
+      await deleteAccount(accountId);
+      
+      // 계좌 연동 상태 초기화
+      setIsAccountLinked(false);
+      setAccountLabel(undefined);
+      setAccountBalance(undefined);
+      setAccountId(undefined);
+      setLinkedForPlan(Number(tripId), false);
+      
+      // 쿼리 refetch
+      const planId = String(tripId);
+      await qc.refetchQueries({
+        queryKey: TRIP_KEYS.balances(planId),
+        exact: true,
+      });
+      await qc.refetchQueries({
+        queryKey: TRIP_KEYS.detail(planId),
+        exact: true,
+      });
+      
+      alert('계좌 연동이 해제되었습니다.');
+    } catch (error) {
+      console.error('계좌 삭제 실패:', error);
+      alert('계좌 연동 해제에 실패했어요. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setIsDeletingAccount(false);
+    }
   };
 
   // ---------- 플랜 삭제 ----------
@@ -379,6 +425,8 @@ export default function DetailPage() {
         accountId={accountId}
         tripId={tripId}
         onClickLink={() => setOpenBank(true)}
+        onClickUnlink={handleUnlinkAccount}
+        onClickChangeAccount={() => setOpenBank(true)}
         tip={tipForProgress}
       />
 
