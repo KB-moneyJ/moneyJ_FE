@@ -59,8 +59,8 @@ export default function FriendInviteModal({ isOpen, onClose, planId }: FriendInv
           {inputs.map((input, idx) => (
             <InputWrapper key={idx}>
               <IdInput
-                type="text"
-                placeholder="ID 입력"
+                type="email"
+                placeholder="이메일 입력"
                 value={input}
                 onChange={(e) => handleChangeInput(idx, e.target.value)}
               />

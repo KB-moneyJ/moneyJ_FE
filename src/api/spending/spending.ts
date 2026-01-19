@@ -66,6 +66,7 @@ export async function getSummary() {
   const res = await axios.get(`${BASE_URL}/summary`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  console.log('요약 데이터:', res.data);
   return res.data;
 }
 

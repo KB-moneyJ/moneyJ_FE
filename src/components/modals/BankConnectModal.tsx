@@ -128,7 +128,7 @@ export default function BankConnectModal({
 
   const linkTripAccount = async (organizationCode: string, acctNo: string, planId: number) => {
     await axios.post(
-      `${BASE_URL}/api/codef/accounts/bank`,
+      `${BASE_URL}/accounts/link`,
       { organizationCode, accountNumber: acctNo, tripPlanId: planId },
       {
         headers: getAuthHeader(),
@@ -139,7 +139,7 @@ export default function BankConnectModal({
   // 계좌가 이미 다른 여행 플랜에 등록되어 있는지 확인
   const checkAccountAlreadyLinked = async (accountNumber: string): Promise<boolean | 'error'> => {
     try {
-      const { data } = await axios.get(`${BASE_URL}/api/codef/accounts/check/${accountNumber}`, {
+      const { data } = await axios.get(`${BASE_URL}/accounts/check/${accountNumber}`, {
         headers: getAuthHeader(),
       });
       // true/false 또는 "true"/"false" 문자열 모두 처리
@@ -153,17 +153,31 @@ export default function BankConnectModal({
 
   async function checkAccountExists(organization: string): Promise<boolean> {
     try {
-      const res = await axios.get(`${BASE_URL}/api/codef/credentials`, {
-        headers: getAuthHeader(),
-      });
-
-      const accountList = res.data?.data?.accountList || [];
-
-      const exists = accountList.some((account: any) => account.organization === organization);
-
-      return exists;
-    } catch (err) {
-      console.error('계정 존재 여부 확인 실패:', err);
+      await axios.post(
+        `${BASE_URL}/api/codef/credentials`,
+        {
+          countryCode: 'KR',
+          businessType: 'BK',
+          clientType: 'P',
+          organization,
+          loginType: '1',
+          id: bankId,
+          password,
+        },
+        {
+          headers: getAuthHeader(),
+        },
+      );
+      // POST 성공 = 계정 추가 성공 = 이미 등록된 상태로 간주하여 이후 중복 추가 로직 스킵
+      return true;
+    } catch (err: any) {
+      const code = err?.response?.data?.result?.code;
+      // 이미 존재하거나 중복된 경우도 등록된 상태로 간주
+      if (code === 'CF-03002' || code === 'CF-04004') {
+        return true;
+      }
+      // 그 외 에러(비밀번호 틀림 등)는 false 반환 -> 이후 로직에서 다시 시도하거나 에러 발생시킴
+      console.error('계정 존재 여부 확인(POST) 실패:', err);
       return false;
     }
   }
@@ -213,12 +227,18 @@ export default function BankConnectModal({
       }
       setAccounts(list);
     } catch (err: any) {
-      const msg =
+      const code = err?.response?.data?.code || err?.response?.data?.result?.code;
+      let msg =
         err?.response?.data?.result?.message ||
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
         '계좌 목록을 불러오지 못했습니다. 정보를 확인해 주세요.';
+
+      if (code === 'CF011') {
+        msg = '계좌 아이디 또는 비밀번호가 올바르지 않습니다.';
+      }
+
       setErrorMsg(String(msg));
     } finally {
       setSubmitting(false);
@@ -244,7 +264,9 @@ export default function BankConnectModal({
 
       // 이미 등록된 계좌면 에러 메시지 표시하고 연결하지 않음
       if (checkResult === true) {
-        setErrorMsg('이 계좌는 이미 다른 여행 플랜에 등록되어 있습니다. 다른 계좌를 선택해 주세요.');
+        setErrorMsg(
+          '이 계좌는 이미 다른 여행 플랜에 등록되어 있습니다. 다른 계좌를 선택해 주세요.',
+        );
         setSubmitting(false);
         return;
       }
@@ -254,11 +276,19 @@ export default function BankConnectModal({
       onConnected?.(bank, selectedAccount);
       onClose();
     } catch (err: any) {
-      const msg =
+      const code = err?.response?.data?.code;
+      let msg =
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
         '계좌 연동에 실패했습니다. 다시 시도해 주세요.';
+
+      if (code === 'ACC-005') {
+        msg = '본인 계좌만 변경하실 수 있습니다.';
+      } else if (code === 'ACC-006') {
+        msg = '잘못된 계좌 형식입니다.';
+      }
+
       setErrorMsg(String(msg));
     } finally {
       setSubmitting(false);

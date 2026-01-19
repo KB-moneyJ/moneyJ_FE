@@ -173,13 +173,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.21.0":
-  version: 7.28.6
-  resolution: "@babel/runtime@npm:7.28.6"
-  checksum: 10c0/358cf2429992ac1c466df1a21c1601d595c46930a13c1d4662fde908d44ee78ec3c183aaff513ecb01ef8c55c3624afe0309eeeb34715672dbfadb7feedb2c0d
-  languageName: node
-  linkType: hard
-
 "@babel/template@npm:^7.28.6":
   version: 7.28.6
   resolution: "@babel/template@npm:7.28.6"
@@ -1219,16 +1212,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:2.30.0":
-  version: 2.30.0
-  resolution: "date-fns@npm:2.30.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.21.0"
-  checksum: 10c0/e4b521fbf22bc8c3db332bbfb7b094fd3e7627de0259a9d17c7551e2d2702608a7307a449206065916538e384f37b181565447ce2637ae09828427aed9cb5581
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: 10c0/b79ff32830e6b7faa009590af6ae0fb8c3fd9ffad46d930548fbb5acf473773b4712ae887e156ba91a7b3dc30591ce0f517d69fd83bd9c38650fdc03b4e0bac8
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.18":
+"dayjs@npm:^1.11.19":
   version: 1.11.19
   resolution: "dayjs@npm:1.11.19"
   checksum: 10c0/7d8a6074a343f821f81ea284d700bd34ea6c7abbe8d93bce7aba818948957c1b7f56131702e5e890a5622cdfc05dcebe8aed0b8313bdc6838a594d7846b0b000
@@ -1446,9 +1437,9 @@ __metadata:
   linkType: hard
 
 "eventemitter3@npm:^5.0.1":
-  version: 5.0.3
-  resolution: "eventemitter3@npm:5.0.3"
-  checksum: 10c0/774027471b1c24e25789c05ae0cadeae89222d977cc3704354ed76be5dc8beac78524c05a527defbddf2fff145b261eeadfde7f2508257efe5db451aae2c0556
+  version: 5.0.4
+  resolution: "eventemitter3@npm:5.0.4"
+  checksum: 10c0/575b8cac8d709e1473da46f8f15ef311b57ff7609445a7c71af5cd42598583eee6f098fa7a593e30f27e94b8865642baa0689e8fa97c016f742abdb3b1bf6d9a
   languageName: node
   linkType: hard
 
@@ -2118,18 +2109,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-date-range@npm:1.4.0":
-  version: 1.4.0
-  resolution: "react-date-range@npm:1.4.0"
+"react-date-range@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "react-date-range@npm:2.0.1"
   dependencies:
     classnames: "npm:^2.2.6"
     prop-types: "npm:^15.7.2"
     react-list: "npm:^0.8.13"
     shallow-equal: "npm:^1.2.1"
   peerDependencies:
-    date-fns: 2.0.0-alpha.7 || >=2.0.0
+    date-fns: 3.0.6 || >=3.0.0
     react: ^0.14 || ^15.0.0-rc || >=15.0
-  checksum: 10c0/e9c625d6f2e0b6b87dda8e835c00828b3ec072141c32cf48934de2b1b9c0b1a21a86b854e8140f844839c0cdd1110fd5ce57f34211c7a723297027e7e61e2390
+  checksum: 10c0/be419f377b86cd9eafbe1e4fb60ba20b81b173e64dbe6cab8649edbe2a9afbc97f23701ab1e382caf4d82f65aaf4746e89d3df8cbbeb127df9ea4b7a3d11a8ab
   languageName: node
   linkType: hard
 
@@ -2391,14 +2382,14 @@ __metadata:
     "@types/styled-components": "npm:^5.1.34"
     "@vitejs/plugin-react": "npm:^4.7.0"
     axios: "npm:^1.11.0"
-    date-fns: "npm:2.30.0"
-    dayjs: "npm:^1.11.18"
+    date-fns: "npm:^4.1.0"
+    dayjs: "npm:^1.11.19"
     framer-motion: "npm:^12.23.12"
     lucide-react: "npm:^0.542.0"
     prettier: "npm:^3.6.2"
     react: "npm:^19.1.1"
     react-country-flag: "npm:^3.1.0"
-    react-date-range: "npm:1.4.0"
+    react-date-range: "npm:^2.0.1"
     react-dom: "npm:^19.1.1"
     react-icons: "npm:^5.5.0"
     react-is: "npm:^19.1.1"

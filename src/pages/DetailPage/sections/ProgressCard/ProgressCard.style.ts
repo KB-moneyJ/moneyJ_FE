@@ -104,3 +104,86 @@ export const AccountRow = styled.div`
   align-items: center;
   margin-top: 6px;
 `;
+
+export const RefreshButton = styled.button<{ $isRotating: boolean }>`
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s ease;
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+
+  &:hover:not(:disabled) {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    animation: ${(props) => (props.$isRotating ? 'rotate 1s linear infinite' : 'none')};
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+export const ActionButtonsRow = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 0.5rem;
+  width: 100%;
+`;
+
+export const UnlinkButton = styled.button`
+  border: 0;
+  border-radius: var(--radius-button);
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 123, 123, 0.2);
+  color: #ff7b7b;
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    background 0.2s ease,
+    filter 0.2s ease;
+  width: 100%;
+  flex: 1;
+
+  &:hover {
+    background: rgba(255, 123, 123, 0.3);
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+export const ChangeButton = styled(UnlinkButton)`
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+`;

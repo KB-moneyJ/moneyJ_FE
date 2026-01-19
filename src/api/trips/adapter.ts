@@ -45,7 +45,9 @@ export function toTripCardModel(p: TripPlanApi): TripCardModel {
   const saved = typeof p.currentSavings === 'number' ? p.currentSavings : 0;
 
   const ratio = total > 0 ? saved / total : 0;
-  const progress = total > 0 ? Math.round(clamp01(saved / total) * 100) : 0;
+  // const progress = total > 0 ? Math.round(clamp01(saved / total) * 100) : 0;
+  const progress = p.groupProgress;
+  console.log('toTripCardModel', { total, saved, ratio, progress });
 
   return {
     id: String(p.planId),
@@ -94,17 +96,22 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
     tips,
     checklist,
     cautions,
-    categories: p.categoryDTOList?.map((c) => ({ name: c.categoryName, amount: c.amount })),
+    categories: p.categoryDTOList?.map((c) => ({
+      name: c.categoryName,
+      amount: c.amount,
+      consumed: c.consumed ?? false,
+    })),
     totalBudget: total,
     currentSavings: saved,
   };
 }
 
 export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
-  const raw = (api as any)?.progress;
-  const n = typeof raw === 'string' ? parseFloat(raw) : Number(raw ?? 0);
-  const pct = !isFinite(n) ? 0 : n <= 1 ? n * 100 : n;
-  const percent = Math.round(pct * 10) / 10;
+  // api.progress는 서버에서 이미 퍼센트 값으로 전달됨 (예: 0.8 = 0.8%)
+  // 따라서 그대로 사용 (소수 값이 아닌 퍼센트 값)
+  const n = api.progress ?? 0;
+  // NaN이나 Infinity 같은 잘못된 값은 0으로 처리
+  const percent = Number.isFinite(n) ? Math.round(n * 10) / 10 : 0;
 
   return {
     id: String(api.userId),
@@ -112,5 +119,6 @@ export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
     avatarUrl: absolutize(api.profileImage),
     balance: api.balance,
     percent,
+    accountId: api.accountId,
   };
 }

@@ -10,6 +10,7 @@ export type TripPlanApi = {
   totalBudget: number;
   currentSavings: number;
   memberCount: number;
+  groupProgress: number;
 };
 
 export type TripCardModel = {
@@ -32,6 +33,7 @@ export type TripMemberApi = {
 export type CategoryApi = {
   categoryName: string;
   amount: number;
+  consumed?: boolean;
 };
 
 export type TripPlanDetailApi = TripPlanApi & {
@@ -57,18 +59,24 @@ export type TripDetailModel = {
   tips?: TipItem[];
   checklist: string[];
   cautions: string[];
-  categories?: { name: string; amount: number }[];
+  categories?: { name: string; amount: number; consumed?: boolean }[];
   totalBudget: number;
   currentSavings: number;
   savingsPhrases?: string[];
 };
 
 export type TripBalanceApi = {
+  accountId: number;
   userId: number;
   nickname: string;
   profileImage?: string;
   balance: number;
   progress: number;
+};
+
+export type TripBalanceResponse = {
+  tripPlanProgress: number;
+  userBalanceInfoList: TripBalanceApi[];
 };
 
 export type TripBalanceModel = {
@@ -77,4 +85,10 @@ export type TripBalanceModel = {
   avatarUrl?: string;
   balance: number;
   percent: number;
+  accountId?: number;
+};
+
+export type TripBalancesModel = {
+  groupProgress: number;
+  members: TripBalanceModel[];
 };

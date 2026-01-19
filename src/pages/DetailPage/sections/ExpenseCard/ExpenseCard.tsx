@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Plane, Home, Utensils, Check } from 'lucide-react';
 import { PiAirplaneTiltFill } from 'react-icons/pi';
 import EditModal from '../../../../components/common/EditModal';
@@ -13,6 +13,7 @@ import {
   Item,
   CheckMark,
   ItemContainer,
+  GoalButton,
 } from './ExpenseCard.style';
 import { Label, Price } from '@/pages/StartPlan/PlanCard/PlanCardStyle';
 
@@ -27,85 +28,94 @@ type ExpenseItem = {
 type Props = {
   savedPercent: number;
   tripId: number;
-  onProgressDelta?: (deltaPercent: number) => void;
+  accountBalance?: number;
+  totalBudget?: number;
+  categories?: { name: string; amount: number; consumed?: boolean }[];
+  onDataChange?: () => void;
 };
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
-export default function ExpenseCard({ savedPercent, tripId }: Props) {
-  const [items, setItems] = useState<ExpenseItem[]>([]);
+export default function ExpenseCard({
+  savedPercent,
+  tripId,
+  accountBalance,
+  totalBudget,
+  categories = [],
+  onDataChange,
+}: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem('accessToken');
 
-  // 여행 경비 항목 불러오기 함수 (PATCH 후에도 재사용)
-  const fetchExpenses = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/trip-plans/${tripId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      });
+  // categories를 ExpenseItem 형식으로 변환
+  const items = useMemo<ExpenseItem[]>(() => {
+    return categories.map((c) => {
+      let icon;
+      switch (c.name) {
+        case '항공비':
+          icon = <Plane size={18} />;
+          break;
+        case '숙박':
+          icon = <Home size={18} />;
+          break;
+        case '식비':
+          icon = <Utensils size={18} />;
+          break;
+        default:
+          icon = <Check size={18} />;
+      }
 
-      const data = await res.json();
+      return {
+        id: c.name,
+        label: c.name,
+        amount: c.amount,
+        icon,
+        purchased: c.consumed ?? false,
+      };
+    });
+  }, [categories]);
 
-      const mappedItems: ExpenseItem[] = data.categoryDTOList.map((c: any) => {
-        let icon;
-        switch (c.categoryName) {
-          case '항공비':
-            icon = <Plane size={18} />;
-            break;
-          case '숙박':
-            icon = <Home size={18} />;
-            break;
-          case '식비':
-            icon = <Utensils size={18} />;
-            break;
-          default:
-            icon = <Check size={18} />;
-        }
-
-        return {
-          id: c.categoryName,
-          label: c.categoryName,
-          amount: c.amount,
-          icon,
-          purchased: c.consumed ?? false, // /trip-plans 응답엔 없을 수 있음 → false 처리
-        };
-      });
-
-      setItems(mappedItems);
-    } catch (err) {
-      console.error('Failed to fetch expenses', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchExpenses();
-  }, [tripId]);
-
-  // 총합 & 진행률 기반 커버 계산 (부모 progress 사용)
+  // 총합 & 실제 계좌 잔액 기반 커버 계산
   const total = items.reduce((sum, i) => sum + i.amount, 0);
-  const clamped = Math.max(0, Math.min(100, savedPercent));
-  let remaining = Math.round((total * clamped) / 100);
 
-  const coveredSet = new Set<string>();
-  for (const i of items) {
-    if (remaining >= i.amount) {
-      coveredSet.add(i.id);
-      remaining -= i.amount;
-    } else {
-      break;
+  // 실제 계좌 잔액이 있으면 그것을 사용, 없으면 진행률 기반으로 계산
+  const actualBalance = typeof accountBalance === 'number' && accountBalance >= 0
+    ? accountBalance
+    : (typeof totalBudget === 'number' && totalBudget > 0
+      ? Math.round((totalBudget * savedPercent) / 100)
+      : 0);
+
+  const coveredSet = useMemo(() => {
+    const set = new Set<string>();
+    let remaining = actualBalance;
+
+    // 이미 구매한 항목은 제외하고 계산
+    const unpurchasedItems = items.filter(i => !i.purchased);
+
+    for (const i of unpurchasedItems) {
+      if (remaining >= i.amount) {
+        set.add(i.id);
+        remaining -= i.amount;
+      } else {
+        break;
+      }
     }
-  }
 
-  // 목표 달성 처리 (POST 요청 + 상태 업데이트 + 진행률 증분 전달)
+    return set;
+  }, [items, actualBalance]);
+
+  // 목표 달성 처리 (POST 요청 + 상태 업데이트)
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
   const handlePurchase = async (id: string) => {
+    // 이미 처리 중이면 중복 요청 방지
+    if (processingId) return;
+
     try {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-      if (item.purchased) return; // ✅ 중복 클릭 방지
-      if (total <= 0) return; // ✅ 0 나눗셈 방지
+      if (item.purchased) return; // 중복 클릭 방지
+
+      setProcessingId(id);
 
       const bodyData = {
         tripPlanId: tripId,
@@ -113,29 +123,39 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         isConsumed: true,
       };
       const token = localStorage.getItem('accessToken');
-      console.log('POST 요청 보낼 데이터:', bodyData);
 
-      await fetch(`http://localhost:8080/trip-plans/isconsumed`, {
+      const response = await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify(bodyData),
       });
 
-      // ✅ 증가량 = (해당 항목 금액 / 총합) * 100
-      const rawDelta = (item.amount / total) * 100;
-      const delta = Math.round(rawDelta * 10) / 10; // 보기 좋게 소수 1자리
+      if (!response.ok) {
+        throw new Error(`서버 오류: ${response.status}`);
+      }
 
-      // 부모(DetailPage) 진행률 즉시 반영
-      onProgressDelta?.(delta);
+      const responseData = await response.json();
 
-      // 로컬 purchased 갱신 (버튼 비활성 & 체크마크 표시)
-      setItems((prev) => prev.map((it) => (it.id === id ? { ...it, purchased: true } : it)));
-
-      // (선택) /isconsumed/{tripId} 로 재조회해서 확정 상태 싱크하고 싶다면:
-      // await fetchExpenses();
+      // 서버가 consumed 값을 반환하는지 확인
+      if (responseData.consumed === true) {
+        // 성공적으로 처리되었으므로 데이터 새로고침
+        if (onDataChange) {
+          await onDataChange();
+        }
+      } else {
+        // consumed가 false이거나 undefined인 경우 실패로 간주
+        const errorMsg = responseData.message || '알 수 없는 오류';
+        alert(`목표 달성 처리에 실패했습니다.\n\n${errorMsg}`);
+        setProcessingId(null);
+        return;
+      }
     } catch (err) {
-      console.error('Failed to mark as consumed', err);
+      alert('목표 달성 처리에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -149,8 +169,6 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         })),
       };
 
-      console.log('PATCH 요청 보낼 데이터:', bodyData);
-
       await fetch(`${BASE_URL}/trip-plans/category`, {
         method: 'PATCH',
         headers: {
@@ -159,11 +177,11 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
         },
         body: JSON.stringify(bodyData),
       });
-      // 요청 후 로컬 업데이트
-      setItems(updatedItems);
-      // ⚠️ 합계 변경 후 delta 의미가 달라질 수 있으니, 부모에서 balances 무효화로 동기화하는 걸 추천
+
+      // 부모 컴포넌트에 데이터 새로고침 요청
+      onDataChange?.();
     } catch (err) {
-      console.error('Failed to update expenses', err);
+      // 에러 처리
     }
   };
 
@@ -190,31 +208,21 @@ export default function ExpenseCard({ savedPercent, tripId }: Props) {
                 </Label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Price>₩{i.amount.toLocaleString()}</Price>
-                  {!covered && !i.purchased && (
-                    <button
+                  {!i.purchased && (
+                    <GoalButton
                       onClick={() => handlePurchase(i.id)}
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: '20px',
-                        border: '1px solid #ffeaa6',
-                        background: '#fffea6',
-                        alignItems: 'center',
-                        width: '90px',
-                        justifyContent: 'space-around',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        fontSize: '0.8rem',
-                        marginRight: '8px',
-                      }}
+                      $blink={covered}
+                      disabled={processingId === i.id}
+                      style={{ opacity: processingId === i.id ? 0.6 : 1, cursor: processingId === i.id ? 'wait' : 'pointer' }}
                     >
                       <PiAirplaneTiltFill />
-                      목표 달성
-                    </button>
+                      {processingId === i.id ? '처리 중...' : '목표 달성'}
+                    </GoalButton>
                   )}
                 </div>
               </Item>
 
-              <CheckMark $visible={covered || i.purchased}>
+              <CheckMark $visible={i.purchased}>
                 <Check size={24} strokeWidth={6} />
               </CheckMark>
             </ItemContainer>

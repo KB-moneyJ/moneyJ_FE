@@ -8,12 +8,13 @@ import {
 } from './index';
 import { toTripCardModel, toTripDetailModel } from './adapter';
 import { toBalanceModel } from './adapter';
-import type { TripCardModel, TripDetailModel, TripBalanceModel } from './types';
+import type { TripCardModel, TripDetailModel, TripBalanceModel, TripBalancesModel } from './types';
 
 export const TRIP_KEYS = {
   all: ['tripPlans'] as const,
-  detail: (id: number | string) => ['tripPlan', id] as const,
-  balances: (id: number | string) => ['tripPlan', id, 'balances'] as const,
+  // id를 문자열로 정규화하여 queryKey 일관성 유지 (숫자/문자열 혼용 문제 방지)
+  detail: (id: number | string) => ['tripPlan', String(id)] as const,
+  balances: (id: number | string) => ['tripPlan', String(id), 'balances'] as const,
 };
 
 export function useTripPlans() {
@@ -54,8 +55,8 @@ export function useTripPlanDetail(id?: number | string) {
     },
     retry: false,
     staleTime: 60_000,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -63,14 +64,17 @@ export function useTripPlanBalances(id?: number | string) {
   return useQuery({
     queryKey: id ? TRIP_KEYS.balances(id) : ['tripPlan', 'empty', 'balances'],
     enabled: !!id,
-    queryFn: async (): Promise<TripBalanceModel[]> => {
+    queryFn: async (): Promise<TripBalancesModel> => {
       const data = await fetchTripPlanBalances(id!);
-      console.log(data);
-      return data.map(toBalanceModel).sort((a, b) => b.percent - a.percent);
+      const members = data.userBalanceInfoList.map(toBalanceModel).sort((a, b) => b.percent - a.percent);
+      return {
+        groupProgress: data.tripPlanProgress,
+        members,
+      };
     },
     staleTime: 30_000,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
+    refetchOnMount: true, // 'always' → true로 변경하여 stale일 때만 refetch
+    refetchOnWindowFocus: false, // 창 포커스 시 불필요한 호출 방지
   });
 }
 
