@@ -4,7 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem } from './DetailPage.style';
+import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem, AirportWrapper } from './DetailPage.style';
 import ProgressCard from './sections/ProgressCard/ProgressCard';
 import ExpenseCard from './sections/ExpenseCard/ExpenseCard';
 import TripOverviewCard from './sections/TripOverviewCard/TripOverviewCard';
@@ -23,6 +23,10 @@ import type { TripDetailModel } from '@/api/trips/types';
 import { useMe } from '@/api/users/queries';
 import ExchangeRateCard from './sections/ExchangeRateCard/ExchangeRateCard';
 import { deleteAccount } from '@/api/accounts';
+import styled from 'styled-components';
+import Airport from '@/pages/StartPlan/airport/Airport';
+import { getDestinationAirportCode } from "@/pages/StartPlan/airport/destinationAirportCode";
+
 
 function clampPercent(v: number) {
   if (!Number.isFinite(v)) return 0;
@@ -44,6 +48,36 @@ function setBankOrgForPlan(planId: number, org: string) {
   localStorage.setItem(`plan:${planId}:bankOrg`, org);
 }
 
+function parsePeriod(period: string): { depart: string; returnDate: string } {
+  const [start, end] = period.split(" - ");
+
+  const toISO = (s: string) =>
+    s.replace(/\./g, "-"); // 2026.01.21 → 2026-01-21
+
+  return {
+    depart: toISO(start),
+    returnDate: toISO(end),
+  };
+}
+
+const TabWrapper = styled.div`
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid #eee;
+    margin-top: 6px;
+`;
+const TabItem = styled.div<{ $active: boolean }>`
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    color: ${({ $active }) => ($active ? "#ae65e1" : "#bababa")};
+    border-bottom: ${({ $active }) => ($active ? "2px solid #333" : "2px solid transparent")};
+    transition: 0.2s ease;
+`;
+
 export default function DetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const id = Number(tripId);
@@ -52,6 +86,8 @@ export default function DetailPage() {
 
   const location = useLocation() as { state?: { thumbnailUrl?: string } };
   const thumbFromList = location.state?.thumbnailUrl;
+  const [tab, setTab] = useState<"saving" | "info">("saving");
+
 
   // 상세 / 밸런스 / 유저
   const { data, isLoading, isError } = useTripPlanDetail(tripId); // TripDetailModel
@@ -68,12 +104,19 @@ export default function DetailPage() {
   const [openInvite, setOpenInvite] = useState(false);
   const [openBank, setOpenBank] = useState(false);
 
+
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
   const [accountId, setAccountId] = useState<number | undefined>(undefined);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const tipForProgress = isAccountLinked ? data?.overviewTip : undefined;
+
+  const destinationAirportCode = useMemo(() => {
+    return data?.destination
+      ? getDestinationAirportCode(data.destination)
+      : "ICN";
+  }, [data?.destination]);
 
   // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
   const myProgressFromBalances = useMemo(() => {
@@ -107,6 +150,11 @@ export default function DetailPage() {
 
   // 화면 표시용 진행률(단일 소스)
   const [progress, setProgress] = useState<number>(0);
+
+  const travelDates = useMemo(() => {
+    if (!data?.period) return null;
+    return parsePeriod(data.period);
+  }, [data?.period]);
 
   // 서버 데이터 변화 시 동기화
   useEffect(() => {
@@ -321,21 +369,21 @@ export default function DetailPage() {
   // ---------- 계좌 연동 해제 ----------
   const handleUnlinkAccount = async () => {
     if (!accountId || isDeletingAccount) return;
-    
+
     const ok = window.confirm('정말 계좌 연동을 해제할까요?');
     if (!ok) return;
 
     setIsDeletingAccount(true);
     try {
       await deleteAccount(accountId);
-      
+
       // 계좌 연동 상태 초기화
       setIsAccountLinked(false);
       setAccountLabel(undefined);
       setAccountBalance(undefined);
       setAccountId(undefined);
       setLinkedForPlan(Number(tripId), false);
-      
+
       // 쿼리 refetch
       const planId = String(tripId);
       await qc.refetchQueries({
@@ -346,7 +394,7 @@ export default function DetailPage() {
         queryKey: TRIP_KEYS.detail(planId),
         exact: true,
       });
-      
+
       alert('계좌 연동이 해제되었습니다.');
     } catch (error) {
       console.error('계좌 삭제 실패:', error);
@@ -417,57 +465,88 @@ export default function DetailPage() {
         )}
       </Container>
 
-      <ProgressCard
-        progress={progress}
-        linked={isAccountLinked}
-        accountLabel={accountLabel}
-        balance={accountBalance}
-        accountId={accountId}
-        tripId={tripId}
-        onClickLink={() => setOpenBank(true)}
-        onClickUnlink={handleUnlinkAccount}
-        onClickChangeAccount={() => setOpenBank(true)}
-        tip={tipForProgress}
-      />
+      <TabWrapper>
+        <TabItem $active={tab === "saving"} onClick={() => setTab("saving")}>
+          저축 상세
+        </TabItem>
+        <TabItem $active={tab === "info"} onClick={() => setTab("info")}>
+          부가적 정보
+        </TabItem>
+      </TabWrapper>
 
-      {/* 예상 경비/목표 달성 */}
-      <ExpenseCard
-        tripId={id}
-        savedPercent={progress}
-        accountBalance={accountBalance}
-        totalBudget={data?.totalBudget}
-        categories={data?.categories}
-        onDataChange={async () => {
-          // ExpenseCard에서 데이터 변경 시 쿼리 무효화하여 재조회
-          // 문자열로 정규화하여 queryKey 일관성 유지
-          const planId = String(id);
-          await qc.refetchQueries({ queryKey: TRIP_KEYS.detail(planId), exact: true });
-          await qc.refetchQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
-        }}
-      />
+      {tab === "saving" && (
+        <>
+          <ProgressCard
+            progress={progress}
+            linked={isAccountLinked}
+            accountLabel={accountLabel}
+            balance={accountBalance}
+            accountId={accountId}
+            tripId={tripId}
+            onClickLink={() => setOpenBank(true)}
+            onClickUnlink={handleUnlinkAccount}
+            onClickChangeAccount={() => setOpenBank(true)}
+            tip={tipForProgress}
+          />
 
-      {overview && (
-        <TripOverviewCard
-          destination={overview.destination}
-          countryCode={overview.countryCode}
-          period={overview.period}
-          thumbnailUrl={overview.thumbnailUrl}
-          progressPercent={overview.progressPercent}
-          members={overview.members}
-          tip={overview.tip}
-          podiumImageUrl={overview.podiumImageUrl}
-          podiumTop3={overview.podiumTop3}
-        />
+          {/* 예상 경비/목표 달성 */}
+          <ExpenseCard
+            tripId={id}
+            savedPercent={progress}
+            accountBalance={accountBalance}
+            totalBudget={data?.totalBudget}
+            categories={data?.categories}
+            onDataChange={async () => {
+              // ExpenseCard에서 데이터 변경 시 쿼리 무효화하여 재조회
+              // 문자열로 정규화하여 queryKey 일관성 유지
+              const planId = String(id);
+              await qc.refetchQueries({ queryKey: TRIP_KEYS.detail(planId), exact: true });
+              await qc.refetchQueries({ queryKey: TRIP_KEYS.balances(planId), exact: true });
+            }}
+          />
+
+          {overview && (
+            <TripOverviewCard
+              destination={overview.destination}
+              countryCode={overview.countryCode}
+              period={overview.period}
+              thumbnailUrl={overview.thumbnailUrl}
+              progressPercent={overview.progressPercent}
+              members={overview.members}
+              tip={overview.tip}
+              podiumImageUrl={overview.podiumImageUrl}
+              podiumTop3={overview.podiumTop3}
+            />
+          )}
+
+          <BeforeYouGoCard
+            destination={data.destination}
+            checklist={checklist}
+            cautions={cautions}
+            tips={data.tips}
+          />
+        </>
+      )}
+      {tab === "info" && (
+        <>
+          <>
+            <ExchangeRateCard destination="Japan" />
+            <AirportWrapper>
+              {travelDates && (
+                <Airport
+                  destinationCode={destinationAirportCode}
+                  depart={travelDates.depart}
+                  returnDate={travelDates.returnDate}
+                />
+              )}
+            </AirportWrapper>
+          </>
+
+        </>
       )}
 
-      <BeforeYouGoCard
-        destination={data.destination}
-        checklist={checklist}
-        cautions={cautions}
-        tips={data.tips}
-      />
 
-      <ExchangeRateCard destination={data.destination} />
+
 
       {openInvite && (
         <FriendInviteModal
