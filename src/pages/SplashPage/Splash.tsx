@@ -3,8 +3,8 @@ import { motion, useAnimation } from "framer-motion";
 import { useNavigate } from "react-router-dom"; // <- import
 
 const Splash = () => {
-  const containerWidth = 402;
-  const containerHeight = 874;
+  const containerWidth = 430;
+  const containerHeight = 1200;
 
   const svgControls = useAnimation();
   const leftEyeControls = useAnimation();
@@ -60,8 +60,9 @@ const Splash = () => {
     <div
       style={{
         position: "relative",
-        width: `${containerWidth}px`,
-        height: `${containerHeight}px`,
+        width: "100%",
+        height: "100vh",
+
         overflow: "hidden",
         backgroundColor: "transparent",
         display: "flex",
