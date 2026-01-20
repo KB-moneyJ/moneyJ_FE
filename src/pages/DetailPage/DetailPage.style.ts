@@ -49,3 +49,7 @@ export const DropdownItem = styled.button`
     background: #dbdadaff;
   }
 `;
+
+export const AirportWrapper = styled.div`
+    padding: 0 1rem;
+`

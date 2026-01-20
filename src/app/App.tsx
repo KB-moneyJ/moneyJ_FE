@@ -13,6 +13,9 @@ import Plan from '@/pages/PlanPage/Plan';
 import SpendingPage from '@/pages/AnalysisPage/SpendingPage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+import AirPort from '@/pages/StartPlan/airport/Airport';
+
+
 function App() {
   return (
     <Router>
@@ -43,6 +46,11 @@ function App() {
 
         {/* MyPage */}
         <Route path="/mypage" element={<Myinfo />} />
+
+
+
+        <Route path="/airport" element={<AirPort/>} />
+
       </Routes>
     </Router>
   );

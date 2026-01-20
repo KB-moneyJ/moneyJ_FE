@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Plane, Home, Utensils, Check } from 'lucide-react';
 import { PiAirplaneTiltFill } from 'react-icons/pi';
 import EditModal from '../../../../components/common/EditModal';
@@ -76,21 +76,21 @@ export default function ExpenseCard({
 
   // 총합 & 실제 계좌 잔액 기반 커버 계산
   const total = items.reduce((sum, i) => sum + i.amount, 0);
-  
+
   // 실제 계좌 잔액이 있으면 그것을 사용, 없으면 진행률 기반으로 계산
-  const actualBalance = typeof accountBalance === 'number' && accountBalance >= 0 
-    ? accountBalance 
-    : (typeof totalBudget === 'number' && totalBudget > 0 
-      ? Math.round((totalBudget * savedPercent) / 100) 
+  const actualBalance = typeof accountBalance === 'number' && accountBalance >= 0
+    ? accountBalance
+    : (typeof totalBudget === 'number' && totalBudget > 0
+      ? Math.round((totalBudget * savedPercent) / 100)
       : 0);
 
   const coveredSet = useMemo(() => {
     const set = new Set<string>();
     let remaining = actualBalance;
-    
+
     // 이미 구매한 항목은 제외하고 계산
     const unpurchasedItems = items.filter(i => !i.purchased);
-    
+
     for (const i of unpurchasedItems) {
       if (remaining >= i.amount) {
         set.add(i.id);
@@ -99,17 +99,17 @@ export default function ExpenseCard({
         break;
       }
     }
-    
+
     return set;
   }, [items, actualBalance]);
 
   // 목표 달성 처리 (POST 요청 + 상태 업데이트)
   const [processingId, setProcessingId] = useState<string | null>(null);
-  
+
   const handlePurchase = async (id: string) => {
     // 이미 처리 중이면 중복 요청 방지
     if (processingId) return;
-    
+
     try {
       const item = items.find((i) => i.id === id);
       if (!item) return;
@@ -126,9 +126,9 @@ export default function ExpenseCard({
 
       const response = await fetch(`${BASE_URL}/trip-plans/isconsumed`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-          Authorization: `Bearer ${token}` 
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(bodyData),
       });
@@ -209,8 +209,8 @@ export default function ExpenseCard({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Price>₩{i.amount.toLocaleString()}</Price>
                   {!i.purchased && (
-                    <GoalButton 
-                      onClick={() => handlePurchase(i.id)} 
+                    <GoalButton
+                      onClick={() => handlePurchase(i.id)}
                       $blink={covered}
                       disabled={processingId === i.id}
                       style={{ opacity: processingId === i.id ? 0.6 : 1, cursor: processingId === i.id ? 'wait' : 'pointer' }}
