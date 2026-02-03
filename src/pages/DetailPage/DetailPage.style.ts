@@ -24,32 +24,65 @@ export const RightIcon = styled(EllipsisVertical)`
   cursor: pointer;
 `;
 
-export const Dropdown = styled.div`
-  position: absolute;
-  top: 2rem;
-  right: 0rem;
-  background: white;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  min-width: 150px;
-  z-index: 10;
+export const AirportWrapper = styled.div`
+  padding: 0 1rem;
 `;
 
-export const DropdownItem = styled.button`
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: transparent;
-  border: none;
-  text-align: left;
-  color: black;
-  font-size: 0.9rem;
-  cursor: pointer;
+export const Dim = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+`;
 
-  &:hover {
-    background: #dbdadaff;
+export const BottomCenterModal = styled.div`
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+
+  background: white;
+  border-radius: 14px;
+  min-width: 220px;
+  width: 80%;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+  z-index: 999;
+
+  animation: fadeUp 0.2s ease-out;
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   }
 `;
 
-export const AirportWrapper = styled.div`
-    padding: 0 1rem;
-`
+export const ModalItem = styled.button<{ danger?: boolean }>`
+  width: 100%;
+  padding: 0.9rem 1.25rem;
+
+  background: transparent;
+  border: none;
+  text-align: center;
+
+  font-size: 0.95rem;
+  font-weight: 500;
+
+  color: ${({ danger }) => (danger ? '#ff6b6b' : '#111')};
+  cursor: pointer;
+
+  &:hover {
+    background: #f4f4f4;
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #eee;
+  }
+`;
