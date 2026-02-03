@@ -200,3 +200,74 @@ export const Text = styled.div`
   color: white;
   text-align: center;
 `;
+
+export const MenuButton = styled.button`
+  position: absolute;
+  top: 1.5rem;
+  right: 1.2rem;
+
+  background: transparent;
+  border: none;
+  color: white;
+
+  font-size: 1.6rem;
+  cursor: pointer;
+`;
+
+export const Dim = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 998;
+`;
+
+export const BottomCenterModal = styled.div`
+  position: fixed;
+  left: 50%;
+  bottom: 6rem;
+  transform: translateX(-50%);
+  width: 80%;
+
+  background: white;
+  border-radius: 14px;
+  min-width: 220px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  z-index: 999;
+
+  animation: fadeUp 0.2s ease-out;
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+`;
+
+export const ModalItem = styled.button<{ danger?: boolean }>`
+  width: 100%;
+  padding: 1rem;
+
+  background: transparent;
+  border: none;
+  text-align: center;
+
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  color: ${({ danger }) => (danger ? '#ff6b6b' : '#111')};
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #eee;
+  }
+
+  &:active {
+    background: #f2f2f2;
+  }
+`;

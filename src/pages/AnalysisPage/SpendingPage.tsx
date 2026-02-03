@@ -7,6 +7,10 @@ import {
   SavingsBanner,
   CardButton,
   Text,
+  Dim,
+  MenuButton,
+  BottomCenterModal,
+  ModalItem,
 } from './SpendingPage.style';
 import CardConnectModal from '@/components/modals/CardConnectModal';
 import { useSummaryQuery } from '@/api/spending/queries';
@@ -44,6 +48,7 @@ export default function SpendingPage() {
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('');
   const { data: res } = useSummaryQuery();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   /** 🔹 요약 데이터 로드 */
   const fetchSummary = async () => {
@@ -180,6 +185,7 @@ export default function SpendingPage() {
   return (
     <div>
       <Page>
+        <MenuButton onClick={() => setIsMenuOpen(true)}>⋮</MenuButton>
         <h2 style={{ marginTop: '4rem', marginBottom: '0.5rem', color: 'white' }}>
           {username}님의 소비 분석
         </h2>
@@ -232,7 +238,6 @@ export default function SpendingPage() {
                   setSelected={setSelected}
                 />
 
-                {/* 🔹 카테고리 비교 패널 */}
                 <CategoryPanel>
                   <div className="section-title">CATEGORY GOALS</div>
                   <div className="line1">
@@ -270,7 +275,6 @@ export default function SpendingPage() {
                   </div>
                 </CategoryPanel>
 
-                {/* 🔹 절약/증가 배너 */}
                 <SavingsBanner className={metrics.isSaving ? 'saving' : 'increase'}>
                   <span className="emoji">🎉</span>
                   <span>
@@ -284,7 +288,6 @@ export default function SpendingPage() {
           </>
         )}
 
-        {/* 카드 연결 모달 */}
         <CardConnectModal
           isOpen={isConnectOpen}
           onClose={() => setIsConnectOpen(false)}
@@ -292,6 +295,17 @@ export default function SpendingPage() {
         />
       </Page>
       <BottomNavigationBar />
+      {isMenuOpen && (
+        <>
+          <Dim onClick={() => setIsMenuOpen(false)} />
+          <BottomCenterModal>
+            <ModalItem onClick={() => setIsConnectOpen(true)}>카드 변경</ModalItem>
+            <ModalItem danger onClick={() => alert('카드 해지')}>
+              카드 해지
+            </ModalItem>
+          </BottomCenterModal>
+        </>
+      )}
     </div>
   );
 }
