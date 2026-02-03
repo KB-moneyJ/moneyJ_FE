@@ -4,7 +4,15 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { Container, LeftIcon, RightIcon, Dropdown, DropdownItem, AirportWrapper } from './DetailPage.style';
+import {
+  Container,
+  LeftIcon,
+  RightIcon,
+  AirportWrapper,
+  Dim,
+  BottomCenterModal,
+  ModalItem,
+} from './DetailPage.style';
 import ProgressCard from './sections/ProgressCard/ProgressCard';
 import ExpenseCard from './sections/ExpenseCard/ExpenseCard';
 import TripOverviewCard from './sections/TripOverviewCard/TripOverviewCard';
@@ -25,8 +33,7 @@ import ExchangeRateCard from './sections/ExchangeRateCard/ExchangeRateCard';
 import { deleteAccount } from '@/api/accounts';
 import styled from 'styled-components';
 import Airport from '@/pages/StartPlan/airport/Airport';
-import { getDestinationAirportCode } from "@/pages/StartPlan/airport/destinationAirportCode";
-
+import { getDestinationAirportCode } from '@/pages/StartPlan/airport/destinationAirportCode';
 
 function clampPercent(v: number) {
   if (!Number.isFinite(v)) return 0;
@@ -49,10 +56,9 @@ function setBankOrgForPlan(planId: number, org: string) {
 }
 
 function parsePeriod(period: string): { depart: string; returnDate: string } {
-  const [start, end] = period.split(" - ");
+  const [start, end] = period.split(' - ');
 
-  const toISO = (s: string) =>
-    s.replace(/\./g, "-"); // 2026.01.21 → 2026-01-21
+  const toISO = (s: string) => s.replace(/\./g, '-'); // 2026.01.21 → 2026-01-21
 
   return {
     depart: toISO(start),
@@ -61,21 +67,21 @@ function parsePeriod(period: string): { depart: string; returnDate: string } {
 }
 
 const TabWrapper = styled.div`
-    display: flex;
-    width: 100%;
-    border-bottom: 1px solid #eee;
-    margin-top: 6px;
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+  margin-top: 6px;
 `;
 const TabItem = styled.div<{ $active: boolean }>`
-    flex: 1;
-    text-align: center;
-    padding: 12px 0;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    color: ${({ $active }) => ($active ? "#ae65e1" : "#bababa")};
-    border-bottom: ${({ $active }) => ($active ? "2px solid #333" : "2px solid transparent")};
-    transition: 0.2s ease;
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  color: ${({ $active }) => ($active ? '#ae65e1' : '#bababa')};
+  border-bottom: ${({ $active }) => ($active ? '2px solid #333' : '2px solid transparent')};
+  transition: 0.2s ease;
 `;
 
 export default function DetailPage() {
@@ -86,8 +92,7 @@ export default function DetailPage() {
 
   const location = useLocation() as { state?: { thumbnailUrl?: string } };
   const thumbFromList = location.state?.thumbnailUrl;
-  const [tab, setTab] = useState<"saving" | "info">("saving");
-
+  const [tab, setTab] = useState<'saving' | 'info'>('saving');
 
   // 상세 / 밸런스 / 유저
   const { data, isLoading, isError } = useTripPlanDetail(tripId); // TripDetailModel
@@ -104,7 +109,6 @@ export default function DetailPage() {
   const [openInvite, setOpenInvite] = useState(false);
   const [openBank, setOpenBank] = useState(false);
 
-
   const [isAccountLinked, setIsAccountLinked] = useState(false);
   const [accountLabel, setAccountLabel] = useState<string | undefined>(undefined);
   const [accountBalance, setAccountBalance] = useState<number | undefined>(undefined);
@@ -113,9 +117,7 @@ export default function DetailPage() {
   const tipForProgress = isAccountLinked ? data?.overviewTip : undefined;
 
   const destinationAirportCode = useMemo(() => {
-    return data?.destination
-      ? getDestinationAirportCode(data.destination)
-      : "ICN";
+    return data?.destination ? getDestinationAirportCode(data.destination) : 'ICN';
   }, [data?.destination]);
 
   // ---------- 내 진행률: balances 1순위, 상세 폴백 ----------
@@ -455,26 +457,29 @@ export default function DetailPage() {
         <LeftIcon onClick={() => navigate(-2)} />
         <RightIcon onClick={() => setOpenMenu((s) => !s)} />
         {openMenu && (
-          <Dropdown>
-            <DropdownItem onClick={() => setOpenInvite(true)}>멤버 초대</DropdownItem>
-            {/* <DropdownItem onClick={() => setOpenBank(true)}>계좌 연동</DropdownItem> */}
-            <DropdownItem style={{ color: '#ff7b7b' }} onClick={handleDeletePlan}>
-              플랜 삭제
-            </DropdownItem>
-          </Dropdown>
+          <>
+            <Dim onClick={() => setOpenMenu(false)} />
+            <BottomCenterModal>
+              <ModalItem onClick={() => setOpenInvite(true)}>멤버 초대</ModalItem>
+              {/* <ModalItem onClick={() => setOpenBank(true)}>계좌 연동</ModalItem> */}
+              <ModalItem danger onClick={handleDeletePlan}>
+                플랜 삭제
+              </ModalItem>
+            </BottomCenterModal>
+          </>
         )}
       </Container>
 
       <TabWrapper>
-        <TabItem $active={tab === "saving"} onClick={() => setTab("saving")}>
+        <TabItem $active={tab === 'saving'} onClick={() => setTab('saving')}>
           저축 상세
         </TabItem>
-        <TabItem $active={tab === "info"} onClick={() => setTab("info")}>
+        <TabItem $active={tab === 'info'} onClick={() => setTab('info')}>
           부가적 정보
         </TabItem>
       </TabWrapper>
 
-      {tab === "saving" && (
+      {tab === 'saving' && (
         <>
           <ProgressCard
             progress={progress}
@@ -527,7 +532,7 @@ export default function DetailPage() {
           />
         </>
       )}
-      {tab === "info" && (
+      {tab === 'info' && (
         <>
           <>
             <ExchangeRateCard destination="Japan" />
@@ -541,12 +546,8 @@ export default function DetailPage() {
               )}
             </AirportWrapper>
           </>
-
         </>
       )}
-
-
-
 
       {openInvite && (
         <FriendInviteModal
