@@ -8,27 +8,36 @@ type ConfirmModalProps = {
   title: string;
   description: React.ReactNode;
   confirmText?: string;
+  cancelText?: string;
   onConfirm: () => void;
+  onCancel: () => void;
 };
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
-  open,
-  title,
-  description,
-  confirmText = '닫기',
-  onConfirm,
-}) => {
+                                                     open,
+                                                     title,
+                                                     description,
+                                                     confirmText = '확인',
+                                                     cancelText = '취소',
+                                                     onConfirm,
+                                                     onCancel,
+                                                   }) => {
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
+
     confirmBtnRef.current?.focus();
+
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onConfirm();
+      if (e.key === 'Escape') {
+        onCancel();
+      }
     };
+
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onConfirm]);
+  }, [open, onCancel]);
 
   return (
     <AnimatePresence>
@@ -37,7 +46,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onConfirm}
+          onClick={onCancel}
         >
           <S.Dialog
             role="dialog"
@@ -54,8 +63,16 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
               <S.Logo src={logo} alt="앱 로고" />
               <S.Title id="confirm-modal-title">{title}</S.Title>
             </S.TitleContainer>
-            <S.Description id="confirm-modal-desc">{description}</S.Description>
+
+            <S.Description id="confirm-modal-desc">
+              {description}
+            </S.Description>
+
             <S.Actions>
+              <S.CancelButton onClick={onCancel}>
+                {cancelText}
+              </S.CancelButton>
+
               <S.ConfirmButton ref={confirmBtnRef} onClick={onConfirm}>
                 {confirmText}
               </S.ConfirmButton>

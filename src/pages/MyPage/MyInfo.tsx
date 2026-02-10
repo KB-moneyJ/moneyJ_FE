@@ -17,13 +17,15 @@ import { logout } from '@/api/auth/auth';
 import { useNavigate } from 'react-router-dom';
 import { useMe } from '@/api/users/queries';
 
-export default function Myinfo() {
+export default function MyInfo() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { data: me, isLoading: meLoading, isError: meError } = useMe();
+  const { data: me, isLoading: meLoading } = useMe();
+
   const handleImgError: React.ReactEventHandler<HTMLImageElement> = (e) => {
-    (e.currentTarget as HTMLImageElement).style.display = 'none';
+    e.currentTarget.style.display = 'none';
   };
+
   const goLogout = async () => {
     try {
       const result = await logout();
@@ -53,8 +55,11 @@ export default function Myinfo() {
               onError={handleImgError}
             />
           </AvatarCircle>
-          <Username>{me?.nickname ?? (meLoading ? '불러오는 중…' : 'Guest')}</Username>
+          <Username>
+            {me?.nickname ?? (meLoading ? '불러오는 중…' : 'Guest')}
+          </Username>
         </ProfileWrap>
+
         <LogoutBtn type="button" onClick={() => setOpen(true)}>
           <Item>
             <FiLogOut />
@@ -62,18 +67,21 @@ export default function Myinfo() {
           </Item>
         </LogoutBtn>
       </Page>
+
       <BottomNavigationBar />
+
       <ConfirmModal
         open={open}
         title="로그아웃"
         description={
           <>
             접속 중인 아이디로
-            <br /> 정말 로그아웃 하시겠습니까?
+            <br />
+            정말 로그아웃 하시겠습니까?
           </>
         }
-        cancelText="취소"
         confirmText="로그아웃"
+        cancelText="취소"
         onCancel={() => setOpen(false)}
         onConfirm={() => {
           goLogout();
