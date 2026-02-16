@@ -174,9 +174,16 @@ export default function DetailPage() {
 
   // ---------- balances에서 "나"의 계좌 정보 ----------
   const myBalanceRow = useMemo(() => {
-    if (!meId) return undefined;
-    // TripBalanceModel은 id(string) 필드를 사용
-    return (balances as any[]).find((b) => String(b.id) === String(meId));
+    // 1순위: 내 ID
+    if (meId) {
+      const found = (balances as any[]).find((b) => String(b.id) === String(meId));
+      if (found) return found;
+    }
+    // 2순위: 첫 번째 멤버 (fallback)
+    if (balances.length > 0) {
+      return balances[0];
+    }
+    return undefined;
   }, [balances, meId]);
 
   // ---------- balances 기반으로 계좌 상태 세팅 ----------
@@ -228,9 +235,15 @@ export default function DetailPage() {
     if (target.accountId) {
       setAccountId(target.accountId);
     }
-    // accountLabel은 handleBankConnected에서 설정하거나, 없으면 기본값
-    // useEffect에서는 balances 기반으로 isAccountLinked와 balance만 업데이트
-    if (!accountLabel) {
+
+    // accountName, accountNumber가 있으면 우선 사용
+    if (target.accountName && target.accountNumber) {
+      const maskAccount = (s: string) => s.replace(/\d(?=\d{4})/g, '*'); // 앞부분 마스킹? or 뒷부분? usually masking middle or end. User said "735702-01-xxxxxx" which is end masking.
+      // let's just pass raw and mask in Component, or mask here.
+      // Actually component needs raw for some things? No, display only.
+      setAccountLabel(`${target.accountName} ${target.accountNumber}`); // This was old way. 
+      // We should probably update Component to accept these separately.
+    } else if (!accountLabel) {
       setAccountLabel('연동된 계좌');
     }
     setLinkedForPlan(planIdNum, true);
@@ -455,6 +468,9 @@ export default function DetailPage() {
     <div>
       <Container>
         <LeftIcon onClick={() => navigate(-2)} />
+        <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#fff' }}>
+          {data?.destination ? `${data.destination} ${data.countryCode === 'JP' ? '🇯🇵' : (data.countryCode === 'VN' ? '🇻🇳' : '')}` : ''}
+        </div>
         <RightIcon onClick={() => setOpenMenu((s) => !s)} />
         {openMenu && (
           <>
@@ -484,7 +500,8 @@ export default function DetailPage() {
           <ProgressCard
             progress={progress}
             linked={isAccountLinked}
-            accountLabel={accountLabel}
+            accountName={myBalanceRow?.accountName}
+            accountNumber={myBalanceRow?.accountNumber}
             balance={accountBalance}
             accountId={accountId}
             tripId={tripId}
@@ -564,6 +581,7 @@ export default function DetailPage() {
           onConnected={handleBankConnected}
           tripPlanId={id}
           isAlreadyLinked={isAccountLinked}
+          accountId={accountId}
         />
       )}
     </div>
