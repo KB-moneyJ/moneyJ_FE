@@ -67,6 +67,8 @@ export type TripDetailModel = {
 
 export type TripBalanceApi = {
   accountId: number;
+  accountName?: string;
+  accountNumber?: string;
   userId: number;
   nickname: string;
   profileImage?: string;
@@ -86,6 +88,8 @@ export type TripBalanceModel = {
   balance: number;
   percent: number;
   accountId?: number;
+  accountName?: string;
+  accountNumber?: string;
 };
 
 export type TripBalancesModel = {

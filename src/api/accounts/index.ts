@@ -17,7 +17,7 @@ export async function manualAccountUpdate(
   accountId: number,
 ): Promise<AccountLinkResponseDTO> {
   const { data } = await axios.get<AccountLinkResponseDTO>(
-    `${BASE_URL}/accounts/${accountId}`,
+    `${BASE_URL}/api/accounts/${accountId}`,
   );
   return data;
 }
@@ -27,6 +27,6 @@ export async function manualAccountUpdate(
  * @param accountId 계좌 ID
  */
 export async function deleteAccount(accountId: number): Promise<void> {
-  await axios.delete(`${BASE_URL}/accounts/${accountId}`);
+  await axios.delete(`${BASE_URL}/api/accounts/${accountId}`);
 }
 
