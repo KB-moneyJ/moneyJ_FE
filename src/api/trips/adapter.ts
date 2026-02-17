@@ -120,5 +120,7 @@ export function toBalanceModel(api: TripBalanceApi): TripBalanceModel {
     balance: api.balance,
     percent,
     accountId: api.accountId,
+    accountName: api.accountName,
+    accountNumber: api.accountNumber,
   };
 }

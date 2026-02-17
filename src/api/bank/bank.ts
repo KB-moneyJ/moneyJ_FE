@@ -2,9 +2,8 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
-const token = localStorage.getItem('accessToken');
 
-/* ====================== Types (필요한 필드만) ====================== */
+/* ====================== Types ====================== */
 
 export type BankOrganizationCode =
   | '0002'
@@ -28,289 +27,149 @@ export type BankOrganizationCode =
   | '0088'
   | '0089';
 
-export type ConnectedIdResponse = { connectedId: string };
-
-export type CredentialsResult = {
-  code: string; // 'CF-00000' 이면 성공
-  extraMessage: string;
-  message: string; // '성공'
-  transactionId: string;
-};
-
-export type GetCredentialsListResponse = {
-  result: { code: string; message: string; extraMessage: string };
-  data: {
-    accountList: Array<{
-      clientType: 'P';
-      loginType: '1';
-      countryCode: 'KR';
-      organization: string;
-      businessType: 'BK' | 'CD';
-    }>;
-    connectedId: string;
-  };
-};
-
-// ❗ FE에서 실제로 쓰는 최소 계좌 모델 (표시/선택용)
-export type BankAccount = {
-  accountNumber: string; // 원본 계좌번호 (resAccount, 숫자만)
-  accountNumberDisplay: string; // 마스킹/하이픈 포함 표시용
-  accountName: string; // 상품/계좌명
-  balance?: number; // (옵션) 목록에서 바로 보여줄 때만 사용
-};
-
-// CODEF 원응답 중 필요한 최소 필드만 파싱할 때 사용
-type BankAccountsResponseRaw = {
-  result: { code: string };
-  data: {
-    resDepositTrust: Array<{
-      resAccount: string;
-      resAccountDisplay: string;
-      resAccountName: string;
-      resAccountBalance: string;
-    }>;
-  };
-};
-
-export type TripPlanAccountSaveResponse = {
+// 1-1. 계좌 목록 조회 및 기관 연결 (CODEF) 응답
+export type BankAccountConnectResponse = {
+  organizationCode: string;
   accountName: string;
-  accountNumberDisplay: string; // 7357****1086
+  accountNumber: string;
+  balance: number;
+};
+
+// 1-2. 계좌 저장 (DB Link) 응답
+export type TripPlanAccountLinkResponse = {
+  accountId: number;
+  accountName: string;
+  accountNumber: string;
   balance: number;
 };
 
 /* ====================== Utils ====================== */
+const getAuthHeader = () => ({
+  Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+});
 
-const CF_SUCCESS = 'CF-00000';
-const CF_DUP = 'CF-00016'; // 동일 요청 처리 중
+/* ====================== API: Bank Connect & Link ====================== */
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const jitter = (ms: number) => Math.max(0, Math.floor(ms * (0.8 + Math.random() * 0.4)));
-const digits = (s: string) => s.replace(/\D/g, '');
-
-const isHttp429 = (e: any) => e?.response?.status === 429;
-const isServerDupMsg = (e: any) =>
-  /중복 요청|동일한 요청|처리 중/i.test(e?.response?.data?.message ?? '');
-
-/* ====================== 동시 호출 합치기 ====================== */
-// 같은 은행(org) 계좌 목록을 동시에 불러오면 1회만 네트워크 호출
-const inflightAccounts = new Map<string, Promise<BankAccount[]>>();
-// 같은 tripPlanId 잔액 새로고침도 1회만
-const inflightRefresh = new Map<number, Promise<TripPlanAccountSaveResponse>>();
-
-/* ====================== API: ConnectedId / 자격추가 / 목록 ====================== */
-
-export async function createBankConnectedId(
-  organization: BankOrganizationCode,
-  id: string,
-  password: string,
-): Promise<ConnectedIdResponse> {
-  const { data } = await axios.post<ConnectedIdResponse>(
-    `${BASE_URL}/api/codef/connected-id`,
-    {
-      accountList: [
-        {
-          countryCode: 'KR',
-          businessType: 'BK',
-          clientType: 'P',
-          organization,
-          loginType: '1',
-          id,
-          password,
-        },
-      ],
-    },
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
-  return data;
-}
-
-export async function addBankCredential(
-  organization: BankOrganizationCode,
-  id: string,
-  password: string,
-): Promise<CredentialsResult> {
-  const { data } = await axios.post<CredentialsResult>(
-    `${BASE_URL}/api/codef/credentials`,
+/**
+ * 1-1. 계좌 목록 조회 및 기관 연결 (CODEF)
+ * URL: POST /api/accounts/connect
+ */
+export async function connectBank(params: {
+  organization: string;
+  id: string;
+  password: string;
+}): Promise<BankAccountConnectResponse[]> {
+  const { data } = await axios.post<BankAccountConnectResponse[]>(
+    `${BASE_URL}/api/accounts/connect`,
     {
       countryCode: 'KR',
       businessType: 'BK',
       clientType: 'P',
-      organization,
+      organization: params.organization,
       loginType: '1',
-      id,
-      password,
+      id: params.id,
+      password: params.password,
     },
     {
-      headers: { Authorization: `Bearer ${token}` },
-    },
+      headers: getAuthHeader(),
+    }
   );
   return data;
-}
-
-export async function getCredentialsList(): Promise<GetCredentialsListResponse> {
-  const { data } = await axios.get<GetCredentialsListResponse>(
-    `${BASE_URL}/api/codef/credentials`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
-  return data;
-}
-
-/* ====================== API: 계좌 목록 (필요 필드만 매핑) ====================== */
-
-async function fetchAccountsOnce(organization: BankOrganizationCode): Promise<BankAccount[]> {
-  const { data } = await axios.get<BankAccountsResponseRaw>(`${BASE_URL}/api/codef/bank/accounts`, {
-    params: { organization },
-
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (data?.result?.code !== CF_SUCCESS) {
-    throw new Error(`계좌목록 실패(code:${data?.result?.code || 'UNKNOWN'})`);
-  }
-
-  const list = data?.data?.resDepositTrust ?? [];
-  return list.map((it) => ({
-    accountNumber: digits(it.resAccount),
-    accountNumberDisplay: it.resAccountDisplay,
-    accountName: it.resAccountName,
-    // 필요 시 목록에서 잔액 보여줄 때만 parse:
-    balance: it.resAccountBalance ? Number(it.resAccountBalance) : undefined,
-  }));
 }
 
 /**
- * 계좌 목록 조회 (중복 호출 병합 + 소량 재시도)
- * - 동일 org 동시호출 시 1회로 합치기
- * - 429/CF-00016/“동일한 요청 처리 중” 메시지에서만 최대 2회 재시도
+ * 1-2. 계좌 저장 (DB Link)
+ * URL: POST /api/accounts/link
  */
-export async function fetchBankAccounts(
-  organization: BankOrganizationCode,
-): Promise<BankAccount[]> {
-  const key = organization;
-  const inflight = inflightAccounts.get(key);
-  if (inflight) return inflight;
-
-  const p = (async () => {
-    let delay = 600;
-    for (let i = 0; i < 3; i++) {
-      try {
-        return await fetchAccountsOnce(organization);
-      } catch (e: any) {
-        const code = String(e?.message ?? '');
-        const retryable = isHttp429(e) || isServerDupMsg(e) || code.includes(CF_DUP);
-        if (!retryable || i === 2) throw e;
-        await sleep(jitter(delay));
-        delay = Math.min(delay * 2, 2000);
-      }
-    }
-    // 논리상 도달 X
-    throw new Error('계좌목록 재시도 초과');
-  })();
-
-  inflightAccounts.set(key, p);
-  try {
-    return await p;
-  } finally {
-    inflightAccounts.delete(key);
-  }
-}
-
-/* ====================== API: 플랜 계좌 연결/변경/잔액 ====================== */
-
 export async function linkTripPlanAccount(params: {
-  organizationCode: BankOrganizationCode;
-  accountNumber: string; // digits(resAccount)
   tripPlanId: number;
-}): Promise<TripPlanAccountSaveResponse> {
-  const { data } = await axios.post<TripPlanAccountSaveResponse>(
-    `${BASE_URL}/accounts/link`,
-    params,
+  organizationCode: string;
+  accountName: string;
+  accountNumber: string;
+  balance: number;
+}): Promise<TripPlanAccountLinkResponse> {
+  // accountNumber: 하이픈 없이 숫자만
+  const cleanaccountNumber = params.accountNumber.replace(/-/g, '');
+
+  const { data } = await axios.post<TripPlanAccountLinkResponse>(
+    `${BASE_URL}/api/accounts/link`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      ...params,
+      accountNumber: cleanaccountNumber,
     },
+    {
+      headers: getAuthHeader(),
+    }
   );
   return data;
 }
+
+/**
+ * 1-3. 계좌 변경 (Switch)
+ * URL: PATCH /api/accounts/switch/{accountId}
+ */
+export async function switchTripPlanAccount(params: {
+  accountId: number;
+  organizationCode: string;
+  accountName: string;
+  accountNumber: string;
+  balance: number;
+}): Promise<TripPlanAccountLinkResponse> {
+  const cleanAccountNumber = params.accountNumber.replace(/-/g, '');
+
+  const { data } = await axios.patch<TripPlanAccountLinkResponse>(
+    `${BASE_URL}/api/accounts/switch/${params.accountId}`,
+    {
+      organizationCode: params.organizationCode,
+      accountName: params.accountName,
+      accountNumber: cleanAccountNumber,
+      balance: params.balance,
+    },
+    {
+      headers: getAuthHeader(),
+    }
+  );
+  return data;
+}
+
+/**
+ * 1-4. 계좌 목록 단순 조회 (Refresh) -> 필요시 구현
+ * URL: GET /api/accounts/list?organization=0004
+ * (현재는 사용처가 명확하지 않아 보류하거나 필요 시 추가)
+ */
+
+/* ====================== Legacy / Others ====================== */
+
+// 기존 refreshTripPlanBalance 등은 유지하거나 필요에 따라 수정
+// 명세에 1-3. 계좌 변경, 1-4. 단순 조회 등이 있으나, 
+// 기존 코드에서 사용하던 refreshTripPlanBalance 로직이 
+// 1-4 혹은 별도 엔드포인트로 대체될 수 있음.
+// 일단 기존 refresh 로직은 유지하되, 필요 시 업데이트.
 
 export async function refreshTripPlanBalance(
   tripPlanId: number,
-): Promise<TripPlanAccountSaveResponse> {
-  const { data } = await axios.post<TripPlanAccountSaveResponse>(
+): Promise<TripPlanAccountLinkResponse> {
+  // 주의: 기존 코드는 POST /accounts/link 였음.
+  // 명세에는 "1-4. 계좌 목록 단순 조회 (Refresh)"가 GET /api/accounts/list 로 되어있음.
+  // 하지만 "TripPlan 잔액 새로고침" 기능은 
+  // 연결된 계좌의 최신 잔액을 가져오는 것이므로 
+  // 기존 /accounts/link (POST)가 잔액 갱신 역할도 했다면 
+  // 백엔드 명세 변경에 맞춰 수정 필요.
+
+  // 일단 기존 로직 유지 (백엔드가 하위호환 안된다면 에러 날 것임)
+  // 사용자 명세에 "TripPlan 잔액 새로고침"에 대한 명확한 API 변경점은 
+  // "1-4. 계좌 목록 단순 조회"로 매핑하기엔 조금 다름 (특정 Plan의 계좌를 갱신하는 것이므로).
+  // 여기서는 기존 API 호출을 그대로 두거나, 사용자에게 추가 확인 필요.
+  // 우선 컴파일 에러 방지를 위해 기존 시그니처 유지.
+
+  const { data } = await axios.post<TripPlanAccountLinkResponse>(
     `${BASE_URL}/accounts/link`,
     { tripPlanId },
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getAuthHeader(),
     },
   );
   return data;
-}
-
-export async function changeTripPlanAccount(params: {
-  organizationCode: BankOrganizationCode;
-  accountNumber: string;
-  tripPlanId: number;
-}): Promise<TripPlanAccountSaveResponse> {
-  return linkTripPlanAccount(params);
-}
-
-export async function deleteBankCredential(params: {
-  organizationCode: BankOrganizationCode;
-  businessType?: 'BK';
-  loginType?: '1';
-}): Promise<CredentialsResult> {
-  const { data } = await axios.delete<CredentialsResult>(`${BASE_URL}/api/codef/delete`, {
-    data: {
-      organizationCode: params.organizationCode,
-      businessType: params.businessType ?? 'BK',
-      loginType: params.loginType ?? '1',
-    },
-
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return data;
-}
-
-/**
- * 잔액 새로고침 보호 래퍼 (가벼운 버전)
- * - 동시 호출 합치기
- * - 429/중복요청 시 최대 2회 재시도
- * - 자동 재연결(relink) 같은 무거운 보정은 프론트에서 “계좌 재선택” UX로 처리 권장
- */
-export async function refreshTripPlanBalanceWithRetry(
-  tripPlanId: number,
-  opts?: { tries?: number; initialDelayMs?: number; organizationCode?: BankOrganizationCode },
-): Promise<TripPlanAccountSaveResponse> {
-  const exist = inflightRefresh.get(tripPlanId);
-  if (exist) return exist;
-
-  const p = (async () => {
-    const tries = opts?.tries ?? 3;
-    let delay = opts?.initialDelayMs ?? 500;
-
-    for (let i = 0; i < tries; i++) {
-      try {
-        return await refreshTripPlanBalance(tripPlanId);
-      } catch (e: any) {
-        const retryable = isHttp429(e) || isServerDupMsg(e);
-        if (!retryable || i === tries - 1) throw e;
-        await sleep(jitter(delay));
-        delay = Math.min(delay * 2, 1500);
-      }
-    }
-    // 논리상 도달 X
-    throw new Error('잔액 재시도 초과');
-  })();
-
-  inflightRefresh.set(tripPlanId, p);
-  try {
-    return await p;
-  } finally {
-    inflightRefresh.delete(tripPlanId);
-  }
 }
 
 // 호출 너무 많이 해서 일단 주석

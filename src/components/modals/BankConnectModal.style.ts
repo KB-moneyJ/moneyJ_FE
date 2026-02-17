@@ -14,10 +14,19 @@ export const Overlay = styled.div`
 
 export const ModalContainer = styled(GlassCard)`
   width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
   position: relative;
+
+  /* 스크롤바 숨김 처리 (Glassmorphism 유지) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 `;
 
 export const Title = styled.p`
@@ -95,6 +104,13 @@ export const ConfirmButton = styled.button`
   padding: 12px;
   cursor: pointer;
   margin-top: 20px;
+  transition: background-color 0.2s;
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
 `;
 
 export const CloseButton = styled(X)`

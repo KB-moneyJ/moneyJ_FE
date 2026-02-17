@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { BANKS } from '@/constants/banks';
+import { connectBank, linkTripPlanAccount, switchTripPlanAccount } from '@/api/bank/bank';
 import {
   Overlay,
   ModalContainer,
@@ -13,13 +13,6 @@ import {
   CloseButton,
 } from './BankConnectModal.style';
 
-const BASE_URL = import.meta.env.VITE_API_URL as string;
-
-// 토큰을 호출 시점에 가져오는 헬퍼 함수
-const getAuthHeader = () => ({
-  Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-});
-
 interface BankConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,14 +21,9 @@ interface BankConnectModalProps {
   tripPlanId: number;
   /** 이미 계좌가 연동되어 있는지 여부 */
   isAlreadyLinked?: boolean;
+  /** 이미 연동된 계좌 ID (변경 시 필요) */
+  accountId?: number;
 }
-
-type DepositTrustAccount = {
-  resAccount: string;
-  resAccountDisplay: string;
-  resAccountName: string;
-  resAccountBalance: string;
-};
 
 export default function BankConnectModal({
   isOpen,
@@ -43,6 +31,7 @@ export default function BankConnectModal({
   onConnected,
   tripPlanId,
   isAlreadyLinked = false,
+  accountId,
 }: BankConnectModalProps) {
   const [bank, setBank] = useState('');
   const [bankId, setBankId] = useState('');
@@ -52,7 +41,7 @@ export default function BankConnectModal({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // 계좌 목록 & 선택값
-  const [accounts, setAccounts] = useState<DepositTrustAccount[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>('');
 
   useEffect(() => {
@@ -73,116 +62,7 @@ export default function BankConnectModal({
   const canFetchAccounts = !!bank && !!bankId.trim() && !!password.trim();
   const canSubmit = !!selectedAccount && !!bank && !submitting;
 
-  // ----- API helpers -----
-  const createConnectedIdBK = (organization: string, id: string, pw: string) =>
-    axios.post(
-      `${BASE_URL}/api/codef/connected-id`,
-      {
-        accountList: [
-          {
-            countryCode: 'KR',
-            businessType: 'BK',
-            clientType: 'P',
-            organization,
-            loginType: '1',
-            id,
-            password: pw,
-          },
-        ],
-      },
-      {
-        headers: getAuthHeader(),
-      },
-    );
-
-  const addCredentialBK = (organization: string, id: string, pw: string) =>
-    axios.post(
-      `${BASE_URL}/api/codef/credentials`,
-      {
-        countryCode: 'KR',
-        businessType: 'BK',
-        clientType: 'P',
-        organization,
-        loginType: '1',
-        id,
-        password: pw,
-      },
-      {
-        headers: getAuthHeader(),
-      },
-    );
-
-  const fetchBankAccounts = async (organization: string) => {
-    const { data } = await axios.get(`${BASE_URL}/api/codef/bank/accounts`, {
-      params: { organization },
-      headers: getAuthHeader(),
-    });
-    const list: DepositTrustAccount[] = (data?.data?.resDepositTrust ?? []).map((a: any) => ({
-      resAccount: a.resAccount,
-      resAccountDisplay: a.resAccountDisplay,
-      resAccountName: a.resAccountName,
-      resAccountBalance: a.resAccountBalance,
-    }));
-    return list;
-  };
-
-  const linkTripAccount = async (organizationCode: string, acctNo: string, planId: number) => {
-    await axios.post(
-      `${BASE_URL}/accounts/link`,
-      { organizationCode, accountNumber: acctNo, tripPlanId: planId },
-      {
-        headers: getAuthHeader(),
-      },
-    );
-  };
-
-  // 계좌가 이미 다른 여행 플랜에 등록되어 있는지 확인
-  const checkAccountAlreadyLinked = async (accountNumber: string): Promise<boolean | 'error'> => {
-    try {
-      const { data } = await axios.get(`${BASE_URL}/accounts/check/${accountNumber}`, {
-        headers: getAuthHeader(),
-      });
-      // true/false 또는 "true"/"false" 문자열 모두 처리
-      return data === true || data === 'true';
-    } catch (err) {
-      console.error('계좌 중복 확인 실패:', err);
-      // 에러 시 'error' 반환해서 구분
-      return 'error';
-    }
-  };
-
-  async function checkAccountExists(organization: string): Promise<boolean> {
-    try {
-      await axios.post(
-        `${BASE_URL}/api/codef/credentials`,
-        {
-          countryCode: 'KR',
-          businessType: 'BK',
-          clientType: 'P',
-          organization,
-          loginType: '1',
-          id: bankId,
-          password,
-        },
-        {
-          headers: getAuthHeader(),
-        },
-      );
-      // POST 성공 = 계정 추가 성공 = 이미 등록된 상태로 간주하여 이후 중복 추가 로직 스킵
-      return true;
-    } catch (err: any) {
-      const code = err?.response?.data?.result?.code;
-      // 이미 존재하거나 중복된 경우도 등록된 상태로 간주
-      if (code === 'CF-03002' || code === 'CF-04004') {
-        return true;
-      }
-      // 그 외 에러(비밀번호 틀림 등)는 false 반환 -> 이후 로직에서 다시 시도하거나 에러 발생시킴
-      console.error('계정 존재 여부 확인(POST) 실패:', err);
-      return false;
-    }
-  }
-
-  // 1) 인증/연결 및 계좌 목록 불러오기
+  // 1) 인증/연결 및 계좌 목록 불러오기 (New API)
   const handleFetchAccounts = async () => {
     if (!canFetchAccounts) return;
     setSubmitting(true);
@@ -191,45 +71,22 @@ export default function BankConnectModal({
     setSelectedAccount('');
 
     try {
-      // 이 은행 계정이 우리 DB에 이미 등록되어 있는지 먼저 확인
-      const isAlreadyRegistered = await checkAccountExists(bank);
+      const list = await connectBank({
+        organization: bank,
+        id: bankId,
+        password: password
+      });
 
-      // 우리 DB에 등록되어 있지 않은 새로운 계정일 경우에만 등록 절차 실행
-      if (!isAlreadyRegistered) {
-        let connectedIdCreated = false;
-
-        // 1) connectedId 생성 (은행 자격도 같이 등록됨)
-        try {
-          await createConnectedIdBK(bank, bankId, password);
-          connectedIdCreated = true;
-        } catch (e: any) {
-          const code = e?.response?.data?.result?.code;
-          if (code !== 'CF-04006') throw e; // CF-04006: 이미 Connected ID 있음
-        }
-
-        // 2) createConnectedIdBK가 실패했을 때만 credential 추가 시도
-        if (!connectedIdCreated) {
-          try {
-            await addCredentialBK(bank, bankId, password);
-          } catch (e: any) {
-            const code = e?.response?.data?.result?.code;
-            if (code !== 'CF-03002' && code !== 'CF-04004') throw e;
-          }
-        }
-      }
-
-      // 3) 계좌 조회
-      const list = await fetchBankAccounts(bank);
-      if (!list.length) {
+      if (!list || list.length === 0) {
         throw new Error(
-          '조회 가능한 예금/신탁 계좌가 없습니다. (은행 코드/조직코드 매핑, 인증수단, 계좌유형을 확인해 주세요)',
+          '조회 가능한 계좌가 없습니다. (정보를 다시 확인해 주세요)'
         );
       }
       setAccounts(list);
     } catch (err: any) {
+      console.error(err);
       const code = err?.response?.data?.code || err?.response?.data?.result?.code;
       let msg =
-        err?.response?.data?.result?.message ||
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
@@ -238,57 +95,53 @@ export default function BankConnectModal({
       if (code === 'CF011') {
         msg = '계좌 아이디 또는 비밀번호가 올바르지 않습니다.';
       }
-
       setErrorMsg(String(msg));
     } finally {
       setSubmitting(false);
     }
   };
 
-  // 2) 선택된 계좌로 여행 플랜 연결
+  // 2) 선택된 계좌로 여행 플랜 연결/변경
   const handleSubmit = async () => {
     if (!canSubmit) return;
     setSubmitting(true);
     setErrorMsg(null);
 
+    const targetAccount = accounts.find(a => a.accountNumber === selectedAccount);
+    if (!targetAccount) return;
+
     try {
-      // 먼저 계좌가 이미 다른 여행 플랜에 등록되어 있는지 확인
-      const checkResult = await checkAccountAlreadyLinked(selectedAccount);
-
-      // 중복 확인 API 에러 시
-      if (checkResult === 'error') {
-        setErrorMsg('계좌 중복 확인에 실패했습니다. 다시 시도해 주세요.');
-        setSubmitting(false);
-        return;
+      if (isAlreadyLinked && accountId) {
+        // [변경] switchTripPlanAccount
+        await switchTripPlanAccount({
+          accountId,
+          organizationCode: bank,
+          accountName: targetAccount.accountName,
+          accountNumber: targetAccount.accountNumber,
+          balance: targetAccount.balance
+        });
+      } else {
+        // [신규 연결] linkTripPlanAccount
+        await linkTripPlanAccount({
+          tripPlanId,
+          organizationCode: bank,
+          accountName: targetAccount.accountName,
+          accountNumber: targetAccount.accountNumber,
+          balance: targetAccount.balance
+        });
       }
 
-      // 이미 등록된 계좌면 에러 메시지 표시하고 연결하지 않음
-      if (checkResult === true) {
-        setErrorMsg(
-          '이 계좌는 이미 다른 여행 플랜에 등록되어 있습니다. 다른 계좌를 선택해 주세요.',
-        );
-        setSubmitting(false);
-        return;
-      }
-
-      await linkTripAccount(bank, selectedAccount, tripPlanId);
       // 성공 시 즉시 부모 알림 & 모달 닫기
       onConnected?.(bank, selectedAccount);
       onClose();
     } catch (err: any) {
       const code = err?.response?.data?.code;
       let msg =
+        err?.response?.data?.detail ||
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
         '계좌 연동에 실패했습니다. 다시 시도해 주세요.';
-
-      if (code === 'ACC-005') {
-        msg = '본인 계좌만 변경하실 수 있습니다.';
-      } else if (code === 'ACC-006') {
-        msg = '잘못된 계좌 형식입니다.';
-      }
-
       setErrorMsg(String(msg));
     } finally {
       setSubmitting(false);
@@ -355,20 +208,20 @@ export default function BankConnectModal({
             <div style={{ fontWeight: 600, marginBottom: 8 }}>계좌 선택</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               {accounts.map((a) => (
-                <li key={a.resAccount} style={{ marginBottom: 8 }}>
+                <li key={a.accountNumber} style={{ marginBottom: 8 }}>
                   <label
                     style={{ display: 'flex', gap: 8, alignItems: 'center', cursor: 'pointer' }}
                   >
                     <input
                       type="radio"
                       name="account"
-                      value={a.resAccount}
-                      checked={selectedAccount === a.resAccount}
-                      onChange={() => setSelectedAccount(a.resAccount)}
+                      value={a.accountNumber}
+                      checked={selectedAccount === a.accountNumber}
+                      onChange={() => setSelectedAccount(a.accountNumber)}
                     />
                     <span>
-                      {a.resAccountName} · {a.resAccountDisplay} · 잔액{' '}
-                      {Number(a.resAccountBalance).toLocaleString()}원
+                      {a.accountName} · {a.accountNumber} · 잔액{' '}
+                      {Number(a.balance).toLocaleString()}원
                     </span>
                   </label>
                 </li>

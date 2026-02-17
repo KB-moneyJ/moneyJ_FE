@@ -1,5 +1,3 @@
-import { CircleDollarSign } from 'lucide-react';
-import { useState } from 'react';
 import {
   Wrapper,
   SaveBtn,
@@ -11,26 +9,30 @@ import {
   Tip,
   TipLabel,
   TipText,
-  AccountText,
   CardLinkBtn,
-  BalancePill,
-  AccountRow,
   RefreshButton,
   UnlinkButton,
   ChangeButton,
   ActionButtonsRow,
+  HeaderRow,
+  BankName,
+  AccountNumber,
+  BalanceBig,
+  BankInfoColumn,
 } from './ProgressCard.style';
 import { useCardStore } from '@/stores/useCardStore';
 import { useNavigate } from 'react-router-dom';
 import { manualAccountUpdate } from '@/api/accounts';
 import { useQueryClient } from '@tanstack/react-query';
 import { TRIP_KEYS } from '@/api/trips/queries';
+import { useState } from 'react';
 
 type Props = {
   progress: number;
   tip?: string;
   linked?: boolean;
-  accountLabel?: string;
+  accountName?: string;
+  accountNumber?: string;
   balance?: number;
   accountId?: number;
   tripId?: string;
@@ -44,25 +46,25 @@ export default function ProgressCard({
   progress,
   tip,
   linked,
-  accountLabel,
+  accountName,
+  accountNumber,
   balance,
   accountId,
   tripId,
-  onClickSave,
   onClickLink,
   onClickUnlink,
   onClickChangeAccount,
 }: Props) {
   const isLinked = !!linked;
   const hasTip = typeof tip === 'string' && tip.trim().length > 0;
-  const { cardConnected, setCardConnected } = useCardStore();
+  const { cardConnected } = useCardStore();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
     if (!accountId || isRefreshing) return;
-    
+
     setIsRefreshing(true);
     try {
       await manualAccountUpdate(accountId);
@@ -84,43 +86,62 @@ export default function ProgressCard({
     }
   };
 
+  const maskAccount = (acc?: string) => {
+    if (!acc) return '';
+    // if simple number: 12341234
+    if (acc.length < 6) return acc;
+    // Show first 6, mask rest? User example: 735702-01-xxxxxx
+    // Attempt to mask last 6 digits
+    const len = acc.length;
+    if (len > 6) {
+      return acc.slice(0, len - 6) + 'x'.repeat(6);
+    }
+    return acc;
+  };
+
   return (
     <Wrapper>
-      <Title>나의 진행 상황</Title>
-      {!isLinked && <SaveBtn onClick={onClickLink}>계좌 연동하기</SaveBtn>}
-      {isLinked && (
+      {!isLinked ? (
         <>
-          <AccountRow>
-            {accountLabel && <AccountText>{accountLabel}</AccountText>}
-            {typeof balance === 'number' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <BalancePill aria-label="모은 잔액">
-                  <CircleDollarSign size={14} style={{ marginRight: 4 }} />
-                  모은 잔액 {balance.toLocaleString()}원
-                </BalancePill>
-                <RefreshButton
-                  onClick={handleRefresh}
-                  disabled={isRefreshing || !accountId}
-                  $isRotating={isRefreshing}
-                  aria-label="계좌 잔액 새로고침"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                    <path d="M17 8h4v4" />
-                  </svg>
-                </RefreshButton>
-              </div>
-            )}
-          </AccountRow>
+          <Title>나의 진행 상황</Title>
+          <SaveBtn onClick={onClickLink}>계좌 연동하기</SaveBtn>
+        </>
+      ) : (
+        <>
+          {/* Header: Bank Name + Refresh + Account Number */}
+          <HeaderRow>
+            <BankInfoColumn>
+              <BankName>{accountName || '은행 정보 없음'}</BankName>
+              <AccountNumber>{maskAccount(accountNumber)}</AccountNumber>
+            </BankInfoColumn>
+            <RefreshButton
+              onClick={handleRefresh}
+              disabled={isRefreshing || !accountId}
+              $isRotating={isRefreshing}
+              aria-label="잔액 새로고침"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                <path d="M17 8h4v4" />
+              </svg>
+            </RefreshButton>
+          </HeaderRow>
+
+          {/* Big Balance */}
+          <BalanceBig>
+            {typeof balance === 'number' ? `${balance.toLocaleString()}원` : '잔액 조회 실패'}
+          </BalanceBig>
+
+          {/* Action Buttons */}
           <ActionButtonsRow>
             {onClickChangeAccount && (
               <ChangeButton onClick={onClickChangeAccount} disabled={!accountId}>
@@ -135,7 +156,9 @@ export default function ProgressCard({
           </ActionButtonsRow>
         </>
       )}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+
+      {/* Progress Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', marginTop: '12px' }}>
         <ProgressBar
           role="progressbar"
           aria-valuenow={progress}
@@ -144,7 +167,7 @@ export default function ProgressCard({
         >
           <ProgressFill $percent={progress} />
         </ProgressBar>
-        <ProgressRightLabel>{(Math.round(progress * 10) / 10).toFixed(1)}%</ProgressRightLabel>
+        <ProgressRightLabel>{(Math.round(progress * 10) / 10).toFixed(0)}%</ProgressRightLabel>
       </div>
 
       <Divider />
@@ -157,12 +180,12 @@ export default function ProgressCard({
       ) : (
         <>
           <Tip>
-            <TipLabel>저축 TIP이 궁금하다면?</TipLabel>
+            <TipLabel>TIP</TipLabel>
+            <TipText>오늘 커피 한 잔을 줄이면,<br />단 7일 안에 목표를 이룰 수 있습니다.</TipText>
           </Tip>
-          {cardConnected ? (
-            <CardLinkBtn>이제 계좌만 연동하면 돼요!</CardLinkBtn>
-          ) : (
+          {!cardConnected && (
             <CardLinkBtn
+              style={{ marginTop: 10 }}
               onClick={() => {
                 navigate('/spending');
               }}
