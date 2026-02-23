@@ -92,7 +92,12 @@ export function toTripDetailModel(p: TripPlanDetailApi): TripDetailModel {
     thumbnailUrl: '/assets/images/trip-placeholder.jpg',
     progressPercent: progress,
     members,
-    overviewTip: (p.savingsPhrase?.[0] ?? tips[0]?.text ?? p.tripTip?.[0]) || undefined,
+    overviewTip:
+      ((p.savingsPhrase?.length
+        ? p.savingsPhrase[Math.floor(Math.random() * p.savingsPhrase.length)]
+        : undefined) ??
+      tips[0]?.text ??
+      p.tripTip?.[0]) || undefined,
     tips,
     checklist,
     cautions,
