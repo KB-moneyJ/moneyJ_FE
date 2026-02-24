@@ -181,7 +181,7 @@ export default function ProgressCard({
         <>
           <Tip>
             <TipLabel>TIP</TipLabel>
-            <TipText>오늘 커피 한 잔을 줄이면,<br />단 7일 안에 목표를 이룰 수 있습니다.</TipText>
+            <TipText>계좌와 카드를 연동하면 여행 목표 금액에 도달할 수 있게  맞춤형 저축 팁을 드릴 수 있어요!</TipText>
           </Tip>
           {!cardConnected && (
             <CardLinkBtn
