@@ -31,6 +31,21 @@ export default function Home() {
     (e.currentTarget as HTMLImageElement).style.display = 'none';
   };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const filteredTrips = trips.filter((t) => {
+    if (!t.period) return false;
+
+    const [, end] = t.period.split(' - ');
+    if (!end) return false;
+
+    const [year, month, day] = end.split('.').map(Number);
+    const endDate = new Date(year, month - 1, day);
+
+    return endDate >= today;
+  });
+
   return (
     <>
       <Wrapper>
@@ -76,7 +91,7 @@ export default function Home() {
 
           {!isLoading &&
             !isError &&
-            trips.map((t) => (
+            filteredTrips.map((t) => (
               <TripCard
                 key={t.id}
                 tripId={t.id}
