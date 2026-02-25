@@ -10,7 +10,7 @@ export const Page = styled.div`
 export const Tabs = styled.div`
   --tab-h: 2.75rem;
   --rail-inset: clamp(12px, 4vw, 24px);
-  --rail-width: calc(100% - (var(--rail-inset) * 2));
+  --rail-width: calc(100% );
   --rail-height: 1px;
 
   position: relative;
@@ -68,8 +68,6 @@ export const SegTab = styled.button<{ $active?: boolean }>`
 
 export const CardWrap = styled.div`
   position: relative;
-  margin: clamp(0.75rem, 3vw, 1rem);
-
   > *:first-child,
   > *:first-child > *:first-child {
     margin: 0 !important;
