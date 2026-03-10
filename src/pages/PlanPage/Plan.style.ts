@@ -1,9 +1,14 @@
 import styled from 'styled-components';
 
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+    justify-content: space-between;
+    height: 100dvh;
+`;
 export const Page = styled.div`
   padding: 1rem;
   color: white;
-  height: 90vh;
   overflow-y: auto;
 `;
 
@@ -24,7 +29,7 @@ export const Tabs = styled.div`
     left: 50%;
     transform: translateX(-50%);
     bottom: 0;
-    width: var(--rail-width);
+    width: 90%;
     height: var(--rail-height);
     background: #e1dbff;
   }
@@ -32,7 +37,7 @@ export const Tabs = styled.div`
 
 export const Track = styled.div`
   position: relative;
-  width: var(--rail-width);
+  width:90%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: flex-end;
@@ -75,7 +80,6 @@ export const CardWrap = styled.div`
 `;
 
 export const EmptyArea = styled.div`
-  padding: 1rem;
   opacity: 0.85;
   display: flex;
   flex-direction: column;

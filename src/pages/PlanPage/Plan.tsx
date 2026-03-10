@@ -11,7 +11,7 @@ import {
   CardWrap,
   EmptyArea,
   EmptyText,
-  EmptyActionButton,
+  EmptyActionButton, Wrapper
 } from './Plan.style';
 import UsersBadge from '@/pages/MainPage/sections/TripCard/UsersBadge';
 import BottomNavigationBar from '@/components/common/BottomNavigationBar/BottomNavigationBar';
@@ -27,7 +27,7 @@ export default function Plan() {
   const done = useMemo(() => trips.filter((t) => t.progressPercent >= 100), [trips]);
 
   return (
-    <div>
+    <Wrapper>
       <Page>
         <Tabs>
           <Track>
@@ -96,7 +96,8 @@ export default function Plan() {
             </CardWrap>
           ))}
       </Page>
+
       <BottomNavigationBar />
-    </div>
+    </Wrapper>
   );
 }
