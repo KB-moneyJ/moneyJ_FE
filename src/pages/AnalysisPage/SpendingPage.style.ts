@@ -194,6 +194,8 @@ export const CardButton = styled.div`
   background-color: var(--color-button-primary);
   border-radius: var(--radius-button);
   color: white;
+  padding: 8px;  
+    margin-top: 25px;
 `;
 
 export const Text = styled.div`

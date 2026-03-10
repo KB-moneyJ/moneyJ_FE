@@ -204,7 +204,7 @@ export default function SpendingPage() {
           <>
             {isCard ? (
               <Wrapper>
-                <Text>
+                <Text style={{marginTop:'40px'}}>
                   연결된 카드가 없습니다
                   <br />
                   소비 분석을 위해 카드를 연동해주세요

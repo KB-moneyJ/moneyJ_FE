@@ -2,15 +2,16 @@ import styled from 'styled-components';
 import { CircleUserRound, Bell } from 'lucide-react';
 
 export const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100dvh;
 `;
 
 export const Page = styled.div`
   overflow-y: auto;
   flex: 1;
   width: 100%;
-  min-height: 800px;
 `;
 
 export const Container = styled.div`
