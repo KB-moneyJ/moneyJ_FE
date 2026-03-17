@@ -14,7 +14,6 @@ export const Wrapper = styled.div`
   height: 100%;
   width: 100%;
   gap: 5%;
-  padding: 24px 20px 32px;
   box-sizing: border-box;
 `;
 
@@ -57,7 +56,7 @@ export const Timeline = styled.div`
 
 export const StepItem = styled.div`
   display: grid;
-  grid-template-columns: 96px 1fr;
+  grid-template-columns: 60px 1fr;
   align-items: center;
   gap: 30px;
   position: relative;
