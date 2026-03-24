@@ -126,18 +126,12 @@ export default function DetailPage() {
     if (!rows.length) return undefined;
 
     // 1순위: 내 ID로 매칭되는 멤버
-    if (meId) {
+    if (meId && meId > 0) {
       const meRow = rows.find((b) => String(b.id) === String(meId));
       if (meRow && typeof meRow.percent === 'number') {
         // 서버에서 0.0%로 왔을 때도 유효한 값으로 처리
         return meRow.percent;
       }
-    }
-
-    // 2순위: 매칭 실패 시 첫 번째 멤버 (잔액 표시 로직과 일치시킴)
-    // 이렇게 해야 잔액은 나오는데 진행도는 0%인 불일치를 방지할 수 있음
-    if (rows[0] && typeof rows[0].percent === 'number') {
-      return rows[0].percent;
     }
 
     return undefined;
@@ -175,13 +169,9 @@ export default function DetailPage() {
   // ---------- balances에서 "나"의 계좌 정보 ----------
   const myBalanceRow = useMemo(() => {
     // 1순위: 내 ID
-    if (meId) {
+    if (meId && meId > 0) {
       const found = (balances as any[]).find((b) => String(b.id) === String(meId));
       if (found) return found;
-    }
-    // 2순위: 첫 번째 멤버 (fallback)
-    if (balances.length > 0) {
-      return balances[0];
     }
     return undefined;
   }, [balances, meId]);
@@ -211,10 +201,6 @@ export default function DetailPage() {
     let target = undefined;
     if (meId != null && meId > 0) {
       target = rows.find((b) => String(b.id) === String(meId));
-    }
-    // meId로 찾지 못했거나 meId가 유효하지 않으면 첫 번째 항목 사용
-    if (!target && rows.length > 0) {
-      target = rows[0];
     }
 
     // 잔액 정보가 null이거나 undefined이면 = 미연동으로 본다
