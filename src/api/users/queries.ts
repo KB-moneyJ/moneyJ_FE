@@ -26,10 +26,10 @@ export function useMe() {
     // },
     initialData: () => {
       const cached = loadMeFromStorage();
-      if (!cached) return undefined;
+      if (!cached || !cached.id || cached.id === -1) return undefined;
 
       const initial: UserMe = {
-        id: -1, // 로컬에는 id가 없어서 임시 id 부여
+        id: cached.id,
         nickname: cached.nickname,
         email: cached.email,
         profileImage: cached.profileImage,

@@ -2,7 +2,7 @@ import type { UserMe } from './types';
 
 const KEY = 'me.public';
 
-export type MePublic = Pick<UserMe, 'nickname' | 'email' | 'profileImage'>;
+export type MePublic = Pick<UserMe, 'id' | 'nickname' | 'email' | 'profileImage'>;
 
 export function loadMeFromStorage(): MePublic | undefined {
   try {
@@ -10,6 +10,7 @@ export function loadMeFromStorage(): MePublic | undefined {
     if (!raw) return undefined;
     const parsed = JSON.parse(raw);
     const me: MePublic = {
+      id: parsed?.id ?? -1,
       nickname: parsed?.nickname ?? '',
       email: parsed?.email ?? '',
       profileImage: parsed?.profileImage ?? undefined,
@@ -23,6 +24,7 @@ export function loadMeFromStorage(): MePublic | undefined {
 export function saveMeToStorage(me: UserMe | MePublic | undefined) {
   if (!me) return;
   const toSave: MePublic = {
+    id: me.id,
     nickname: me.nickname,
     email: me.email,
     profileImage: me.profileImage,
